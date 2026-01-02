@@ -1,13 +1,17 @@
 import Link from 'next/link';
+import packageJson from '../../package.json';
 
 export default function Navigation() {
   return (
     <nav className="border-b border-gray-200 bg-white">
       <div className="max-w-4xl mx-auto px-4 py-3">
         <div className="flex items-center justify-between">
-          <Link href="/" className="text-xl font-bold text-gray-900 hover:text-gray-700">
-            QOTD & WOD
-          </Link>
+          <div className="flex items-center gap-3">
+            <Link href="/" className="text-xl font-bold text-gray-900 hover:text-gray-700">
+              QOTD & WOD
+            </Link>
+            <span className="text-xs text-gray-500 font-mono">v{packageJson.version}</span>
+          </div>
           <div className="flex gap-6">
             <Link
               href="/"
