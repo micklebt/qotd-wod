@@ -27,15 +27,17 @@ export default function WordChallenge({ isOpen, onClose }: WordChallengeProps) {
 
   useEffect(() => {
     if (isOpen) {
-      loadCurrentParticipant();
+      // Always reload participant when modal opens
+      const participantId = getCurrentParticipantId();
+      setCurrentParticipantId(participantId);
       fetchRandomWord();
       setShowMetadata(false);
     }
   }, [isOpen]);
 
-  // Listen for storage changes to update participant when it changes in EntryForm
+  // Listen for storage changes and custom events to update participant
   useEffect(() => {
-    if (typeof window === 'undefined' || !isOpen) return;
+    if (typeof window === 'undefined') return;
 
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === 'qotd-wod-selected-participant') {
@@ -48,9 +50,7 @@ export default function WordChallenge({ isOpen, onClose }: WordChallengeProps) {
       }
     };
 
-    window.addEventListener('storage', handleStorageChange);
-    
-    // Also listen for custom events (for same-window updates)
+    // Listen for custom events (for same-window updates)
     const handleCustomStorageChange = () => {
       const newParticipantId = getCurrentParticipantId();
       setCurrentParticipantId(newParticipantId);
@@ -59,13 +59,31 @@ export default function WordChallenge({ isOpen, onClose }: WordChallengeProps) {
       }
     };
 
+    window.addEventListener('storage', handleStorageChange);
     window.addEventListener('participantChanged', handleCustomStorageChange);
+
+    // Also check localStorage periodically when modal is open (every 500ms)
+    let intervalId: NodeJS.Timeout | null = null;
+    if (isOpen) {
+      intervalId = setInterval(() => {
+        const currentId = getCurrentParticipantId();
+        if (currentId !== currentParticipantId) {
+          setCurrentParticipantId(currentId);
+          if (randomWord && currentId) {
+            fetchWordStats(randomWord.id);
+          }
+        }
+      }, 500);
+    }
 
     return () => {
       window.removeEventListener('storage', handleStorageChange);
       window.removeEventListener('participantChanged', handleCustomStorageChange);
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
     };
-  }, [randomWord, isOpen]);
+  }, [randomWord, isOpen, currentParticipantId]);
 
   const loadCurrentParticipant = () => {
     const participantId = getCurrentParticipantId();
@@ -101,10 +119,12 @@ export default function WordChallenge({ isOpen, onClose }: WordChallengeProps) {
   };
 
   const fetchWordStats = async (entryId: number) => {
-    if (!currentParticipantId) {
-      loadCurrentParticipant();
+    // Always get the latest participant ID from localStorage
+    const participantId = getCurrentParticipantId();
+    // Update state if it changed
+    if (participantId !== currentParticipantId) {
+      setCurrentParticipantId(participantId);
     }
-    const participantId = currentParticipantId || getCurrentParticipantId();
 
     try {
       // Get all responses for this word
@@ -150,11 +170,12 @@ export default function WordChallenge({ isOpen, onClose }: WordChallengeProps) {
     setSaving(true);
     try {
       // Use upsert to insert or update the response
+      // Use the participantId from localStorage, not state
       const { error } = await supabase
         .from('word_challenge_responses')
         .upsert({
           entry_id: randomWord.id,
-          participant_id: currentParticipantId,
+          participant_id: participantId,
           is_known: isKnown,
           updated_at: new Date().toISOString(),
         }, {
