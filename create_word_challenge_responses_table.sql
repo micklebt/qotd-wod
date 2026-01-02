@@ -7,10 +7,10 @@ CREATE TABLE IF NOT EXISTS word_challenge_responses (
   participant_id TEXT NOT NULL REFERENCES participants(id) ON DELETE CASCADE,
   is_known BOOLEAN NOT NULL, -- true = confirmed they know it, false = confirmed they don't know it yet
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
   
-  -- Ensure one response per participant per word (can update if they change their mind)
-  UNIQUE(entry_id, participant_id)
+  -- Note: No UNIQUE constraint - allows multiple responses per participant per word
+  -- This enables tracking learning journey (e.g., knew it, forgot it, learned it again)
 );
 
 -- Create index for faster lookups
