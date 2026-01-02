@@ -114,7 +114,7 @@ export default function WordChallenge({ isOpen, onClose }: WordChallengeProps) {
         const randomIndex = Math.floor(Math.random() * allWords.length);
         const word = allWords[randomIndex];
         setRandomWord(word);
-        await fetchWordStats(word.id);
+        await fetchWordStats(word.id, true); // Pass true to reset user response
       } else {
         setRandomWord(null);
       }
@@ -126,7 +126,7 @@ export default function WordChallenge({ isOpen, onClose }: WordChallengeProps) {
     }
   };
 
-  const fetchWordStats = async (entryId: number) => {
+  const fetchWordStats = async (entryId: number, resetUserResponse: boolean = false) => {
     // Always get the latest participant ID from localStorage
     const participantId = getCurrentParticipantId();
     // Update state if it changed
@@ -143,10 +143,10 @@ export default function WordChallenge({ isOpen, onClose }: WordChallengeProps) {
 
       if (responsesError) throw responsesError;
 
-      // Get current user's response
-      const userResponse = allResponses?.find(r => r.participant_id === participantId);
+      // Get current user's response (only if not resetting)
+      const userResponse = resetUserResponse ? null : allResponses?.find(r => r.participant_id === participantId);
 
-      // Calculate stats
+      // Calculate stats (aggregate data always shown)
       const totalAppearances = allResponses?.length || 0;
       const confirmedKnown = allResponses?.filter(r => r.is_known === true).length || 0;
       const confirmedNotKnown = allResponses?.filter(r => r.is_known === false).length || 0;
@@ -155,7 +155,7 @@ export default function WordChallenge({ isOpen, onClose }: WordChallengeProps) {
         totalAppearances,
         confirmedKnown,
         confirmedNotKnown,
-        currentUserResponse: userResponse ? userResponse.is_known : null,
+        currentUserResponse: resetUserResponse ? null : (userResponse ? userResponse.is_known : null),
       });
     } catch (err) {
       console.error('Error fetching word stats:', err);
