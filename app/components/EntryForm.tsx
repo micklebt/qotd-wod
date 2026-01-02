@@ -150,6 +150,10 @@ export default function EntryForm() {
   const handleParticipantChange = (participantId: string) => {
     setSelectedParticipant(participantId);
     localStorage.setItem(STORAGE_KEY_SELECTED_PARTICIPANT, participantId);
+    // Dispatch custom event to notify other components (like WordChallenge)
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new Event('participantChanged'));
+    }
   };
 
   const wrapSelectedText = (

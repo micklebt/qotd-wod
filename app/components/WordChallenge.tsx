@@ -3,7 +3,7 @@
 import { supabase } from '@/lib/supabase';
 import type { Entry } from '@/lib/supabase';
 import { useState, useEffect } from 'react';
-import { getCurrentParticipantId } from '@/lib/participants';
+import { getCurrentParticipantId, getParticipantName } from '@/lib/participants';
 
 interface WordChallengeProps {
   isOpen: boolean;
@@ -32,6 +32,40 @@ export default function WordChallenge({ isOpen, onClose }: WordChallengeProps) {
       setShowMetadata(false);
     }
   }, [isOpen]);
+
+  // Listen for storage changes to update participant when it changes in EntryForm
+  useEffect(() => {
+    if (typeof window === 'undefined' || !isOpen) return;
+
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'qotd-wod-selected-participant') {
+        const newParticipantId = getCurrentParticipantId();
+        setCurrentParticipantId(newParticipantId);
+        // Refresh stats if we have a word loaded
+        if (randomWord && newParticipantId) {
+          fetchWordStats(randomWord.id);
+        }
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    
+    // Also listen for custom events (for same-window updates)
+    const handleCustomStorageChange = () => {
+      const newParticipantId = getCurrentParticipantId();
+      setCurrentParticipantId(newParticipantId);
+      if (randomWord && newParticipantId) {
+        fetchWordStats(randomWord.id);
+      }
+    };
+
+    window.addEventListener('participantChanged', handleCustomStorageChange);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('participantChanged', handleCustomStorageChange);
+    };
+  }, [randomWord, isOpen]);
 
   const loadCurrentParticipant = () => {
     const participantId = getCurrentParticipantId();
@@ -176,11 +210,18 @@ export default function WordChallenge({ isOpen, onClose }: WordChallengeProps) {
                   Do you have confident knowledge and use of this word?
                 </p>
                 
-                {/* Confirmation Buttons */}
+                {/* Participant Info */}
+                {currentParticipantId && (
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+                    <p className="text-sm text-blue-800">
+                      Tracking progress for: <span className="font-semibold">{getParticipantName(currentParticipantId)}</span>
+                    </p>
+                  </div>
+                )}
                 {!currentParticipantId && (
                   <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-4">
                     <p className="text-sm text-yellow-800">
-                      ⚠️ Please select a participant in the "Create New Entry" form first to track your progress.
+                      ⚠️ Please select a participant in the "Create New Entry" form to track your progress.
                     </p>
                   </div>
                 )}
