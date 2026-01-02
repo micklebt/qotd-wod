@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import packageJson from '../../package.json';
+import { APP_VERSION } from '@/lib/version';
 
 export default function Navigation() {
   return (
@@ -10,7 +10,7 @@ export default function Navigation() {
             <Link href="/" className="text-xl font-bold text-gray-900 hover:text-gray-700">
               QOTD & WOD
             </Link>
-            <span className="text-xs text-gray-500 font-mono">v{packageJson.version}</span>
+            <span className="text-xs text-gray-500 font-mono">v{APP_VERSION}</span>
           </div>
           <div className="flex gap-6">
             <Link
