@@ -46,7 +46,7 @@ export default function CalendarPage() {
         // Fetch entries
         const { data, error } = await supabase
           .from('entries')
-          .select('id, type, content, created_at, participant_id')
+          .select('id, type, content, created_at, updated_at, participant_id')
           .order('created_at', { ascending: false });
 
         if (error) throw error;
@@ -55,7 +55,7 @@ export default function CalendarPage() {
         // Normalize participant_id to strings for consistency
         const normalizedEntries = (data || []).map(entry => ({
           ...entry,
-          participant_id: String(entry.participant_id)
+          participant_id: String(entry.participant_id),
         }));
         
         // Log unique participant IDs in entries

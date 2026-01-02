@@ -1,5 +1,8 @@
 import { supabase, type Participant } from './supabase';
 
+// Re-export Participant type for convenience
+export type { Participant };
+
 // Cache for participants to avoid repeated database calls
 let participantsCache: Participant[] | null = null;
 let cacheTimestamp: number = 0;
@@ -33,14 +36,7 @@ export async function fetchParticipants(): Promise<Participant[]> {
 
     // If no data or empty array, return empty array
     if (!data || data.length === 0) {
-      return PARTICIPANTS.map(p => ({
-        id: p.id,
-        name: p.name,
-        mobile_phone: null,
-        email: null,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      }));
+      return [];
     }
 
     // Update cache
@@ -53,14 +49,7 @@ export async function fetchParticipants(): Promise<Participant[]> {
       console.error('Error fetching participants:', error);
     }
     // Return empty array if database fails
-    return PARTICIPANTS.map(p => ({
-      id: p.id,
-      name: p.name,
-      mobile_phone: null,
-      email: null,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    }));
+    return [];
   }
 }
 
@@ -88,8 +77,7 @@ export async function getParticipantNameAsync(userId: string): Promise<string> {
     return participant?.name || userId;
   } catch (error) {
     // Return ID if not found
-    const participant = PARTICIPANTS.find(p => p.id === userId);
-    return participant?.name || userId;
+    return userId;
   }
 }
 
@@ -113,18 +101,7 @@ export async function getParticipantByIdAsync(userId: string): Promise<Participa
     const participants = await fetchParticipants();
     return participants.find(p => p.id === userId);
   } catch (error) {
-    // Return ID if not found
-    const constantParticipant = PARTICIPANTS.find(p => p.id === userId);
-    if (constantParticipant) {
-      return {
-        id: constantParticipant.id,
-        name: constantParticipant.name,
-        mobile_phone: null,
-        email: null,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      };
-    }
+    // Return undefined if not found
     return undefined;
   }
 }

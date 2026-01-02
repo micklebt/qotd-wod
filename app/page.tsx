@@ -16,7 +16,7 @@ export default async function Home() {
     // Fetch latest word
     const { data: wordData, error: wordError } = await supabase
       .from('entries')
-      .select('id, type, content, created_at, participant_id, word_metadata(*)')
+      .select('id, type, content, created_at, updated_at, participant_id, word_metadata(*)')
       .eq('type', 'word')
       .order('created_at', { ascending: false })
       .limit(1)
@@ -28,7 +28,7 @@ export default async function Home() {
     // Fetch latest quote
     const { data: quoteData, error: quoteError } = await supabase
       .from('entries')
-      .select('id, type, content, created_at, participant_id, quote_metadata(*)')
+      .select('id, type, content, created_at, updated_at, participant_id, quote_metadata(*)')
       .eq('type', 'quote')
       .order('created_at', { ascending: false })
       .limit(1)
