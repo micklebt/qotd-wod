@@ -2,6 +2,7 @@ import { supabase } from '@/lib/supabase';
 import type { Entry } from '@/lib/supabase';
 import { getParticipantName } from '@/lib/participants';
 import Link from 'next/link';
+import WordChallengeTrigger from '@/components/WordChallengeTrigger';
 
 export default async function Home() {
   let word: Entry | null = null;
@@ -43,12 +44,15 @@ export default async function Home() {
       <div className="max-w-4xl mx-auto p-4 space-y-6">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-3xl font-bold">Today's Featured</h1>
-          <Link
-            href="/entries/new"
-            className="bg-blue-600 text-white font-semibold px-4 py-2 rounded hover:bg-blue-700"
-          >
-            Create New Entry
-          </Link>
+          <div className="flex gap-2">
+            <WordChallengeTrigger />
+            <Link
+              href="/entries/new"
+              className="bg-blue-600 text-white font-semibold px-4 py-2 rounded hover:bg-blue-700"
+            >
+              Create New Entry
+            </Link>
+          </div>
         </div>
 
         {/* Word of the Day */}

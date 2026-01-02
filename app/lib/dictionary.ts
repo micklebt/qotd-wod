@@ -23,6 +23,7 @@ export async function lookupWord(word: string): Promise<{
   audioUrl?: string;
   exampleSentence?: string;
   sourceUrl?: string;
+  wordnikSourceUrl?: string;
   error?: string;
   suggestions?: string[];
 }> {
@@ -34,17 +35,18 @@ export async function lookupWord(word: string): Promise<{
         // Try to get spelling suggestions
         const suggestions = await getSpellingSuggestions(word.trim());
         
-        return {
-          definition: '',
-          pronunciation: '',
-          partOfSpeech: '',
-          etymology: '',
-          audioUrl: undefined,
-          exampleSentence: undefined,
-          sourceUrl: undefined,
-          error: 'Word not found in dictionary',
-          suggestions: suggestions.length > 0 ? suggestions : undefined,
-        };
+      return {
+        definition: '',
+        pronunciation: '',
+        partOfSpeech: '',
+        etymology: '',
+        audioUrl: undefined,
+        exampleSentence: undefined,
+        sourceUrl: undefined,
+        wordnikSourceUrl: undefined,
+        error: 'Word not found in dictionary',
+        suggestions: suggestions.length > 0 ? suggestions : undefined,
+      };
       }
       throw new Error(`Dictionary API error: ${response.status}`);
     }
@@ -60,6 +62,7 @@ export async function lookupWord(word: string): Promise<{
           audioUrl: undefined,
           exampleSentence: undefined,
           sourceUrl: undefined,
+          wordnikSourceUrl: undefined,
           error: 'No data returned for this word',
         };
     }
@@ -185,6 +188,7 @@ export async function lookupWord(word: string): Promise<{
       : '';
 
     // If no example sentences from dictionary API, try to get from other sources
+    let wordnikSourceUrl: string | undefined = undefined;
     if (!exampleSentence) {
       try {
         // Try our API route which uses Wordnik for real example sentences
@@ -197,6 +201,10 @@ export async function lookupWord(word: string): Promise<{
           const examplesData = await examplesResponse.json();
           if (examplesData.examples && Array.isArray(examplesData.examples) && examplesData.examples.length > 0) {
             exampleSentence = examplesData.examples.join('\n\n');
+            // Track Wordnik source URL for attribution if examples came from Wordnik
+            if (examplesData.wordnikSourceUrl) {
+              wordnikSourceUrl = examplesData.wordnikSourceUrl;
+            }
           }
         }
       } catch (examplesError) {
@@ -233,97 +241,8 @@ export async function lookupWord(word: string): Promise<{
         }
       }
 
-      // If still no examples, create contextual examples based on part of speech and definition
-      if (!exampleSentence && allDefinitions.length > 0) {
-        const wordLower = word.trim().toLowerCase();
-        const wordCapitalized = word.trim().charAt(0).toUpperCase() + word.trim().slice(1).toLowerCase();
-        const examples: string[] = [];
-        const firstDefinition = allDefinitions[0] || '';
-        const defLower = firstDefinition.toLowerCase();
-        
-        // Generate examples based on part of speech and definition meaning
-        if (partOfSpeech.toLowerCase().includes('adjective')) {
-          // For adjectives, create examples showing the quality/characteristic
-          if (defLower.includes('social') || defLower.includes('friendly') || defLower.includes('sociable')) {
-            examples.push(`She has a ${wordLower} nature and enjoys meeting new people.`);
-            examples.push(`His ${wordLower} personality made him popular at the party.`);
-          } else if (defLower.includes('happy') || defLower.includes('cheerful') || defLower.includes('joyful')) {
-            examples.push(`The ${wordLower} mood in the room was contagious.`);
-            examples.push(`She maintained a ${wordLower} attitude despite the challenges.`);
-          } else {
-            examples.push(`The ${wordLower} quality was evident in her approach.`);
-            examples.push(`He displayed a ${wordLower} character throughout the situation.`);
-          }
-        } else if (partOfSpeech.toLowerCase().includes('noun')) {
-          // For nouns, create examples that actually use the word correctly based on its definition
-          
-          // Linguistic/grammar terms
-          if (defLower.includes('mark') && (defLower.includes('letter') || defLower.includes('pronunciation') || defLower.includes('accent'))) {
-            examples.push(`The word 'café' uses '${wordLower}' to indicate the correct pronunciation.`);
-            examples.push(`Many languages use '${wordLower}' to modify the sound of letters.`);
-            examples.push(`The accent marks in Spanish are examples of '${wordLower}'.`);
-          }
-          // Abstract concepts (luck, chance, serendipity)
-          else if (defLower.includes('luck') || defLower.includes('chance') || defLower.includes('accident') || defLower.includes('fortune')) {
-            examples.push(`Finding that rare book at the garage sale was pure '${wordLower}'.`);
-            examples.push(`It was '${wordLower}' that we met at the coffee shop that day.`);
-          }
-          // Emotions/feelings
-          else if (defLower.includes('feeling') || defLower.includes('emotion') || defLower.includes('sentiment')) {
-            examples.push(`She felt a deep sense of '${wordLower}' after the good news.`);
-            examples.push(`The '${wordLower}' overwhelmed him as he realized his success.`);
-          }
-          // People/individuals
-          else if (defLower.includes('person') || defLower.includes('individual') || defLower.includes('someone')) {
-            examples.push(`As a '${wordLower}', he always sought new experiences.`);
-            examples.push(`The '${wordLower}' in the group stood out for their unique perspective.`);
-          }
-          // Places/locations
-          else if (defLower.includes('place') || defLower.includes('location') || defLower.includes('area') || defLower.includes('site')) {
-            examples.push(`We visited the '${wordLower}' during our vacation.`);
-            examples.push(`The '${wordLower}' was known for its beautiful architecture.`);
-          }
-          // Objects/things
-          else if (defLower.includes('object') || defLower.includes('thing') || defLower.includes('item') || defLower.includes('tool')) {
-            examples.push(`The '${wordLower}' was essential for completing the task.`);
-            examples.push(`She used the '${wordLower}' to solve the problem.`);
-          }
-          // Actions/processes
-          else if (defLower.includes('action') || defLower.includes('process') || defLower.includes('method') || defLower.includes('way')) {
-            examples.push(`The '${wordLower}' requires careful attention to detail.`);
-            examples.push(`They used '${wordLower}' to achieve their goal.`);
-          }
-          // Concepts/ideas
-          else if (defLower.includes('concept') || defLower.includes('idea') || defLower.includes('notion') || defLower.includes('principle')) {
-            examples.push(`The '${wordLower}' is fundamental to understanding this topic.`);
-            examples.push(`She explained the '${wordLower}' clearly to the students.`);
-          }
-          // If we can't categorize, create simple but correct examples
-          else {
-            // Use the word in a way that reflects its definition
-            const isPlural = wordLower.endsWith('s') && wordLower.length > 3;
-            if (isPlural) {
-              examples.push(`The '${wordLower}' are important in this context.`);
-              examples.push(`Many examples of '${wordLower}' can be found in literature.`);
-            } else {
-              examples.push(`The '${wordLower}' is important in this context.`);
-              examples.push(`An example of '${wordLower}' can be found in the text.`);
-            }
-          }
-        } else if (partOfSpeech.toLowerCase().includes('verb')) {
-          // For verbs, create examples showing the action
-          const verbForm = wordLower;
-          examples.push(`They '${verbForm}' regularly to maintain their skills.`);
-          examples.push(`To '${verbForm}' effectively, one must practice consistently.`);
-          examples.push(`She learned to '${verbForm}' through years of experience.`);
-        } else {
-          // Generic examples for other parts of speech - but still grammatically correct
-          examples.push(`The term '${word.trim().toLowerCase()}' is used in various contexts.`);
-          examples.push(`'${wordCapitalized}' is an important term in this field.`);
-        }
-        
-        exampleSentence = examples.join('\n\n');
-      }
+      // If no examples found from any source, return empty string
+      // We do not generate AI examples - only use real dictionary sources
     }
 
     // If no etymology from dictionary API, try our API route (which uses Wiktionary)
@@ -406,6 +325,7 @@ export async function lookupWord(word: string): Promise<{
       audioUrl: audioUrl || undefined,
       exampleSentence: exampleSentence || undefined,
       sourceUrl: sourceUrl || undefined,
+      wordnikSourceUrl: wordnikSourceUrl || undefined,
     };
   } catch (error) {
     return {
@@ -416,6 +336,7 @@ export async function lookupWord(word: string): Promise<{
       audioUrl: undefined,
       exampleSentence: undefined,
       sourceUrl: undefined,
+      wordnikSourceUrl: undefined,
       error: error instanceof Error ? error.message : 'Failed to lookup word',
       suggestions: undefined,
     };

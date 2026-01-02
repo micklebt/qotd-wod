@@ -22,6 +22,12 @@ export default function Navigation() {
               All Entries
             </Link>
             <Link
+              href="/calendar"
+              className="text-gray-600 hover:text-gray-900 font-medium"
+            >
+              Calendar
+            </Link>
+            <Link
               href="/entries/new"
               className="text-blue-600 hover:text-blue-700 font-medium"
             >

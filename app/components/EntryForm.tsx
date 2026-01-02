@@ -31,6 +31,7 @@ export default function EntryForm() {
   const [etymology, setEtymology] = useState('');
   const [exampleSentence, setExampleSentence] = useState('');
   const [sourceUrl, setSourceUrl] = useState<string>('');
+  const [wordnikSourceUrl, setWordnikSourceUrl] = useState<string>('');
   const [author, setAuthor] = useState('');
   const [source, setSource] = useState('');
   const [quoteContext, setQuoteContext] = useState('');
@@ -127,6 +128,7 @@ export default function EntryForm() {
     setEtymology('');
     setExampleSentence('');
     setSourceUrl('');
+    setWordnikSourceUrl('');
     setAuthor('');
     setSource('');
     setQuoteContext('');
@@ -171,6 +173,7 @@ export default function EntryForm() {
         setPronunciationAudio(result.audioUrl || '');
         setExampleSentence(result.exampleSentence || '');
         setSourceUrl(result.sourceUrl || '');
+        setWordnikSourceUrl(result.wordnikSourceUrl || '');
         setShowWordFields(true); // Show fields after lookup
         
         // Debug: log etymology value
@@ -202,6 +205,9 @@ export default function EntryForm() {
       if (result.error) {
         setError(result.error);
       } else {
+        // Always show fields after lookup attempt, even if some fields are empty
+        setShowQuoteFields(true);
+        
         if (result.author) setAuthor(result.author);
         if (result.source) setSource(result.source);
         if (result.context) setQuoteContext(result.context);
@@ -210,7 +216,11 @@ export default function EntryForm() {
         if (result.significance) setQuoteSignificance(result.significance);
         if (result.sourceUrl) setSourceUrl(result.sourceUrl);
         if (result.sourceType) setQuoteSourceType(result.sourceType);
-        setShowQuoteFields(true); // Show fields after lookup
+        
+        // If no data was found, show a helpful message
+        if (!result.author && !result.context && !result.interpretation) {
+          setError('Quote not found in database. You can manually fill in the details below.');
+        }
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to lookup quote');
@@ -480,6 +490,7 @@ export default function EntryForm() {
                             setPronunciationAudio(result.audioUrl || '');
                             setExampleSentence(result.exampleSentence || '');
                             setSourceUrl(result.sourceUrl || '');
+                            setWordnikSourceUrl(result.wordnikSourceUrl || '');
                           }
                         } catch (err) {
                           setError(err instanceof Error ? err.message : 'Failed to lookup word');
@@ -736,6 +747,21 @@ export default function EntryForm() {
                 <div className="text-sm text-gray-700">
                   {formatExampleSentences(exampleSentence)}
                 </div>
+                {wordnikSourceUrl && (
+                  <div className="mt-2 pt-2 border-t border-gray-300">
+                    <p className="text-xs text-gray-500">
+                      Examples from{' '}
+                      <a
+                        href={wordnikSourceUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:text-blue-800 hover:underline"
+                      >
+                        Wordnik
+                      </a>
+                    </p>
+                  </div>
+                )}
               </div>
             )}
           </div>
