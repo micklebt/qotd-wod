@@ -3,7 +3,7 @@
 import { supabase } from '@/lib/supabase';
 import type { Entry } from '@/lib/supabase';
 import { useState, useEffect } from 'react';
-import { getCurrentParticipantId, getParticipantName } from '@/lib/participants';
+import { getCurrentParticipantId, getParticipantName, getParticipantsAsync, type Participant } from '@/lib/participants';
 
 interface WordChallengeProps {
   isOpen: boolean;
@@ -24,6 +24,7 @@ export default function WordChallenge({ isOpen, onClose }: WordChallengeProps) {
   const [stats, setStats] = useState<WordChallengeStats | null>(null);
   const [saving, setSaving] = useState(false);
   const [currentParticipantId, setCurrentParticipantId] = useState<string | null>(null);
+  const [participants, setParticipants] = useState<Participant[]>([]);
 
   useEffect(() => {
     if (isOpen) {
@@ -32,6 +33,13 @@ export default function WordChallenge({ isOpen, onClose }: WordChallengeProps) {
       setCurrentParticipantId(participantId);
       fetchRandomWord();
       setShowMetadata(false);
+      
+      // Load participants for dropdown
+      const loadParticipants = async () => {
+        const participantsData = await getParticipantsAsync();
+        setParticipants(participantsData);
+      };
+      loadParticipants();
     }
   }, [isOpen]);
 
@@ -161,6 +169,17 @@ export default function WordChallenge({ isOpen, onClose }: WordChallengeProps) {
     }
   };
 
+  const handleParticipantChange = (participantId: string) => {
+    setCurrentParticipantId(participantId);
+    if (participantId) {
+      localStorage.setItem('qotd-wod-selected-participant', participantId);
+      // Refresh stats if we have a word loaded
+      if (randomWord) {
+        fetchWordStats(randomWord.id);
+      }
+    }
+  };
+
   const handleConfirmation = async (isKnown: boolean) => {
     if (!randomWord) {
       alert('No word selected');
@@ -170,7 +189,7 @@ export default function WordChallenge({ isOpen, onClose }: WordChallengeProps) {
     // Always check localStorage directly before saving
     const participantId = getCurrentParticipantId();
     if (!participantId) {
-      alert('Please select a participant in the "Create New Entry" form first');
+      alert('Please select a participant first');
       return;
     }
     
@@ -251,13 +270,6 @@ export default function WordChallenge({ isOpen, onClose }: WordChallengeProps) {
                     </p>
                   </div>
                 )}
-                {!currentParticipantId && (
-                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-4">
-                    <p className="text-sm text-yellow-800">
-                      ⚠️ Please select a participant in the "Create New Entry" form to track your progress.
-                    </p>
-                  </div>
-                )}
                 <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 justify-center mb-4 sm:mb-6">
                   <button
                     onClick={() => handleConfirmation(true)}
@@ -312,6 +324,23 @@ export default function WordChallenge({ isOpen, onClose }: WordChallengeProps) {
                     Show Definition & Details
                   </button>
                 )}
+
+                {/* Participant Selection at Bottom */}
+                <div className="border-t border-gray-200 pt-4 mt-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Select Participant</label>
+                  <select
+                    value={currentParticipantId || ''}
+                    onChange={(e) => handleParticipantChange(e.target.value)}
+                    className="w-full border border-gray-300 rounded p-2 text-gray-700 bg-white"
+                  >
+                    <option value="">Select participant (your selection will be remembered)</option>
+                    {participants.map((participant) => (
+                      <option key={participant.id} value={String(participant.id)}>
+                        {participant.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
 
               {showMetadata && randomWord.word_metadata && randomWord.word_metadata[0] && (

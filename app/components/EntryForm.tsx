@@ -696,22 +696,6 @@ export default function EntryForm() {
       </div>
 
       <div>
-        <select
-          value={selectedParticipant}
-          onChange={(e) => handleParticipantChange(e.target.value)}
-          className="w-full border border-gray-300 rounded p-2 text-gray-500"
-          required
-        >
-          <option value="">Submitted by (your selection will be remembered)</option>
-          {dbParticipants.map((participant) => (
-            <option key={participant.id} value={participant.id}>
-              {participant.name}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <div>
         {type === 'word' ? (
           <div className="space-y-2">
             <div className="flex flex-col sm:flex-row gap-2">
@@ -1034,6 +1018,23 @@ export default function EntryForm() {
           )}
         </>
       )}
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">Submitted by</label>
+        <select
+          value={selectedParticipant}
+          onChange={(e) => handleParticipantChange(e.target.value)}
+          className="w-full border border-gray-300 rounded p-2 text-gray-700 bg-white"
+          required
+        >
+          <option value="">Select participant (your selection will be remembered)</option>
+          {dbParticipants.map((participant) => (
+            <option key={participant.id} value={participant.id}>
+              {participant.name}
+            </option>
+          ))}
+        </select>
+      </div>
 
       <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
         <button

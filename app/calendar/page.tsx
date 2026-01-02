@@ -2,7 +2,7 @@
 
 import { supabase } from '@/lib/supabase';
 import type { Entry } from '@/lib/supabase';
-import { getParticipantsAsync, type Participant } from '@/lib/participants';
+import { getParticipantsAsync, getCurrentParticipantId, type Participant } from '@/lib/participants';
 import { useState, useEffect } from 'react';
 
 interface MonthDay {
@@ -42,6 +42,12 @@ export default function CalendarPage() {
         }));
         console.log('Loaded participants:', normalizedParticipants);
         setParticipants(normalizedParticipants);
+
+        // Default to sticky participant from localStorage
+        const stickyParticipantId = getCurrentParticipantId();
+        if (stickyParticipantId && normalizedParticipants.some(p => String(p.id) === stickyParticipantId)) {
+          setSelectedParticipant(stickyParticipantId);
+        }
 
         // Fetch entries
         const { data, error } = await supabase
