@@ -258,9 +258,9 @@ export default function CalendarPage() {
   }
 
   return (
-    <div className="max-w-full mx-auto px-2 sm:px-4 py-2 sm:py-3">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0 mb-2 sm:mb-3">
-        <h1 className="text-base sm:text-lg font-bold text-gray-900">Participation Calendar <span className="text-gray-900">{currentYear}</span></h1>
+    <div className="max-w-4xl mx-auto px-3 sm:px-4 py-3 sm:py-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-2 mb-3 sm:mb-4">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Participation Calendar <span className="text-gray-900">{currentYear}</span></h1>
         <div className="flex gap-1 items-center flex-wrap">
           <button
             onClick={() => setCurrentYear(currentYear - 1)}
@@ -297,12 +297,12 @@ export default function CalendarPage() {
         </div>
       </div>
 
-      <div className="bg-gray-50 border border-gray-200 rounded p-2 sm:p-2.5 mb-2 sm:mb-3">
-        <div className="mb-2">
+      <div className="bg-gray-50 border border-gray-200 rounded p-2.5 sm:p-3 mb-3 sm:mb-4">
+        <div className="mb-2 sm:mb-3">
           <select
             value={selectedParticipant}
             onChange={(e) => setSelectedParticipant(e.target.value)}
-            className="w-full text-sm sm:text-xs border border-gray-300 rounded px-2 py-1.5 sm:py-1 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full text-sm border border-gray-300 rounded px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="all">All Participants</option>
             {participants.map((participant) => (
@@ -313,19 +313,19 @@ export default function CalendarPage() {
           </select>
         </div>
 
-        <div className="grid grid-cols-2 gap-2">
-          <div className="bg-white rounded p-2 border border-gray-200">
-            <p className="text-xs text-gray-900 font-semibold mb-0.5">Current Streak</p>
+        <div className="grid grid-cols-2 gap-2 sm:gap-3">
+          <div className="bg-white rounded p-2 sm:p-3 border border-gray-200">
+            <p className="text-xs text-gray-900 font-semibold mb-1 sm:mb-0.5">Current Streak</p>
             <p className="text-lg sm:text-xl font-bold text-blue-700">{currentStreak}</p>
           </div>
-          <div className="bg-white rounded p-2 border border-gray-200">
-            <p className="text-xs text-gray-900 font-semibold mb-0.5">Longest Streak</p>
+          <div className="bg-white rounded p-2 sm:p-3 border border-gray-200">
+            <p className="text-xs text-gray-900 font-semibold mb-1 sm:mb-0.5">Longest Streak</p>
             <p className="text-lg sm:text-xl font-bold text-green-700">{longestStreak}</p>
           </div>
         </div>
       </div>
 
-      <div className="bg-white border border-gray-200 rounded p-1.5 sm:p-2 overflow-x-auto">
+      <div className="bg-white border border-gray-200 rounded p-2 sm:p-3 overflow-x-auto">
         <div className="inline-block min-w-full">
           <div className="grid grid-cols-[auto_repeat(12,1fr)] gap-1 mb-1">
             <div className="w-8"></div>

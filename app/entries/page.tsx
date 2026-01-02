@@ -94,9 +94,9 @@ export default function EntriesPage() {
 
   if (loading) {
     return (
-      <div className="max-w-4xl mx-auto p-4">
+      <div className="max-w-4xl mx-auto px-3 sm:px-4 py-3 sm:py-4">
         <div className="text-center py-8">
-          <p className="text-gray-500">Loading entries...</p>
+          <p className="text-gray-500 text-sm sm:text-base">Loading entries...</p>
         </div>
       </div>
     );
