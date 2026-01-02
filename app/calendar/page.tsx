@@ -254,7 +254,7 @@ export default function CalendarPage() {
   return (
     <div className="max-w-full mx-auto px-2 sm:px-4 py-2 sm:py-4">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0 mb-3">
-        <h1 className="text-base sm:text-lg font-bold">Participation Calendar {currentYear}</h1>
+        <h1 className="text-base sm:text-lg font-bold text-gray-900">Participation Calendar <span className="text-gray-900">{currentYear}</span></h1>
         <div className="flex gap-1 items-center flex-wrap">
           <button
             onClick={() => setCurrentYear(currentYear - 1)}
