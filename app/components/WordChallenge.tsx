@@ -234,19 +234,14 @@ export default function WordChallenge({ isOpen, onClose }: WordChallengeProps) {
           <div className="mb-4 sm:mb-6">
             <h2 className="text-xl sm:text-2xl font-bold mb-2 sm:mb-3">Word Challenge</h2>
             <div className="flex gap-2">
-              <button
-                onClick={fetchRandomWord}
-                disabled={loading}
-                className="px-3 sm:px-4 py-1.5 sm:py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
-              >
-                {loading ? 'Loading...' : 'New Word'}
-              </button>
-              <button
-                onClick={onClose}
-                className="px-3 sm:px-4 py-1.5 sm:py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors text-sm sm:text-base"
-              >
-                Close
-              </button>
+              {!showMetadata && randomWord && (
+                <button
+                  onClick={() => setShowMetadata(true)}
+                  className="px-3 sm:px-4 py-1.5 sm:py-2 bg-blue-600 text-white font-semibold rounded hover:bg-blue-700 transition-colors text-sm sm:text-base"
+                >
+                  Show Definition & Details
+                </button>
+              )}
             </div>
           </div>
 
@@ -262,14 +257,6 @@ export default function WordChallenge({ isOpen, onClose }: WordChallengeProps) {
                   Do you have confident knowledge and use of this word?
                 </p>
                 
-                {/* Participant Info */}
-                {currentParticipantId && (
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-2 sm:p-3 mb-3 sm:mb-4">
-                    <p className="text-sm text-blue-900 font-medium">
-                      Tracking progress for: <span className="font-bold text-blue-950">{getParticipantName(currentParticipantId)}</span>
-                    </p>
-                  </div>
-                )}
                 <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 justify-center mb-4 sm:mb-6">
                   <button
                     onClick={() => handleConfirmation(true)}
@@ -316,16 +303,23 @@ export default function WordChallenge({ isOpen, onClose }: WordChallengeProps) {
                   </div>
                 )}
 
-                {!showMetadata && (
+                <div className="flex gap-2 justify-center">
                   <button
-                    onClick={() => setShowMetadata(true)}
-                    className="px-6 py-3 bg-blue-600 text-white font-semibold rounded hover:bg-blue-700 transition-colors"
+                    onClick={fetchRandomWord}
+                    disabled={loading}
+                    className="px-4 sm:px-6 py-2 sm:py-3 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base font-semibold"
                   >
-                    Show Definition & Details
+                    {loading ? 'Loading...' : 'New Word'}
                   </button>
-                )}
+                  <button
+                    onClick={onClose}
+                    className="px-4 sm:px-6 py-2 sm:py-3 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors text-sm sm:text-base font-semibold"
+                  >
+                    Close
+                  </button>
+                </div>
 
-                {/* Participant Selection at Bottom */}
+                {/* Participant Selection */}
                 <div className="border-t border-gray-200 pt-4 mt-4">
                   <label className="block text-sm font-medium text-gray-700 mb-2">Select Participant</label>
                   <select
@@ -341,6 +335,15 @@ export default function WordChallenge({ isOpen, onClose }: WordChallengeProps) {
                     ))}
                   </select>
                 </div>
+
+                {/* Tracking Progress - Moved to Bottom */}
+                {currentParticipantId && (
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-2 sm:p-3 mt-4">
+                    <p className="text-sm text-blue-900 font-medium">
+                      Tracking progress for: <span className="font-bold text-blue-950">{getParticipantName(currentParticipantId)}</span>
+                    </p>
+                  </div>
+                )}
               </div>
 
               {showMetadata && randomWord.word_metadata && randomWord.word_metadata[0] && (
