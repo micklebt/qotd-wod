@@ -1,6 +1,6 @@
 import { supabase } from '@/lib/supabase';
 import type { Entry } from '@/lib/supabase';
-import { getParticipantName } from '@/lib/participants';
+import { getParticipantNameAsync, preloadParticipants } from '@/lib/participants';
 import Link from 'next/link';
 import WordChallengeTrigger from '@/components/WordChallengeTrigger';
 
@@ -9,11 +9,14 @@ export default async function Home() {
   let quote: Entry | null = null;
   let error: string | null = null;
 
+  // Preload participants cache
+  await preloadParticipants();
+
   try {
     // Fetch latest word
     const { data: wordData, error: wordError } = await supabase
       .from('entries')
-      .select('id, type, content, created_at, word_metadata(*)')
+      .select('id, type, content, created_at, participant_id, word_metadata(*)')
       .eq('type', 'word')
       .order('created_at', { ascending: false })
       .limit(1)
@@ -25,7 +28,7 @@ export default async function Home() {
     // Fetch latest quote
     const { data: quoteData, error: quoteError } = await supabase
       .from('entries')
-      .select('id, type, content, created_at, quote_metadata(*)')
+      .select('id, type, content, created_at, participant_id, quote_metadata(*)')
       .eq('type', 'quote')
       .order('created_at', { ascending: false })
       .limit(1)
@@ -38,6 +41,10 @@ export default async function Home() {
   }
 
   if (error) return <div className="p-4 text-red-600">Error: {error}</div>;
+
+  // Get participant names
+  const wordParticipantName = word ? await getParticipantNameAsync(word.participant_id) : '';
+  const quoteParticipantName = quote ? await getParticipantNameAsync(quote.participant_id) : '';
 
   return (
     <div className="min-h-screen bg-white">
@@ -60,7 +67,7 @@ export default async function Home() {
           <div className="border border-gray-300 rounded p-6">
             <div className="flex items-center justify-between mb-2">
               <h2 className="text-lg font-bold">Word of the Day</h2>
-              <p className="text-sm text-gray-500">Submitted by {getParticipantName(word.submitted_by_user_id)}</p>
+              <p className="text-sm text-gray-500">Submitted by {wordParticipantName}</p>
             </div>
             <p className="text-3xl font-bold mb-4">{word.content}</p>
             {word.word_metadata && word.word_metadata[0] && (
@@ -79,7 +86,7 @@ export default async function Home() {
           <div className="border border-gray-300 rounded p-6">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-bold">Quote of the Day</h2>
-              <p className="text-sm text-gray-500">Submitted by {getParticipantName(quote.submitted_by_user_id)}</p>
+              <p className="text-sm text-gray-500">Submitted by {quoteParticipantName}</p>
             </div>
             <p className="text-xl italic mb-4">"{quote.content}"</p>
             {quote.quote_metadata && quote.quote_metadata[0] && (

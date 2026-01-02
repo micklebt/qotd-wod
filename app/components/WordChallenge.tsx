@@ -3,27 +3,45 @@
 import { supabase } from '@/lib/supabase';
 import type { Entry } from '@/lib/supabase';
 import { useState, useEffect } from 'react';
+import { getCurrentParticipantId } from '@/lib/participants';
 
 interface WordChallengeProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
+interface WordChallengeStats {
+  totalAppearances: number;
+  confirmedKnown: number;
+  confirmedNotKnown: number;
+  currentUserResponse: boolean | null; // null = no response yet, true = knows it, false = doesn't know it
+}
+
 export default function WordChallenge({ isOpen, onClose }: WordChallengeProps) {
   const [randomWord, setRandomWord] = useState<Entry | null>(null);
   const [loading, setLoading] = useState(false);
   const [showMetadata, setShowMetadata] = useState(false);
+  const [stats, setStats] = useState<WordChallengeStats | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [currentParticipantId, setCurrentParticipantId] = useState<string | null>(null);
 
   useEffect(() => {
     if (isOpen) {
+      loadCurrentParticipant();
       fetchRandomWord();
       setShowMetadata(false);
     }
   }, [isOpen]);
 
+  const loadCurrentParticipant = () => {
+    const participantId = getCurrentParticipantId();
+    setCurrentParticipantId(participantId);
+  };
+
   const fetchRandomWord = async () => {
     setLoading(true);
     setShowMetadata(false);
+    setStats(null);
     try {
       const { data: allWords, error } = await supabase
         .from('entries')
@@ -34,7 +52,9 @@ export default function WordChallenge({ isOpen, onClose }: WordChallengeProps) {
 
       if (allWords && allWords.length > 0) {
         const randomIndex = Math.floor(Math.random() * allWords.length);
-        setRandomWord(allWords[randomIndex]);
+        const word = allWords[randomIndex];
+        setRandomWord(word);
+        await fetchWordStats(word.id);
       } else {
         setRandomWord(null);
       }
@@ -43,6 +63,79 @@ export default function WordChallenge({ isOpen, onClose }: WordChallengeProps) {
       setRandomWord(null);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchWordStats = async (entryId: number) => {
+    if (!currentParticipantId) {
+      loadCurrentParticipant();
+    }
+    const participantId = currentParticipantId || getCurrentParticipantId();
+
+    try {
+      // Get all responses for this word
+      const { data: allResponses, error: responsesError } = await supabase
+        .from('word_challenge_responses')
+        .select('*')
+        .eq('entry_id', entryId);
+
+      if (responsesError) throw responsesError;
+
+      // Get current user's response
+      const userResponse = allResponses?.find(r => r.participant_id === participantId);
+
+      // Calculate stats
+      const totalAppearances = allResponses?.length || 0;
+      const confirmedKnown = allResponses?.filter(r => r.is_known === true).length || 0;
+      const confirmedNotKnown = allResponses?.filter(r => r.is_known === false).length || 0;
+
+      setStats({
+        totalAppearances,
+        confirmedKnown,
+        confirmedNotKnown,
+        currentUserResponse: userResponse ? userResponse.is_known : null,
+      });
+    } catch (err) {
+      console.error('Error fetching word stats:', err);
+      // Set default stats if error
+      setStats({
+        totalAppearances: 0,
+        confirmedKnown: 0,
+        confirmedNotKnown: 0,
+        currentUserResponse: null,
+      });
+    }
+  };
+
+  const handleConfirmation = async (isKnown: boolean) => {
+    if (!randomWord || !currentParticipantId) {
+      alert('Please select a participant first');
+      return;
+    }
+
+    setSaving(true);
+    try {
+      // Use upsert to insert or update the response
+      const { error } = await supabase
+        .from('word_challenge_responses')
+        .upsert({
+          entry_id: randomWord.id,
+          participant_id: currentParticipantId,
+          is_known: isKnown,
+          updated_at: new Date().toISOString(),
+        }, {
+          onConflict: 'entry_id,participant_id',
+        });
+
+      if (error) throw error;
+
+      // Refresh stats
+      await fetchWordStats(randomWord.id);
+    } catch (err) {
+      console.error('Error saving confirmation:', err);
+      alert('Failed to save your response. Please try again.');
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -80,8 +173,63 @@ export default function WordChallenge({ isOpen, onClose }: WordChallengeProps) {
               <div className="text-center">
                 <p className="text-5xl font-bold mb-4">{randomWord.content}</p>
                 <p className="text-sm text-gray-500 mb-4">
-                  Do you remember this word?
+                  Do you have confident knowledge and use of this word?
                 </p>
+                
+                {/* Confirmation Buttons */}
+                {!currentParticipantId && (
+                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-4">
+                    <p className="text-sm text-yellow-800">
+                      ⚠️ Please select a participant in the "Create New Entry" form first to track your progress.
+                    </p>
+                  </div>
+                )}
+                <div className="flex gap-4 justify-center mb-6">
+                  <button
+                    onClick={() => handleConfirmation(true)}
+                    disabled={saving || !currentParticipantId}
+                    className={`px-6 py-3 font-semibold rounded transition-colors ${
+                      stats?.currentUserResponse === true
+                        ? 'bg-green-600 text-white'
+                        : 'bg-green-100 text-green-700 hover:bg-green-200'
+                    } disabled:opacity-50 disabled:cursor-not-allowed`}
+                  >
+                    {saving ? 'Saving...' : stats?.currentUserResponse === true ? '✓ I Know This Word' : 'I Know This Word'}
+                  </button>
+                  <button
+                    onClick={() => handleConfirmation(false)}
+                    disabled={saving || !currentParticipantId}
+                    className={`px-6 py-3 font-semibold rounded transition-colors ${
+                      stats?.currentUserResponse === false
+                        ? 'bg-red-600 text-white'
+                        : 'bg-red-100 text-red-700 hover:bg-red-200'
+                    } disabled:opacity-50 disabled:cursor-not-allowed`}
+                  >
+                    {saving ? 'Saving...' : stats?.currentUserResponse === false ? '✗ Not Yet Confident' : 'Not Yet Confident'}
+                  </button>
+                </div>
+
+                {/* Statistics Display */}
+                {stats && (
+                  <div className="bg-gray-50 rounded-lg p-4 mb-4">
+                    <p className="text-sm font-semibold text-gray-700 mb-2">Word Challenge Statistics</p>
+                    <div className="grid grid-cols-3 gap-4 text-center">
+                      <div>
+                        <p className="text-2xl font-bold text-gray-900">{stats.totalAppearances}</p>
+                        <p className="text-xs text-gray-600">Total Appearances</p>
+                      </div>
+                      <div>
+                        <p className="text-2xl font-bold text-green-600">{stats.confirmedKnown}</p>
+                        <p className="text-xs text-gray-600">Confirmed Known</p>
+                      </div>
+                      <div>
+                        <p className="text-2xl font-bold text-red-600">{stats.confirmedNotKnown}</p>
+                        <p className="text-xs text-gray-600">Not Yet Confident</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {!showMetadata && (
                   <button
                     onClick={() => setShowMetadata(true)}

@@ -1,44 +1,87 @@
 /**
- * Formats example sentences to highlight quoted words with italics and underline
- * Looks for words wrapped in single quotes and formats them
+ * Formats example sentences to highlight:
+ * 1. The word being looked up (bold and italic)
+ * 2. Words wrapped in single quotes (italic and underline)
  */
 
 import React from 'react';
 
-export function formatExampleSentence(sentence: string): React.ReactNode {
+export function formatExampleSentence(sentence: string, word?: string): React.ReactNode {
   if (!sentence) return sentence;
 
-  // Pattern to match words in single quotes: 'word'
-  const quotePattern = /'([^']+)'/g;
   const parts: (string | React.ReactElement)[] = [];
   let lastIndex = 0;
-  let match;
   let key = 0;
 
-  while ((match = quotePattern.exec(sentence)) !== null) {
-    // Add text before the quoted word
-    if (match.index > lastIndex) {
-      parts.push(sentence.substring(lastIndex, match.index));
+  // Collect all matches (word and quotes) with their positions
+  const matches: Array<{ start: number; end: number; type: 'word' | 'quote'; text: string; quotedText?: string }> = [];
+
+  // Find word matches (case-insensitive, whole word only)
+  if (word && word.trim()) {
+    const wordTrimmed = word.trim();
+    const wordRegex = new RegExp(`\\b${wordTrimmed.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'gi');
+    let match;
+    
+    while ((match = wordRegex.exec(sentence)) !== null) {
+      matches.push({
+        start: match.index,
+        end: match.index + match[0].length,
+        type: 'word',
+        text: match[0]
+      });
+    }
+  }
+
+  // Find quote matches
+  const quotePattern = /'([^']+)'/g;
+  let quoteMatch;
+  
+  while ((quoteMatch = quotePattern.exec(sentence)) !== null) {
+    matches.push({
+      start: quoteMatch.index,
+      end: quoteMatch.index + quoteMatch[0].length,
+      type: 'quote',
+      text: quoteMatch[0],
+      quotedText: quoteMatch[1]
+    });
+  }
+
+  // Sort matches by position
+  matches.sort((a, b) => a.start - b.start);
+
+  // Build parts array
+  matches.forEach((match) => {
+    // Add text before the match
+    if (match.start > lastIndex) {
+      parts.push(sentence.substring(lastIndex, match.start));
     }
     
-    // Add the formatted word with quotes, italic, and underline
-    parts.push(
-      <span key={key++} className="italic underline font-semibold">
-        {'\''}
-        {match[1]}
-        {'\''}
-      </span>
-    );
+    // Add the formatted match
+    if (match.type === 'word') {
+      parts.push(
+        <span key={key++} className="font-bold italic">
+          {match.text}
+        </span>
+      );
+    } else if (match.type === 'quote' && match.quotedText) {
+      parts.push(
+        <span key={key++} className="italic underline font-semibold">
+          {'\''}
+          {match.quotedText}
+          {'\''}
+        </span>
+      );
+    }
     
-    lastIndex = match.index + match[0].length;
-  }
+    lastIndex = match.end;
+  });
   
   // Add remaining text after the last match
   if (lastIndex < sentence.length) {
     parts.push(sentence.substring(lastIndex));
   }
   
-  // If no quoted words found, return original sentence
+  // If no matches found, return original sentence
   if (parts.length === 0) {
     return sentence;
   }
@@ -48,8 +91,10 @@ export function formatExampleSentence(sentence: string): React.ReactNode {
 
 /**
  * Formats multiple example sentences (separated by newlines)
+ * @param sentences - Multiple sentences separated by \n\n
+ * @param word - The word being looked up (optional, for highlighting)
  */
-export function formatExampleSentences(sentences: string): React.ReactNode {
+export function formatExampleSentences(sentences: string, word?: string): React.ReactNode {
   if (!sentences) return sentences;
   
   const lines = sentences.split('\n\n');
@@ -58,7 +103,7 @@ export function formatExampleSentences(sentences: string): React.ReactNode {
     <div className="space-y-2">
       {lines.map((line, index) => (
         <p key={index} className="text-sm">
-          {formatExampleSentence(line)}
+          {formatExampleSentence(line, word)}
         </p>
       ))}
     </div>

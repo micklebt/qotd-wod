@@ -4,12 +4,14 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import type { Entry } from '@/lib/supabase';
-import { PARTICIPANTS, STORAGE_KEY_SELECTED_PARTICIPANT, type Participant } from '@/lib/constants';
+const STORAGE_KEY_SELECTED_PARTICIPANT = 'qotd-wod-selected-participant';
 import { lookupWord } from '@/lib/dictionary';
 import { lookupQuote } from '@/lib/quoteLookup';
-import { getParticipantName } from '@/lib/participants';
+import { getParticipantName, getParticipantsAsync, preloadParticipants, type Participant as DbParticipant } from '@/lib/participants';
 import { formatIPA } from '@/lib/pronunciation';
 import { formatExampleSentences } from '@/lib/formatExampleSentence';
+import MarkdownContextMenu from './MarkdownContextMenu';
+import MarkdownTextarea from './MarkdownTextarea';
 
 export default function EntryForm() {
   const router = useRouter();
@@ -48,15 +50,46 @@ export default function EntryForm() {
   const [spellingSuggestions, setSpellingSuggestions] = useState<string[]>([]);
   const [showWordFields, setShowWordFields] = useState(false);
   const [showQuoteFields, setShowQuoteFields] = useState(false);
+  const [dbParticipants, setDbParticipants] = useState<DbParticipant[]>([]);
+  const [contextMenu, setContextMenu] = useState<{
+    x: number;
+    y: number;
+    textareaRef: React.RefObject<HTMLTextAreaElement>;
+    setValue: (value: string) => void;
+  } | null>(null);
 
+  // Preload participants from database
   useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY_SELECTED_PARTICIPANT);
-    if (stored && PARTICIPANTS.some(p => p.id === stored)) {
-      setSelectedParticipant(stored);
-    } else if (PARTICIPANTS.length > 0) {
-      setSelectedParticipant(PARTICIPANTS[0].id);
-    }
+    const loadParticipants = async () => {
+      await preloadParticipants();
+      const participants = await getParticipantsAsync();
+      setDbParticipants(participants);
+      
+      // Set selected participant from localStorage or default to first
+      const stored = localStorage.getItem(STORAGE_KEY_SELECTED_PARTICIPANT);
+      if (stored && participants.some(p => p.id === stored)) {
+        setSelectedParticipant(stored);
+      } else if (participants.length > 0) {
+        setSelectedParticipant(participants[0].id);
+      }
+    };
+    loadParticipants();
   }, []);
+
+  // Prevent default context menu on textareas when we have our custom menu
+  useEffect(() => {
+    const handleDocumentContextMenu = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (target.tagName === 'TEXTAREA' && contextMenu) {
+        e.preventDefault();
+      }
+    };
+
+    document.addEventListener('contextmenu', handleDocumentContextMenu);
+    return () => {
+      document.removeEventListener('contextmenu', handleDocumentContextMenu);
+    };
+  }, [contextMenu]);
 
   useEffect(() => {
     if (definitionTextareaRef.current) {
@@ -117,6 +150,119 @@ export default function EntryForm() {
   const handleParticipantChange = (participantId: string) => {
     setSelectedParticipant(participantId);
     localStorage.setItem(STORAGE_KEY_SELECTED_PARTICIPANT, participantId);
+  };
+
+  const wrapSelectedText = (
+    textarea: HTMLTextAreaElement | HTMLElement,
+    setValue: (value: string) => void,
+    prefix: string,
+    suffix: string
+  ) => {
+    if (textarea instanceof HTMLTextAreaElement) {
+      // Handle regular textarea
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      const selectedText = textarea.value.substring(start, end);
+      
+      if (selectedText) {
+        const newText =
+          textarea.value.substring(0, start) +
+          prefix + selectedText + suffix +
+          textarea.value.substring(end);
+        setValue(newText);
+        
+        // Restore cursor position after the formatted text
+        setTimeout(() => {
+          textarea.focus();
+          const newPosition = start + prefix.length + selectedText.length + suffix.length;
+          textarea.setSelectionRange(newPosition, newPosition);
+        }, 0);
+      }
+    } else {
+      // Handle contenteditable div
+      const selection = window.getSelection();
+      if (selection && selection.rangeCount > 0) {
+        const range = selection.getRangeAt(0);
+        const selectedText = range.toString();
+        
+        if (selectedText && textarea instanceof HTMLElement) {
+          // Wrap the selected text with HTML tags based on markdown
+          let wrapperElement: HTMLElement;
+          if (prefix === '**') {
+            wrapperElement = document.createElement('strong');
+          } else if (prefix === '*') {
+            wrapperElement = document.createElement('em');
+          } else if (prefix === '<u>') {
+            wrapperElement = document.createElement('u');
+          } else {
+            wrapperElement = document.createElement('span');
+          }
+          
+          try {
+            // Try to surround the contents
+            range.surroundContents(wrapperElement);
+          } catch (e) {
+            // If surroundContents fails (e.g., range spans multiple nodes), delete and insert
+            range.deleteContents();
+            wrapperElement.textContent = selectedText;
+            range.insertNode(wrapperElement);
+          }
+          
+          // Verify the HTML was added and log for debugging
+          const htmlAfterFormat = textarea instanceof HTMLElement ? textarea.innerHTML : '';
+          console.log('HTML after formatting:', htmlAfterFormat);
+          
+          // Ensure the element stays focused so formatting is visible
+          if (textarea instanceof HTMLElement) {
+            textarea.focus();
+            
+            // Trigger input event to sync markdown, but HTML formatting stays visible
+            setTimeout(() => {
+              const inputEvent = new Event('input', { bubbles: true, cancelable: true });
+              textarea.dispatchEvent(inputEvent);
+            }, 10);
+          }
+          
+          // Clear selection after formatting is applied
+          setTimeout(() => {
+            selection.removeAllRanges();
+          }, 50);
+        }
+      }
+    }
+  };
+
+  const handleContextMenu = (
+    e: React.MouseEvent<HTMLTextAreaElement | HTMLDivElement>,
+    textareaRef: React.RefObject<HTMLTextAreaElement | HTMLElement>,
+    setValue: (value: string) => void
+  ) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    const element = textareaRef.current;
+    if (!element) return;
+    
+    // Check if there's selected text
+    let hasSelection = false;
+    if (element instanceof HTMLTextAreaElement) {
+      const start = element.selectionStart;
+      const end = element.selectionEnd;
+      hasSelection = start !== end && start < end;
+    } else {
+      // Contenteditable div
+      const selection = window.getSelection();
+      hasSelection = selection !== null && selection.toString().length > 0;
+    }
+    
+    if (hasSelection) {
+      setContextMenu({
+        x: e.clientX,
+        y: e.clientY,
+        textareaRef: textareaRef as React.RefObject<HTMLTextAreaElement>,
+        setValue,
+      });
+    }
   };
 
   const handleClearForm = () => {
@@ -291,7 +437,7 @@ export default function EntryForm() {
         .insert({
           type,
           content,
-          submitted_by_user_id: userId,
+          participant_id: userId,
         })
         .select()
         .single();
@@ -391,7 +537,7 @@ export default function EntryForm() {
               <div className="border border-gray-300 rounded p-4 bg-gray-50">
                 <h3 className="font-bold text-lg mb-3 text-gray-700">Existing Entry</h3>
                 <div className="space-y-2 text-sm">
-                  <p><span className="font-semibold">Submitted by:</span> {getParticipantName(existingEntry.submitted_by_user_id)}</p>
+                  <p><span className="font-semibold">Submitted by:</span> {getParticipantName(existingEntry.participant_id)}</p>
                   <p><span className="font-semibold">Date:</span> {new Date(existingEntry.created_at).toLocaleDateString()}</p>
                   {existingEntry.word_metadata?.[0] && (
                     <>
@@ -553,7 +699,7 @@ export default function EntryForm() {
           required
         >
           <option value="">Submitted by (your selection will be remembered)</option>
-          {PARTICIPANTS.map((participant) => (
+          {dbParticipants.map((participant) => (
             <option key={participant.id} value={participant.id}>
               {participant.name}
             </option>
@@ -660,23 +806,15 @@ export default function EntryForm() {
           {showWordFields && (
             <>
               <div>
-                <textarea
-                  ref={definitionTextareaRef}
+                <MarkdownTextarea
                   value={definition}
-                  onChange={(e) => {
-                    setDefinition(e.target.value);
-                    if (e.target) {
-                      e.target.style.height = 'auto';
-                      e.target.style.height = `${e.target.scrollHeight}px`;
-                    }
+                  onChange={setDefinition}
+                  onContextMenu={(e) => {
+                    const target = e.currentTarget;
+                    const fakeRef = { current: target } as React.RefObject<HTMLTextAreaElement>;
+                    handleContextMenu(e as any, fakeRef, setDefinition);
                   }}
-                  onInput={(e) => {
-                    const target = e.target as HTMLTextAreaElement;
-                    target.style.height = 'auto';
-                    target.style.height = `${target.scrollHeight}px`;
-                  }}
-                  placeholder="Definition"
-                  className="w-full border border-gray-300 rounded p-2 resize-none overflow-hidden"
+                  placeholder="Definition (Right-click selected text for formatting: **bold**, *italic*, <u>underline</u>)"
                   style={{ minHeight: '2.5rem' }}
                   required
                 />
@@ -722,48 +860,30 @@ export default function EntryForm() {
                 </div>
               </div>
               <div>
-                <textarea
-                  ref={exampleSentenceTextareaRef}
+                <MarkdownTextarea
                   value={exampleSentence}
-                  onChange={(e) => {
-                    setExampleSentence(e.target.value);
-                    if (e.target) {
-                      e.target.style.height = 'auto';
-                      e.target.style.height = `${e.target.scrollHeight}px`;
-                    }
+                  onChange={setExampleSentence}
+                  onContextMenu={(e) => {
+                    const target = e.currentTarget;
+                    const fakeRef = { current: target } as React.RefObject<HTMLTextAreaElement>;
+                    handleContextMenu(e as any, fakeRef, setExampleSentence);
                   }}
-                  onInput={(e) => {
-                    const target = e.target as HTMLTextAreaElement;
-                    target.style.height = 'auto';
-                    target.style.height = `${target.scrollHeight}px`;
-                  }}
-                  placeholder="Use in Sentence - e.g., The word 'example' was used in a sentence..."
-                  className="w-full border border-gray-300 rounded p-2 resize-none overflow-hidden"
+                  placeholder="Use in Sentence (Right-click selected text for formatting) - e.g., The word 'example' was used in a sentence..."
                   style={{ minHeight: '2.5rem' }}
                 />
-            {exampleSentence && (
-              <div className="mt-2 p-2 bg-gray-50 rounded border border-gray-200">
-                <p className="text-xs text-gray-500 mb-1">Preview:</p>
-                <div className="text-sm text-gray-700">
-                  {formatExampleSentences(exampleSentence)}
-                </div>
                 {wordnikSourceUrl && (
-                  <div className="mt-2 pt-2 border-t border-gray-300">
-                    <p className="text-xs text-gray-500">
-                      Examples from{' '}
-                      <a
-                        href={wordnikSourceUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-600 hover:text-blue-800 hover:underline"
-                      >
-                        Wordnik
-                      </a>
-                    </p>
+                  <div className="mt-2 text-xs text-gray-500">
+                    Examples from{' '}
+                    <a
+                      href={wordnikSourceUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:text-blue-800 hover:underline"
+                    >
+                      Wordnik
+                    </a>
                   </div>
                 )}
-              </div>
-            )}
           </div>
             </>
           )}
@@ -777,23 +897,15 @@ export default function EntryForm() {
             />
           </div>
           <div>
-            <textarea
-              ref={etymologyTextareaRef}
+            <MarkdownTextarea
               value={etymology}
-              onChange={(e) => {
-                setEtymology(e.target.value);
-                if (e.target) {
-                  e.target.style.height = 'auto';
-                  e.target.style.height = `${e.target.scrollHeight}px`;
-                }
+              onChange={setEtymology}
+              onContextMenu={(e) => {
+                const target = e.currentTarget;
+                const fakeRef = { current: target } as React.RefObject<HTMLTextAreaElement>;
+                handleContextMenu(e as any, fakeRef, setEtymology);
               }}
-              onInput={(e) => {
-                const target = e.target as HTMLTextAreaElement;
-                target.style.height = 'auto';
-                target.style.height = `${target.scrollHeight}px`;
-              }}
-              placeholder="Etymology"
-              className="w-full border border-gray-300 rounded p-2 resize-none overflow-hidden"
+              placeholder="Etymology (Right-click selected text for formatting)"
               style={{ minHeight: '2.5rem' }}
             />
           </div>
@@ -936,6 +1048,32 @@ export default function EntryForm() {
         </button>
       </div>
     </form>
+    
+    {contextMenu && (
+      <MarkdownContextMenu
+        x={contextMenu.x}
+        y={contextMenu.y}
+        onClose={() => setContextMenu(null)}
+        onBold={() => {
+          const textarea = contextMenu.textareaRef.current;
+          if (textarea) {
+            wrapSelectedText(textarea, contextMenu.setValue, '**', '**');
+          }
+        }}
+        onItalic={() => {
+          const textarea = contextMenu.textareaRef.current;
+          if (textarea) {
+            wrapSelectedText(textarea, contextMenu.setValue, '*', '*');
+          }
+        }}
+        onUnderline={() => {
+          const textarea = contextMenu.textareaRef.current;
+          if (textarea) {
+            wrapSelectedText(textarea, contextMenu.setValue, '<u>', '</u>');
+          }
+        }}
+      />
+    )}
     </>
   );
 }

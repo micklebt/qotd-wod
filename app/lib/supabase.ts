@@ -5,11 +5,20 @@ export const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
 
+export interface Participant {
+  id: string;
+  name: string;
+  mobile_phone: string | null;
+  email: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface Entry {
   id: number;
   type: "word" | "quote";
   content: string;
-  submitted_by_user_id: string;
+  participant_id: string;
   created_at: string;
   updated_at: string;
   word_metadata?: {

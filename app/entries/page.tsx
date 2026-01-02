@@ -3,7 +3,7 @@
 import { supabase } from '@/lib/supabase';
 import EntryCard from '@/components/EntryCard';
 import type { Entry } from '@/lib/supabase';
-import { PARTICIPANTS } from '@/lib/constants';
+import { getParticipantsAsync, type Participant } from '@/lib/participants';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 
@@ -11,6 +11,7 @@ export default function EntriesPage() {
   const [entries, setEntries] = useState<Entry[]>([]);
   const [filteredEntries, setFilteredEntries] = useState<Entry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [participants, setParticipants] = useState<Participant[]>([]);
   
   // Filter states
   const [selectedParticipant, setSelectedParticipant] = useState<string>('all');
@@ -18,8 +19,13 @@ export default function EntriesPage() {
   const [selectedDate, setSelectedDate] = useState<string>('all');
 
   useEffect(() => {
-    const fetchEntries = async () => {
+    const fetchData = async () => {
       try {
+        // Fetch participants from database
+        const participantsData = await getParticipantsAsync();
+        setParticipants(participantsData);
+
+        // Fetch entries
         const { data, error } = await supabase
           .from('entries')
           .select('*, word_metadata(*), quote_metadata(*)')
@@ -29,13 +35,13 @@ export default function EntriesPage() {
         setEntries(data || []);
         setFilteredEntries(data || []);
       } catch (err) {
-        console.error('Error fetching entries:', err);
+        console.error('Error fetching data:', err);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchEntries();
+    fetchData();
   }, []);
 
   useEffect(() => {
@@ -43,7 +49,7 @@ export default function EntriesPage() {
 
     // Filter by participant
     if (selectedParticipant !== 'all') {
-      filtered = filtered.filter(entry => entry.submitted_by_user_id === selectedParticipant);
+      filtered = filtered.filter(entry => entry.participant_id === selectedParticipant);
     }
 
     // Filter by type
@@ -134,7 +140,7 @@ export default function EntriesPage() {
               className="w-full text-sm border border-gray-300 rounded px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="all">All Participants</option>
-              {PARTICIPANTS.map((participant) => (
+              {participants.map((participant) => (
                 <option key={participant.id} value={participant.id}>
                   {participant.name}
                 </option>

@@ -8,7 +8,7 @@ export default function EntryCard({ entry }: { entry: Entry }) {
       <div className="border border-gray-300 rounded p-4 hover:bg-gray-50 cursor-pointer">
         <div className="flex items-start justify-between mb-2">
           <p className="text-sm text-gray-500">{entry.type === 'word' ? 'Word of the Day' : 'Quote of the Day'}</p>
-          <p className="text-xs text-gray-400">{getParticipantName(entry.submitted_by_user_id)}</p>
+          <p className="text-xs text-gray-400">{getParticipantName(entry.participant_id)}</p>
         </div>
         {entry.type === 'word' ? (
           <>

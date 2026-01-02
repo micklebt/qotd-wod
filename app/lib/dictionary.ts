@@ -1,3 +1,5 @@
+import { filterAndRankExamples } from './exampleQuality';
+
 interface DictionaryResponse {
   word: string;
   phonetic?: string;
@@ -168,11 +170,20 @@ export async function lookupWord(word: string): Promise<{
             allDefinitions.push(def.definition);
           }
 
-          // Collect example sentences
+          // Collect example sentences (with basic quality check)
           if (def.example && def.example.trim()) {
             const cleanExample = def.example.trim().replace(/^["']|["']$/g, '');
-            if (cleanExample && !exampleSentences.includes(cleanExample)) {
-              exampleSentences.push(cleanExample);
+            // Basic quality checks: must have reasonable length and contain the word
+            if (cleanExample && 
+                cleanExample.length >= 15 && 
+                cleanExample.length <= 500 &&
+                !exampleSentences.includes(cleanExample)) {
+              // Check if it contains the word (case-insensitive)
+              const wordLower = word.trim().toLowerCase();
+              const exampleLower = cleanExample.toLowerCase();
+              if (exampleLower.includes(wordLower)) {
+                exampleSentences.push(cleanExample);
+              }
             }
           }
         });
@@ -182,67 +193,95 @@ export async function lookupWord(word: string): Promise<{
     // Combine definitions (limit to first 5 most relevant)
     const definition = allDefinitions.slice(0, 5).join('; ');
     
+    // Filter and rank example sentences by quality
+    const qualityFiltered = filterAndRankExamples(exampleSentences, word.trim(), 5);
+    
     // Combine all example sentences (limit to first 5 to avoid too much text)
-    let exampleSentence = exampleSentences.length > 0 
-      ? exampleSentences.slice(0, 5).join('\n\n') 
+    let exampleSentence = qualityFiltered.length > 0 
+      ? qualityFiltered.slice(0, 5).join('\n\n') 
       : '';
 
-    // If no example sentences from dictionary API, try to get from other sources
+    // Try to get additional examples from other sources (Wordnik, etc.)
+    // This enhances the examples we already have from dictionaryapi.dev
     let wordnikSourceUrl: string | undefined = undefined;
+    try {
+      // Try our API route which uses Wordnik for real example sentences
+      // Note: Wordnik requires an API key, but we try anyway and fall back gracefully
+      const examplesResponse = await fetch(
+        `/api/examples?word=${encodeURIComponent(word.trim())}`,
+        { signal: AbortSignal.timeout(3000) }
+      );
+      
+      if (examplesResponse.ok) {
+        const examplesData = await examplesResponse.json();
+        if (examplesData.examples && Array.isArray(examplesData.examples) && examplesData.examples.length > 0) {
+          // If we already have examples from dictionaryapi.dev, combine them
+          // Otherwise, use the examples from the API route
+          if (exampleSentence) {
+            // Merge examples, avoiding duplicates using exact match (case-insensitive, trimmed)
+            const existingExamples = exampleSentence.split('\n\n').map(e => e.trim().toLowerCase());
+            const newExamples = examplesData.examples
+              .map((ex: string) => ex.trim())
+              .filter((ex: string) => {
+                const exLower = ex.toLowerCase();
+                // Check for exact match (case-insensitive)
+                return !existingExamples.some(existing => existing === exLower);
+              });
+            if (newExamples.length > 0) {
+              const allExamples = [...exampleSentence.split('\n\n'), ...newExamples];
+              // Remove duplicates again (in case of any edge cases)
+              const uniqueExamples = Array.from(new Set(allExamples.map(e => e.trim().toLowerCase())))
+                .map(lower => allExamples.find(e => e.trim().toLowerCase() === lower) || '')
+                .filter(e => e.length > 0);
+              exampleSentence = uniqueExamples.slice(0, 5).join('\n\n');
+            }
+          } else {
+            // Remove duplicates from new examples
+            const uniqueExamples = Array.from(new Set(examplesData.examples.map((e: string) => e.trim().toLowerCase())))
+              .map(lower => examplesData.examples.find((e: string) => e.trim().toLowerCase() === lower) || '')
+              .filter(e => e.length > 0);
+            exampleSentence = uniqueExamples.slice(0, 5).join('\n\n');
+          }
+          
+          // Track Wordnik source URL for attribution if examples came from Wordnik
+          if (examplesData.wordnikSourceUrl) {
+            wordnikSourceUrl = examplesData.wordnikSourceUrl;
+          }
+        }
+      }
+    } catch (examplesError) {
+      // Silently fail - examples are optional
+      // This is normal if Wordnik API key is not yet configured
+      console.log('Examples API lookup failed (this is normal if Wordnik API key is not configured):', examplesError);
+    }
+
+    // Fallback: Try WordsAPI if configured
     if (!exampleSentence) {
       try {
-        // Try our API route which uses Wordnik for real example sentences
-        const examplesResponse = await fetch(
-          `/api/examples?word=${encodeURIComponent(word.trim())}`,
-          { signal: AbortSignal.timeout(3000) }
-        );
-        
-        if (examplesResponse.ok) {
-          const examplesData = await examplesResponse.json();
-          if (examplesData.examples && Array.isArray(examplesData.examples) && examplesData.examples.length > 0) {
-            exampleSentence = examplesData.examples.join('\n\n');
-            // Track Wordnik source URL for attribution if examples came from Wordnik
-            if (examplesData.wordnikSourceUrl) {
-              wordnikSourceUrl = examplesData.wordnikSourceUrl;
+        const wordsApiKey = process.env.NEXT_PUBLIC_WORDS_API_KEY;
+        if (wordsApiKey) {
+          const wordsApiResponse = await fetch(
+            `https://wordsapiv1.p.rapidapi.com/words/${encodeURIComponent(word.trim())}/examples`,
+            {
+              headers: {
+                'X-RapidAPI-Key': wordsApiKey,
+                'X-RapidAPI-Host': 'wordsapiv1.p.rapidapi.com'
+              },
+              signal: AbortSignal.timeout(3000)
+            }
+          );
+          
+          if (wordsApiResponse.ok) {
+            const wordsApiData = await wordsApiResponse.json();
+            if (wordsApiData.examples && Array.isArray(wordsApiData.examples) && wordsApiData.examples.length > 0) {
+              exampleSentence = wordsApiData.examples.slice(0, 5).join('\n\n');
             }
           }
         }
-      } catch (examplesError) {
-        // Silently fail - examples are optional
-        console.log('Examples API lookup failed:', examplesError);
+      } catch (wordsApiError) {
+        // Silently fail - WordsAPI is optional
+        console.log('WordsAPI lookup failed (this is normal if not configured):', wordsApiError);
       }
-
-      // Fallback: Try WordsAPI if configured
-      if (!exampleSentence) {
-        try {
-          const wordsApiKey = process.env.NEXT_PUBLIC_WORDS_API_KEY;
-          if (wordsApiKey) {
-            const wordsApiResponse = await fetch(
-              `https://wordsapiv1.p.rapidapi.com/words/${encodeURIComponent(word.trim())}/examples`,
-              {
-                headers: {
-                  'X-RapidAPI-Key': wordsApiKey,
-                  'X-RapidAPI-Host': 'wordsapiv1.p.rapidapi.com'
-                },
-                signal: AbortSignal.timeout(3000)
-              }
-            );
-            
-            if (wordsApiResponse.ok) {
-              const wordsApiData = await wordsApiResponse.json();
-              if (wordsApiData.examples && Array.isArray(wordsApiData.examples) && wordsApiData.examples.length > 0) {
-                exampleSentence = wordsApiData.examples.slice(0, 5).join('\n\n');
-              }
-            }
-          }
-        } catch (wordsApiError) {
-          // Silently fail - WordsAPI is optional
-          console.log('WordsAPI lookup failed (this is normal if not configured):', wordsApiError);
-        }
-      }
-
-      // If no examples found from any source, return empty string
-      // We do not generate AI examples - only use real dictionary sources
     }
 
     // If no etymology from dictionary API, try our API route (which uses Wiktionary)

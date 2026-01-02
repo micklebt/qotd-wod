@@ -1,11 +1,22 @@
 import { supabase } from '@/lib/supabase';
 import { NextResponse } from 'next/server';
+import { getParticipantsAsync } from '@/lib/participants';
 
 export async function POST() {
   try {
+    // Get Brian Mickley from database
+    const participants = await getParticipantsAsync();
+    const brianMickley = participants.find(p => p.name === 'Brian Mickley');
+    if (!brianMickley) {
+      return NextResponse.json(
+        { error: 'Brian Mickley participant not found in database' },
+        { status: 500 }
+      );
+    }
+
     const { data: entries, error: fetchError } = await supabase
       .from('entries')
-      .select('id, submitted_by_user_id');
+      .select('id, participant_id');
 
     if (fetchError) throw fetchError;
 
@@ -14,10 +25,10 @@ export async function POST() {
     }
 
     const updates = entries
-      .filter(entry => entry.submitted_by_user_id !== 'participant-1')
+      .filter(entry => entry.participant_id !== brianMickley.id)
       .map(entry => ({
         id: entry.id,
-        submitted_by_user_id: 'participant-1',
+        participant_id: brianMickley.id,
       }));
 
     if (updates.length === 0) {
@@ -27,7 +38,7 @@ export async function POST() {
     for (const update of updates) {
       const { error: updateError } = await supabase
         .from('entries')
-        .update({ submitted_by_user_id: 'participant-1' })
+        .update({ participant_id: brianMickley.id })
         .eq('id', update.id);
 
       if (updateError) {
@@ -36,7 +47,7 @@ export async function POST() {
     }
 
     return NextResponse.json({ 
-      message: `Updated ${updates.length} entries to Brian Mickley`,
+      message: `Updated ${updates.length} entries to Brian Mickley (ID: 101)`,
       updated: updates.length 
     });
   } catch (error) {

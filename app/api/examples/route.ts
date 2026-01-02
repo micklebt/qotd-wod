@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { filterAndRankExamples, isDuplicate } from '@/lib/exampleQuality';
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -10,10 +11,13 @@ export async function GET(request: Request) {
 
   const examples: string[] = [];
   const wordEncoded = encodeURIComponent(word.trim());
+  const wordTrimmed = word.trim();
   let wordnikSourceUrl: string | null = null;
 
   try {
     // Try Wordnik API with API key if available
+    // Note: Wordnik requires an API key - there is no unauthenticated access
+    // The API key may take 24 hours to 7 days to receive (or 24 hours with $5 donation)
     const wordnikApiKey = process.env.WORDNIK_API_KEY;
     if (wordnikApiKey) {
       try {
@@ -31,20 +35,34 @@ export async function GET(request: Request) {
           if (wordnikData.examples && Array.isArray(wordnikData.examples) && wordnikData.examples.length > 0) {
             const wordnikExamples = wordnikData.examples
               .map((ex: any) => ex.text?.trim())
-              .filter((text: string) => text && text.length > 0 && text.length < 500)
-              .slice(0, 5);
-            examples.push(...wordnikExamples);
+              .filter((text: string) => text && text.length > 0 && text.length < 500);
+            
+            // Filter and rank by quality
+            const qualityFiltered = filterAndRankExamples(wordnikExamples, wordTrimmed, 10);
+            
+            // Add high-quality examples (prioritize Wordnik as it's usually better)
+            for (const example of qualityFiltered) {
+              if (!isDuplicate(example, examples) && examples.length < 10) {
+                examples.push(example);
+              }
+            }
             
             // Set Wordnik source URL for attribution (required by Wordnik terms)
-            if (wordnikExamples.length > 0) {
+            if (qualityFiltered.length > 0) {
               wordnikSourceUrl = `https://www.wordnik.com/words/${wordEncoded}`;
             }
           }
+        } else if (wordnikResponse.status === 401 || wordnikResponse.status === 403) {
+          // API key invalid or missing - this is expected if key not yet received
+          console.log('Wordnik API key not yet active (this is normal during the 24-hour wait period)');
         }
       } catch (wordnikError) {
         // Continue to other sources
         console.log('Wordnik API lookup failed:', wordnikError);
       }
+    } else {
+      // No API key configured yet - this is expected during the wait period
+      console.log('Wordnik API key not configured yet (waiting for key approval)');
     }
 
     // Try Free Dictionary API (dictionaryapi.dev) - it sometimes has examples
@@ -67,11 +85,13 @@ export async function GET(request: Request) {
                 for (const meaning of entry.meanings) {
                   if (meaning.definitions && Array.isArray(meaning.definitions)) {
                     for (const def of meaning.definitions) {
-                      if (def.example && def.example.trim() && !examples.includes(def.example.trim())) {
+                      if (def.example && def.example.trim()) {
                         const cleanExample = def.example.trim().replace(/^["']|["']$/g, '');
                         if (cleanExample.length > 0 && cleanExample.length < 500) {
-                          examples.push(cleanExample);
-                          if (examples.length >= 5) break;
+                          // Only add if not duplicate and we haven't reached limit
+                          if (!isDuplicate(cleanExample, examples) && examples.length < 10) {
+                            examples.push(cleanExample);
+                          }
                         }
                       }
                     }
@@ -89,10 +109,14 @@ export async function GET(request: Request) {
       }
     }
 
-    // Return only real examples from dictionary sources
+    // Filter and rank all examples by quality, then return top 5
+    const qualityFiltered = filterAndRankExamples(examples, wordTrimmed, 5);
+    const finalExamples = qualityFiltered.slice(0, 5);
+
+    // Return only high-quality examples from dictionary sources
     // Include Wordnik source URL if examples came from Wordnik (required for attribution)
     return NextResponse.json({ 
-      examples: examples.slice(0, 5),
+      examples: finalExamples,
       wordnikSourceUrl: wordnikSourceUrl || null
     });
   } catch (error) {
