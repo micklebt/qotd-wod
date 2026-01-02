@@ -604,7 +604,7 @@ export default function EntryForm() {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="max-w-2xl mx-auto px-3 sm:px-4 py-4 sm:py-6 space-y-3 sm:space-y-4">
+      <form onSubmit={handleSubmit} className="max-w-2xl mx-auto px-3 sm:px-4 py-3 sm:py-4 space-y-2.5 sm:space-y-3">
         {error && (
           <div className="bg-red-100 text-red-700 p-3 rounded">
             <p className="font-semibold">{error}</p>

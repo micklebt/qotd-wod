@@ -211,20 +211,20 @@ export default function WordChallenge({ isOpen, onClose }: WordChallengeProps) {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-        <div className="p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold">Word Challenge</h2>
+        <div className="p-4 sm:p-6">
+          <div className="mb-4 sm:mb-6">
+            <h2 className="text-xl sm:text-2xl font-bold mb-2 sm:mb-3">Word Challenge</h2>
             <div className="flex gap-2">
               <button
                 onClick={fetchRandomWord}
                 disabled={loading}
-                className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-3 sm:px-4 py-1.5 sm:py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
               >
                 {loading ? 'Loading...' : 'New Word'}
               </button>
               <button
                 onClick={onClose}
-                className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors"
+                className="px-3 sm:px-4 py-1.5 sm:py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors text-sm sm:text-base"
               >
                 Close
               </button>
@@ -232,22 +232,22 @@ export default function WordChallenge({ isOpen, onClose }: WordChallengeProps) {
           </div>
 
           {loading ? (
-            <div className="text-center py-12">
+            <div className="text-center py-8 sm:py-12">
               <p className="text-gray-500">Loading random word...</p>
             </div>
           ) : randomWord ? (
-            <div className="space-y-6">
+            <div className="space-y-4 sm:space-y-6">
               <div className="text-center">
-                <p className="text-5xl font-bold mb-4">{randomWord.content}</p>
-                <p className="text-sm text-gray-500 mb-4">
+                <p className="text-4xl sm:text-5xl font-bold mb-3 sm:mb-4">{randomWord.content}</p>
+                <p className="text-xs sm:text-sm text-gray-500 mb-3 sm:mb-4">
                   Do you have confident knowledge and use of this word?
                 </p>
                 
                 {/* Participant Info */}
                 {currentParticipantId && (
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
-                    <p className="text-sm text-blue-800">
-                      Tracking progress for: <span className="font-semibold">{getParticipantName(currentParticipantId)}</span>
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-2 sm:p-3 mb-3 sm:mb-4">
+                    <p className="text-sm text-blue-900 font-medium">
+                      Tracking progress for: <span className="font-bold text-blue-950">{getParticipantName(currentParticipantId)}</span>
                     </p>
                   </div>
                 )}
@@ -258,11 +258,11 @@ export default function WordChallenge({ isOpen, onClose }: WordChallengeProps) {
                     </p>
                   </div>
                 )}
-                <div className="flex gap-4 justify-center mb-6">
+                <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 justify-center mb-4 sm:mb-6">
                   <button
                     onClick={() => handleConfirmation(true)}
                     disabled={saving || !currentParticipantId}
-                    className={`px-6 py-3 font-semibold rounded transition-colors ${
+                    className={`px-4 sm:px-6 py-2 sm:py-3 font-semibold rounded transition-colors text-sm sm:text-base ${
                       stats?.currentUserResponse === true
                         ? 'bg-green-600 text-white'
                         : 'bg-green-100 text-green-700 hover:bg-green-200'
@@ -273,7 +273,7 @@ export default function WordChallenge({ isOpen, onClose }: WordChallengeProps) {
                   <button
                     onClick={() => handleConfirmation(false)}
                     disabled={saving || !currentParticipantId}
-                    className={`px-6 py-3 font-semibold rounded transition-colors ${
+                    className={`px-4 sm:px-6 py-2 sm:py-3 font-semibold rounded transition-colors text-sm sm:text-base ${
                       stats?.currentUserResponse === false
                         ? 'bg-red-600 text-white'
                         : 'bg-red-100 text-red-700 hover:bg-red-200'
@@ -285,20 +285,20 @@ export default function WordChallenge({ isOpen, onClose }: WordChallengeProps) {
 
                 {/* Statistics Display */}
                 {stats && (
-                  <div className="bg-gray-50 rounded-lg p-4 mb-4">
-                    <p className="text-sm font-semibold text-gray-700 mb-2">Word Challenge Statistics</p>
-                    <div className="grid grid-cols-3 gap-4 text-center">
+                  <div className="bg-gray-50 rounded-lg p-3 sm:p-4 mb-3 sm:mb-4">
+                    <p className="text-xs sm:text-sm font-semibold text-gray-900 mb-2">Word Challenge Statistics</p>
+                    <div className="grid grid-cols-3 gap-2 sm:gap-4 text-center">
                       <div>
-                        <p className="text-2xl font-bold text-gray-900">{stats.totalAppearances}</p>
-                        <p className="text-xs text-gray-600">Total Appearances</p>
+                        <p className="text-xl sm:text-2xl font-bold text-gray-900">{stats.totalAppearances}</p>
+                        <p className="text-xs text-gray-700">Total Appearances</p>
                       </div>
                       <div>
-                        <p className="text-2xl font-bold text-green-600">{stats.confirmedKnown}</p>
-                        <p className="text-xs text-gray-600">Confirmed Known</p>
+                        <p className="text-xl sm:text-2xl font-bold text-green-700">{stats.confirmedKnown}</p>
+                        <p className="text-xs text-gray-700">Confirmed Known</p>
                       </div>
                       <div>
-                        <p className="text-2xl font-bold text-red-600">{stats.confirmedNotKnown}</p>
-                        <p className="text-xs text-gray-600">Not Yet Confident</p>
+                        <p className="text-xl sm:text-2xl font-bold text-red-700">{stats.confirmedNotKnown}</p>
+                        <p className="text-xs text-gray-700">Not Yet Confident</p>
                       </div>
                     </div>
                   </div>

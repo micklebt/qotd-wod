@@ -103,8 +103,8 @@ export default function EntriesPage() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-3 sm:px-4 py-4 sm:py-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-2 mb-4 sm:mb-6">
+    <div className="max-w-4xl mx-auto px-3 sm:px-4 py-3 sm:py-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-2 mb-3 sm:mb-4">
         <h1 className="text-2xl sm:text-3xl font-bold">All Entries</h1>
         <Link
           href="/entries/new"
@@ -115,7 +115,7 @@ export default function EntriesPage() {
       </div>
 
       {/* Filter Section */}
-      <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 sm:p-4 mb-4 sm:mb-6">
+      <div className="bg-gray-50 border border-gray-200 rounded-lg p-2.5 sm:p-3 mb-3 sm:mb-4">
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-xs sm:text-sm font-semibold text-gray-700">Filters</h2>
           {hasActiveFilters && (

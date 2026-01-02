@@ -48,8 +48,8 @@ export default async function Home() {
 
   return (
     <div className="min-h-screen bg-white">
-      <div className="max-w-4xl mx-auto px-3 sm:px-4 py-4 sm:py-6 space-y-4 sm:space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-2 mb-4 sm:mb-6">
+      <div className="max-w-4xl mx-auto px-3 sm:px-4 py-3 sm:py-4 space-y-3 sm:space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-2 mb-3 sm:mb-4">
           <h1 className="text-2xl sm:text-3xl font-bold">Today's Featured</h1>
           <div className="flex gap-2">
             <WordChallengeTrigger />
@@ -64,7 +64,7 @@ export default async function Home() {
 
         {/* Word of the Day */}
         {word && (
-          <div className="border border-gray-300 rounded p-4 sm:p-6">
+          <div className="border border-gray-300 rounded p-3 sm:p-4">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-2 mb-3 sm:mb-2">
               <h2 className="text-base sm:text-lg font-bold">Word of the Day</h2>
               <p className="text-xs sm:text-sm text-gray-500">Submitted by {wordParticipantName}</p>
@@ -85,7 +85,7 @@ export default async function Home() {
 
         {/* Quote of the Day */}
         {quote && (
-          <div className="border border-gray-300 rounded p-4 sm:p-6">
+          <div className="border border-gray-300 rounded p-3 sm:p-4">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-2 mb-3 sm:mb-4">
               <h2 className="text-base sm:text-lg font-bold">Quote of the Day</h2>
               <p className="text-xs sm:text-sm text-gray-500">Submitted by {quoteParticipantName}</p>
