@@ -200,23 +200,23 @@ export default function WordChallenge({ isOpen, onClose }: WordChallengeProps) {
 
     setSaving(true);
     try {
-      // Use upsert to insert or update the response
-      // Use the participantId from localStorage, not state
+      // Always insert a new record - don't update existing ones
+      // This allows users to change their mind and track their learning journey
+      // Each click increments the counters independently
       const { error } = await supabase
         .from('word_challenge_responses')
-        .upsert({
+        .insert({
           entry_id: randomWord.id,
           participant_id: participantId,
           is_known: isKnown,
+          created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
-        }, {
-          onConflict: 'entry_id,participant_id',
         });
 
       if (error) throw error;
 
-      // Refresh stats
-      await fetchWordStats(randomWord.id);
+      // Refresh stats to show updated counters
+      await fetchWordStats(randomWord.id, false);
     } catch (err) {
       console.error('Error saving confirmation:', err);
       alert('Failed to save your response. Please try again.');
