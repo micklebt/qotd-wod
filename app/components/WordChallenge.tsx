@@ -213,13 +213,23 @@ export default function WordChallenge({ isOpen, onClose }: WordChallengeProps) {
           updated_at: new Date().toISOString(),
         });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Database error:', error);
+        // Check if it's a unique constraint violation
+        if (error.code === '23505' || error.message?.includes('unique') || error.message?.includes('duplicate')) {
+          alert('Database constraint error: Please run the migration SQL to remove the UNIQUE constraint. See remove_unique_constraint_word_challenge.sql');
+        } else {
+          throw error;
+        }
+        return;
+      }
 
       // Refresh stats to show updated counters
       await fetchWordStats(randomWord.id, false);
     } catch (err) {
       console.error('Error saving confirmation:', err);
-      alert('Failed to save your response. Please try again.');
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+      alert(`Failed to save your response: ${errorMessage}. Please check the console for details.`);
     } finally {
       setSaving(false);
     }
