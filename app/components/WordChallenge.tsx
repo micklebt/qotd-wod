@@ -233,16 +233,6 @@ export default function WordChallenge({ isOpen, onClose }: WordChallengeProps) {
         <div className="p-4 sm:p-6">
           <div className="mb-4 sm:mb-6">
             <h2 className="text-xl sm:text-2xl font-bold mb-2 sm:mb-3">Word Challenge</h2>
-            <div className="flex gap-2">
-              {!showMetadata && randomWord && (
-                <button
-                  onClick={() => setShowMetadata(true)}
-                  className="px-3 sm:px-4 py-1.5 sm:py-2 bg-blue-600 text-white font-semibold rounded hover:bg-blue-700 transition-colors text-sm sm:text-base"
-                >
-                  Show Definition & Details
-                </button>
-              )}
-            </div>
           </div>
 
           {loading ? (
@@ -281,6 +271,17 @@ export default function WordChallenge({ isOpen, onClose }: WordChallengeProps) {
                     {saving ? 'Saving...' : stats?.currentUserResponse === false ? '✗ Not Yet Confident' : 'Not Yet Confident'}
                   </button>
                 </div>
+
+                {!showMetadata && (
+                  <div className="flex justify-center">
+                    <button
+                      onClick={() => setShowMetadata(true)}
+                      className="px-4 sm:px-6 py-2 sm:py-3 bg-blue-100 text-blue-700 font-semibold rounded hover:bg-blue-200 transition-colors text-sm sm:text-base"
+                    >
+                      Show Definition & Details
+                    </button>
+                  </div>
+                )}
 
                 {/* Statistics Display */}
                 {stats && (
