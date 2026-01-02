@@ -103,25 +103,25 @@ export default function EntriesPage() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-4">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-bold">All Entries</h1>
+    <div className="max-w-4xl mx-auto px-3 sm:px-4 py-4 sm:py-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-2 mb-4 sm:mb-6">
+        <h1 className="text-2xl sm:text-3xl font-bold">All Entries</h1>
         <Link
           href="/entries/new"
-          className="bg-blue-600 text-white font-semibold px-4 py-2 rounded hover:bg-blue-700 transition-colors"
+          className="bg-blue-600 text-white font-semibold px-3 sm:px-4 py-2 rounded hover:bg-blue-700 transition-colors text-sm sm:text-base whitespace-nowrap text-center"
         >
           Create New Entry
         </Link>
       </div>
 
       {/* Filter Section */}
-      <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-6">
+      <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 sm:p-4 mb-4 sm:mb-6">
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-sm font-semibold text-gray-700">Filters</h2>
+          <h2 className="text-xs sm:text-sm font-semibold text-gray-700">Filters</h2>
           {hasActiveFilters && (
             <button
               onClick={clearFilters}
-              className="text-xs text-blue-600 hover:text-blue-800 hover:underline"
+              className="text-xs text-blue-600 hover:text-blue-800 hover:underline touch-target"
             >
               Clear all
             </button>

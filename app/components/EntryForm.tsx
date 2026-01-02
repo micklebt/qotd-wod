@@ -529,14 +529,14 @@ export default function EntryForm() {
   return (
     <>
       {showComparison && existingEntry && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto p-6">
-            <h2 className="text-2xl font-bold mb-4">Word Already Exists</h2>
-            <p className="text-gray-600 mb-6">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-3 sm:p-4">
+          <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto p-4 sm:p-6">
+            <h2 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4">Word Already Exists</h2>
+            <p className="text-sm sm:text-base text-gray-600 mb-4 sm:mb-6">
               The word "<strong>{content}</strong>" already exists in the database. Compare the entries below:
             </p>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-4 sm:mb-6">
               {/* Existing Entry */}
               <div className="border border-gray-300 rounded p-4 bg-gray-50">
                 <h3 className="font-bold text-lg mb-3 text-gray-700">Existing Entry</h3>
@@ -584,18 +584,18 @@ export default function EntryForm() {
               </div>
             </div>
 
-            <div className="flex gap-3 justify-end">
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 justify-end">
               <button
                 type="button"
                 onClick={handleCancelDuplicate}
-                className="px-6 py-2 bg-gray-500 text-white font-semibold rounded hover:bg-gray-600"
+                className="px-4 sm:px-6 py-2.5 bg-gray-500 text-white font-semibold rounded hover:bg-gray-600 text-sm sm:text-base"
               >
                 Cancel
               </button>
               <button
                 type="button"
                 onClick={handleProceedWithNew}
-                className="px-6 py-2 bg-blue-600 text-white font-semibold rounded hover:bg-blue-700"
+                className="px-4 sm:px-6 py-2.5 bg-blue-600 text-white font-semibold rounded hover:bg-blue-700 text-sm sm:text-base"
               >
                 Proceed with New Entry
               </button>
@@ -604,7 +604,7 @@ export default function EntryForm() {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="max-w-2xl mx-auto p-4 space-y-4">
+      <form onSubmit={handleSubmit} className="max-w-2xl mx-auto px-3 sm:px-4 py-4 sm:py-6 space-y-3 sm:space-y-4">
         {error && (
           <div className="bg-red-100 text-red-700 p-3 rounded">
             <p className="font-semibold">{error}</p>
@@ -660,8 +660,8 @@ export default function EntryForm() {
         )}
 
       {/* Type Toggle */}
-      <div className="flex items-center justify-center mb-4">
-        <div className="flex items-center gap-3 bg-gray-100 rounded-lg p-1">
+      <div className="flex items-center justify-center mb-3 sm:mb-4">
+        <div className="flex items-center gap-2 sm:gap-3 bg-gray-100 rounded-lg p-1">
           <button
             type="button"
             onClick={() => {
@@ -669,7 +669,7 @@ export default function EntryForm() {
               setShowWordFields(false);
               setShowQuoteFields(false);
             }}
-            className={`px-6 py-2 rounded-md font-medium transition-all ${
+            className={`px-4 sm:px-6 py-2 rounded-md font-medium transition-all text-sm sm:text-base ${
               type === 'word'
                 ? 'bg-white text-blue-600 shadow-sm'
                 : 'text-gray-600 hover:text-gray-900'
@@ -684,7 +684,7 @@ export default function EntryForm() {
               setShowWordFields(false);
               setShowQuoteFields(false);
             }}
-            className={`px-6 py-2 rounded-md font-medium transition-all ${
+            className={`px-4 sm:px-6 py-2 rounded-md font-medium transition-all text-sm sm:text-base ${
               type === 'quote'
                 ? 'bg-white text-blue-600 shadow-sm'
                 : 'text-gray-600 hover:text-gray-900'
@@ -714,20 +714,20 @@ export default function EntryForm() {
       <div>
         {type === 'word' ? (
           <div className="space-y-2">
-            <div className="flex gap-2">
+            <div className="flex flex-col sm:flex-row gap-2">
               <input
                 type="text"
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
                 placeholder="Word"
-                className="flex-1 border border-gray-300 rounded p-2 bg-blue-50"
+                className="flex-1 border border-gray-300 rounded p-2.5 sm:p-2 bg-blue-50 text-base sm:text-sm"
                 required
               />
             <button
               type="button"
               onClick={handleLookupWord}
               disabled={lookupLoading || !content.trim()}
-              className="px-4 py-2 bg-green-600 text-white font-semibold rounded hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed whitespace-nowrap h-[42px]"
+              className="px-3 sm:px-4 py-2.5 sm:py-2 bg-green-600 text-white font-semibold rounded hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed whitespace-nowrap text-sm sm:text-base"
               title="Auto-fill word details from dictionary"
             >
               {lookupLoading ? 'Looking up...' : 'Lookup Word'}
@@ -749,7 +749,7 @@ export default function EntryForm() {
           </div>
         ) : (
           <div className="space-y-2">
-            <div className="flex gap-2">
+            <div className="flex flex-col sm:flex-row gap-2">
               <textarea
                 ref={quoteContentTextareaRef}
                 value={content}
@@ -771,7 +771,7 @@ export default function EntryForm() {
                   target.style.height = `${target.scrollHeight}px`;
                 }}
                 placeholder="Quote (1 sentence to 1 paragraph)"
-                className="flex-1 border border-gray-300 rounded p-2 bg-blue-50 resize-none overflow-hidden"
+                className="flex-1 border border-gray-300 rounded p-2.5 sm:p-2 bg-blue-50 resize-none overflow-hidden text-base sm:text-sm"
                 style={{ minHeight: '2.5rem' }}
                 required
               />
@@ -779,7 +779,7 @@ export default function EntryForm() {
                 type="button"
                 onClick={handleLookupQuote}
                 disabled={quoteLookupLoading || !content.trim()}
-                className="px-4 py-2 bg-green-600 text-white font-semibold rounded hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed whitespace-nowrap h-[42px] self-start"
+                className="px-3 sm:px-4 py-2.5 sm:py-2 bg-green-600 text-white font-semibold rounded hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed whitespace-nowrap text-sm sm:text-base self-start sm:self-auto"
                 title="Auto-fill quote details from databases"
               >
                 {quoteLookupLoading ? 'Looking up...' : 'Lookup Quote'}
@@ -1035,18 +1035,18 @@ export default function EntryForm() {
         </>
       )}
 
-      <div className="flex gap-3">
+      <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
         <button
           type="button"
           onClick={handleClearForm}
-          className="flex-1 bg-gray-500 text-white font-semibold py-3 rounded hover:bg-gray-600"
+          className="flex-1 bg-gray-500 text-white font-semibold py-3 sm:py-2.5 rounded hover:bg-gray-600 text-sm sm:text-base"
         >
           Clear Form
         </button>
         <button
           type="submit"
           disabled={loading}
-          className="flex-1 bg-blue-600 text-white font-semibold py-3 rounded hover:bg-blue-700 disabled:bg-gray-400"
+          className="flex-1 bg-blue-600 text-white font-semibold py-3 sm:py-2.5 rounded hover:bg-blue-700 disabled:bg-gray-400 text-sm sm:text-base"
         >
           {loading ? 'Creating...' : 'Create Entry'}
         </button>

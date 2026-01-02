@@ -97,8 +97,34 @@ To learn more about Next.js, take a look at the following resources:
 
 You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
-## Deploy on Vercel
+## Deployment
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+The easiest way to deploy this Next.js app is using **Vercel**, the platform created by the Next.js team.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Quick Deploy to Vercel
+
+1. **Push your code to GitHub** (if not already done)
+2. **Sign up at [vercel.com](https://vercel.com)** (free account)
+3. **Import your GitHub repository**: `micklebt/qotd-wod`
+4. **Add Environment Variables** in Vercel dashboard:
+   - `NEXT_PUBLIC_SUPABASE_URL` - Your Supabase project URL
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY` - Your Supabase anon key
+   - `OPENAI_API_KEY` - Your OpenAI API key (optional)
+5. **Deploy** - Vercel will automatically build and deploy
+6. **Run database migrations** in Supabase SQL Editor:
+   - `create_participants_table.sql`
+   - `create_word_challenge_responses_table.sql`
+
+**That's it!** Your app will be live at `https://your-project.vercel.app`
+
+### Detailed Deployment Guide
+
+See [DEPLOYMENT.md](./DEPLOYMENT.md) for comprehensive deployment instructions, troubleshooting, and alternative deployment options.
+
+### Environment Variables Required
+
+- `NEXT_PUBLIC_SUPABASE_URL` - Required
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY` - Required  
+- `OPENAI_API_KEY` - Optional (for AI quote lookup)
+
+Check out the [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
