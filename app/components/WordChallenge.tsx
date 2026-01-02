@@ -4,6 +4,7 @@ import { supabase } from '@/lib/supabase';
 import type { Entry } from '@/lib/supabase';
 import { useState, useEffect } from 'react';
 import { getCurrentParticipantId, getParticipantName, getParticipantsAsync, type Participant } from '@/lib/participants';
+import Navigation from './Navigation';
 
 interface WordChallengeProps {
   isOpen: boolean;
@@ -240,6 +241,9 @@ export default function WordChallenge({ isOpen, onClose }: WordChallengeProps) {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="sticky top-0 bg-white z-10 border-b border-gray-200">
+          <Navigation />
+        </div>
         <div className="p-4 sm:p-6">
           <div className="mb-4 sm:mb-6">
             <h2 className="text-xl sm:text-2xl font-bold mb-2 sm:mb-3">Word Challenge</h2>
