@@ -162,9 +162,21 @@ export default function WordChallenge({ isOpen, onClose }: WordChallengeProps) {
   };
 
   const handleConfirmation = async (isKnown: boolean) => {
-    if (!randomWord || !currentParticipantId) {
-      alert('Please select a participant first');
+    if (!randomWord) {
+      alert('No word selected');
       return;
+    }
+    
+    // Always check localStorage directly before saving
+    const participantId = getCurrentParticipantId();
+    if (!participantId) {
+      alert('Please select a participant in the "Create New Entry" form first');
+      return;
+    }
+    
+    // Update state if needed
+    if (participantId !== currentParticipantId) {
+      setCurrentParticipantId(participantId);
     }
 
     setSaving(true);
