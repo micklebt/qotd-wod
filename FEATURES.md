@@ -103,6 +103,7 @@ This document tracks all features and improvements added incrementally to the Qu
   - `app/layout.tsx` - Added navigation to layout
 
 ### 12. Entry Card Component Usage
+
 - **Added**: Reusable EntryCard component in entries list
 - **Added**: Consistent entry display with participant names
 - **Files Modified**:
