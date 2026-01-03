@@ -47,11 +47,8 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // Prevent flash of unstyled content
-  if (!mounted) {
-    return <>{children}</>;
-  }
-
+  // Always provide the context, even during SSR/static generation
+  // This prevents the "useTheme must be used within a ThemeProvider" error
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme }}>
       {children}
