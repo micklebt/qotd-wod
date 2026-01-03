@@ -10,7 +10,7 @@ interface MarkdownTextareaProps {
   required?: boolean;
   className?: string;
   style?: React.CSSProperties;
-  onContextMenu?: (e: React.MouseEvent) => void;
+  onContextMenu?: (e: React.MouseEvent<HTMLElement>) => void;
 }
 
 export default function MarkdownTextarea({
