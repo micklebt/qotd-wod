@@ -136,32 +136,32 @@ export default function EntriesPage() {
     return (
       <div className="max-w-4xl mx-auto px-3 sm:px-4 py-3 sm:py-4">
         <div className="text-center py-8">
-          <p className="text-gray-500 text-sm sm:text-base">Loading entries...</p>
+          <p className="text-black dark:text-white text-sm sm:text-base font-bold">Loading entries...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-3 sm:px-4 py-3 sm:py-4">
+    <div className="max-w-4xl mx-auto px-3 sm:px-4 py-3 sm:py-4 bg-white dark:bg-black">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-2 mb-3 sm:mb-4">
-        <h1 className="text-2xl sm:text-3xl font-bold">All Entries</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold text-black dark:text-white">All Entries</h1>
         <Link
           href="/entries/new"
-          className="bg-blue-600 text-white font-semibold px-3 sm:px-4 py-2 rounded hover:bg-blue-700 transition-colors text-sm sm:text-base whitespace-nowrap text-center"
+          className="bg-black dark:bg-white text-white dark:text-black font-bold px-3 sm:px-4 py-2 rounded hover:bg-gray-800 dark:hover:bg-gray-200 border-2 border-black dark:border-white transition-colors text-sm sm:text-base whitespace-nowrap text-center"
         >
           Create New Entry
         </Link>
       </div>
 
       {/* Filter Section */}
-      <div className="bg-gray-50 border border-gray-200 rounded-lg p-2.5 sm:p-3 mb-3 sm:mb-4">
+      <div className="bg-white dark:bg-black border-2 border-black dark:border-white rounded-lg p-2.5 sm:p-3 mb-3 sm:mb-4">
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-xs sm:text-sm font-semibold text-gray-700">Filters</h2>
+          <h2 className="text-xs sm:text-sm font-bold text-black dark:text-white">Filters</h2>
           {hasActiveFilters && (
             <button
               onClick={clearFilters}
-              className="text-xs text-blue-600 hover:text-blue-800 hover:underline touch-target"
+              className="text-xs text-blue-700 dark:text-blue-300 hover:text-blue-900 dark:hover:text-blue-100 hover:underline touch-target font-bold"
             >
               Clear all
             </button>
@@ -171,13 +171,13 @@ export default function EntriesPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Participant Filter */}
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">
+            <label className="block text-xs font-bold text-black dark:text-white mb-1">
               Participant
             </label>
             <select
               value={selectedParticipant}
               onChange={(e) => setSelectedParticipant(e.target.value)}
-              className="w-full text-sm border border-gray-300 rounded px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full text-sm border-2 border-black dark:border-white rounded px-3 py-2 bg-white dark:bg-black text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-700 dark:focus:ring-blue-300 focus:border-transparent font-semibold"
             >
               <option value="all">All Participants</option>
               {participants.map((participant) => (
@@ -190,7 +190,7 @@ export default function EntriesPage() {
 
           {/* Type Filter */}
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">
+            <label className="block text-xs font-bold text-black dark:text-white mb-1">
               Type
             </label>
             <select
@@ -203,7 +203,7 @@ export default function EntriesPage() {
                   setSelectedLetter('all');
                 }
               }}
-              className="w-full text-sm border border-gray-300 rounded px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full text-sm border-2 border-black dark:border-white rounded px-3 py-2 bg-white dark:bg-black text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-700 dark:focus:ring-blue-300 focus:border-transparent font-semibold"
             >
               <option value="all">All Types</option>
               <option value="word">Words</option>
@@ -213,13 +213,13 @@ export default function EntriesPage() {
 
           {/* Date Filter */}
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">
+            <label className="block text-xs font-bold text-black dark:text-white mb-1">
               Date
             </label>
             <select
               value={selectedDate}
               onChange={(e) => setSelectedDate(e.target.value)}
-              className="w-full text-sm border border-gray-300 rounded px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full text-sm border-2 border-black dark:border-white rounded px-3 py-2 bg-white dark:bg-black text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-700 dark:focus:ring-blue-300 focus:border-transparent font-semibold"
             >
               <option value="all">All Dates</option>
               <option value="today">Today</option>
@@ -232,14 +232,14 @@ export default function EntriesPage() {
 
         {/* Alphabet Filter - Only show for Words */}
         {selectedType !== 'quote' && (
-          <div className="mt-3 pt-3 border-t border-gray-200">
+          <div className="mt-3 pt-3 border-t-2 border-black dark:border-white">
             <div className="flex flex-wrap gap-1 sm:gap-1.5 justify-center">
             <button
               onClick={() => setSelectedLetter('all')}
-              className={`px-2 sm:px-2.5 py-1 text-xs sm:text-sm font-medium rounded border transition-colors ${
+              className={`px-2 sm:px-2.5 py-1 text-xs sm:text-sm font-bold rounded border-2 transition-colors ${
                 selectedLetter === 'all'
-                  ? 'bg-blue-600 text-white border-blue-600'
-                  : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100'
+                  ? 'bg-blue-700 dark:bg-blue-300 text-white dark:text-black border-blue-900 dark:border-blue-100'
+                  : 'bg-white dark:bg-black text-black dark:text-white border-black dark:border-white hover:bg-gray-100 dark:hover:bg-gray-900'
               }`}
             >
               All
@@ -255,12 +255,12 @@ export default function EntriesPage() {
                   key={letter}
                   onClick={() => isAvailable && setSelectedLetter(letter)}
                   disabled={!isAvailable}
-                  className={`px-2 sm:px-2.5 py-1 text-xs sm:text-sm font-medium rounded border transition-colors ${
+                  className={`px-2 sm:px-2.5 py-1 text-xs sm:text-sm font-bold rounded border-2 transition-colors ${
                     isSelected
-                      ? 'bg-blue-600 text-white border-blue-600'
+                      ? 'bg-blue-700 dark:bg-blue-300 text-white dark:text-black border-blue-900 dark:border-blue-100'
                       : isAvailable
-                      ? 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100'
-                      : 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'
+                      ? 'bg-white dark:bg-black text-black dark:text-white border-black dark:border-white hover:bg-gray-100 dark:hover:bg-gray-900'
+                      : 'bg-gray-200 dark:bg-gray-800 text-gray-500 dark:text-gray-400 border-gray-400 dark:border-gray-600 cursor-not-allowed'
                   }`}
                 >
                   {letter}
@@ -290,12 +290,12 @@ export default function EntriesPage() {
                     }
                   }}
                   disabled={!isAvailable}
-                  className={`px-2 sm:px-2.5 py-1 text-xs sm:text-sm font-medium rounded border transition-colors ${
+                  className={`px-2 sm:px-2.5 py-1 text-xs sm:text-sm font-bold rounded border-2 transition-colors ${
                     isSelected
-                      ? 'bg-blue-600 text-white border-blue-600'
+                      ? 'bg-blue-700 dark:bg-blue-300 text-white dark:text-black border-blue-900 dark:border-blue-100'
                       : isAvailable
-                      ? 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100'
-                      : 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'
+                      ? 'bg-white dark:bg-black text-black dark:text-white border-black dark:border-white hover:bg-gray-100 dark:hover:bg-gray-900'
+                      : 'bg-gray-200 dark:bg-gray-800 text-gray-500 dark:text-gray-400 border-gray-400 dark:border-gray-600 cursor-not-allowed'
                   }`}
                 >
                   {pair}
@@ -307,10 +307,10 @@ export default function EntriesPage() {
         )}
 
         {/* Results count */}
-        <div className="mt-3 pt-3 border-t border-gray-200">
-          <p className="text-xs text-gray-500">
-            Showing <span className="font-semibold text-gray-700">{filteredEntries.length}</span> of{' '}
-            <span className="font-semibold text-gray-700">{entries.length}</span> entries
+        <div className="mt-3 pt-3 border-t-2 border-black dark:border-white">
+          <p className="text-xs text-black dark:text-white font-bold">
+            Showing <span className="font-bold">{filteredEntries.length}</span> of{' '}
+            <span className="font-bold">{entries.length}</span> entries
           </p>
         </div>
       </div>
@@ -322,21 +322,21 @@ export default function EntriesPage() {
             <EntryCard key={entry.id} entry={entry} />
           ))
         ) : (
-          <div className="text-center py-12 bg-gray-50 rounded-lg border border-gray-200">
-            <p className="text-gray-500 mb-2">
+          <div className="text-center py-12 bg-white dark:bg-black rounded-lg border-2 border-black dark:border-white">
+            <p className="text-black dark:text-white mb-2 font-bold">
               {hasActiveFilters ? 'No entries match your filters.' : 'No entries yet.'}
             </p>
             {hasActiveFilters ? (
               <button
                 onClick={clearFilters}
-                className="text-blue-600 hover:text-blue-800 hover:underline text-sm font-medium"
+                className="text-blue-700 dark:text-blue-300 hover:text-blue-900 dark:hover:text-blue-100 hover:underline text-sm font-bold"
               >
                 Clear filters to see all entries
               </button>
             ) : (
               <Link
                 href="/entries/new"
-                className="text-blue-600 hover:underline font-medium text-sm"
+                className="text-blue-700 dark:text-blue-300 hover:underline font-bold text-sm"
               >
                 Create your first entry →
               </Link>

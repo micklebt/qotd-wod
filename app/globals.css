@@ -2,7 +2,18 @@
 
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #000000;
+  --border: #000000;
+  --muted-bg: #f5f5f5;
+  --muted-text: #1a1a1a;
+}
+
+.dark {
+  --background: #000000;
+  --foreground: #ffffff;
+  --border: #ffffff;
+  --muted-bg: #1a1a1a;
+  --muted-text: #e5e5e5;
 }
 
 @theme inline {
@@ -12,19 +23,13 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 /* Mobile-first touch targets */
