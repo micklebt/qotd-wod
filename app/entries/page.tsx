@@ -94,7 +94,27 @@ export default function EntriesPage() {
     if (selectedLetter !== 'all') {
       filtered = filtered.filter(entry => {
         if (entry.type === 'word' && entry.content && entry.content.length > 0) {
-          return entry.content.charAt(0).toUpperCase() === selectedLetter;
+          const firstLetter = entry.content.charAt(0).toUpperCase();
+          // Handle combined letter pairs
+          const letterPairs: Record<string, string[]> = {
+            'O': ['O', 'P'],
+            'P': ['O', 'P'],
+            'Q': ['Q', 'R'],
+            'R': ['Q', 'R'],
+            'S': ['S', 'T'],
+            'T': ['S', 'T'],
+            'U': ['U', 'V'],
+            'V': ['U', 'V'],
+            'W': ['W', 'X'],
+            'X': ['W', 'X'],
+            'Y': ['Y', 'Z'],
+            'Z': ['Y', 'Z']
+          };
+          
+          if (letterPairs[selectedLetter]) {
+            return letterPairs[selectedLetter].includes(firstLetter);
+          }
+          return firstLetter === selectedLetter;
         }
         return false;
       });
@@ -203,19 +223,8 @@ export default function EntriesPage() {
           </div>
         </div>
 
-        {/* Results count */}
+        {/* Alphabet Filter */}
         <div className="mt-3 pt-3 border-t border-gray-200">
-          <p className="text-xs text-gray-500">
-            Showing <span className="font-semibold text-gray-700">{filteredEntries.length}</span> of{' '}
-            <span className="font-semibold text-gray-700">{entries.length}</span> entries
-          </p>
-        </div>
-      </div>
-
-      {/* Alphabet Filter */}
-      <div className="bg-gray-50 border border-gray-200 rounded-lg p-2.5 sm:p-3 mb-3 sm:mb-4">
-        <div className="mb-2">
-          <h2 className="text-xs sm:text-sm font-semibold text-gray-700 mb-2">Filter by First Letter</h2>
           <div className="flex flex-wrap gap-1 sm:gap-1.5 justify-center">
             <button
               onClick={() => setSelectedLetter('all')}
@@ -227,8 +236,9 @@ export default function EntriesPage() {
             >
               All
             </button>
-            {Array.from({ length: 26 }, (_, i) => {
-              const letter = String.fromCharCode(65 + i); // A-Z
+            {/* Single letters A-N */}
+            {Array.from({ length: 14 }, (_, i) => {
+              const letter = String.fromCharCode(65 + i); // A-N
               const isAvailable = availableLetters.includes(letter);
               const isSelected = selectedLetter === letter;
               
@@ -249,7 +259,50 @@ export default function EntriesPage() {
                 </button>
               );
             })}
+            {/* Combined letter pairs O-Z */}
+            {[
+              { pair: 'OP', letters: ['O', 'P'] },
+              { pair: 'QR', letters: ['Q', 'R'] },
+              { pair: 'ST', letters: ['S', 'T'] },
+              { pair: 'UV', letters: ['U', 'V'] },
+              { pair: 'WX', letters: ['W', 'X'] },
+              { pair: 'YZ', letters: ['Y', 'Z'] }
+            ].map(({ pair, letters }) => {
+              const isAvailable = letters.some(letter => availableLetters.includes(letter));
+              const isSelected = letters.includes(selectedLetter);
+              
+              return (
+                <button
+                  key={pair}
+                  onClick={() => {
+                    if (isAvailable) {
+                      // If clicked, set to the first available letter in the pair
+                      const firstAvailable = letters.find(letter => availableLetters.includes(letter));
+                      if (firstAvailable) setSelectedLetter(firstAvailable);
+                    }
+                  }}
+                  disabled={!isAvailable}
+                  className={`px-2 sm:px-2.5 py-1 text-xs sm:text-sm font-medium rounded border transition-colors ${
+                    isSelected
+                      ? 'bg-blue-600 text-white border-blue-600'
+                      : isAvailable
+                      ? 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100'
+                      : 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'
+                  }`}
+                >
+                  {pair}
+                </button>
+              );
+            })}
           </div>
+        </div>
+
+        {/* Results count */}
+        <div className="mt-3 pt-3 border-t border-gray-200">
+          <p className="text-xs text-gray-500">
+            Showing <span className="font-semibold text-gray-700">{filteredEntries.length}</span> of{' '}
+            <span className="font-semibold text-gray-700">{entries.length}</span> entries
+          </p>
         </div>
       </div>
       
