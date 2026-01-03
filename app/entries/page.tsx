@@ -17,6 +17,7 @@ export default function EntriesPage() {
   const [selectedParticipant, setSelectedParticipant] = useState<string>('all');
   const [selectedType, setSelectedType] = useState<'all' | 'word' | 'quote'>('all');
   const [selectedDate, setSelectedDate] = useState<string>('all');
+  const [selectedLetter, setSelectedLetter] = useState<string>('all');
 
   useEffect(() => {
     const fetchData = async () => {
@@ -43,6 +44,14 @@ export default function EntriesPage() {
 
     fetchData();
   }, []);
+
+  // Calculate available letters (only for word entries)
+  const availableLetters = Array.from(new Set(
+    entries
+      .filter(entry => entry.type === 'word' && entry.content && entry.content.length > 0)
+      .map(entry => entry.content.charAt(0).toUpperCase())
+      .filter(letter => /[A-Z]/.test(letter))
+  )).sort();
 
   useEffect(() => {
     let filtered = [...entries];
@@ -81,16 +90,27 @@ export default function EntriesPage() {
       });
     }
 
+    // Filter by first letter (only for word entries)
+    if (selectedLetter !== 'all') {
+      filtered = filtered.filter(entry => {
+        if (entry.type === 'word' && entry.content && entry.content.length > 0) {
+          return entry.content.charAt(0).toUpperCase() === selectedLetter;
+        }
+        return false;
+      });
+    }
+
     setFilteredEntries(filtered);
-  }, [entries, selectedParticipant, selectedType, selectedDate]);
+  }, [entries, selectedParticipant, selectedType, selectedDate, selectedLetter]);
 
   const clearFilters = () => {
     setSelectedParticipant('all');
     setSelectedType('all');
     setSelectedDate('all');
+    setSelectedLetter('all');
   };
 
-  const hasActiveFilters = selectedParticipant !== 'all' || selectedType !== 'all' || selectedDate !== 'all';
+  const hasActiveFilters = selectedParticipant !== 'all' || selectedType !== 'all' || selectedDate !== 'all' || selectedLetter !== 'all';
 
   if (loading) {
     return (
@@ -189,6 +209,47 @@ export default function EntriesPage() {
             Showing <span className="font-semibold text-gray-700">{filteredEntries.length}</span> of{' '}
             <span className="font-semibold text-gray-700">{entries.length}</span> entries
           </p>
+        </div>
+      </div>
+
+      {/* Alphabet Filter */}
+      <div className="bg-gray-50 border border-gray-200 rounded-lg p-2.5 sm:p-3 mb-3 sm:mb-4">
+        <div className="mb-2">
+          <h2 className="text-xs sm:text-sm font-semibold text-gray-700 mb-2">Filter by First Letter</h2>
+          <div className="flex flex-wrap gap-1 sm:gap-1.5 justify-center">
+            <button
+              onClick={() => setSelectedLetter('all')}
+              className={`px-2 sm:px-2.5 py-1 text-xs sm:text-sm font-medium rounded border transition-colors ${
+                selectedLetter === 'all'
+                  ? 'bg-blue-600 text-white border-blue-600'
+                  : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100'
+              }`}
+            >
+              All
+            </button>
+            {Array.from({ length: 26 }, (_, i) => {
+              const letter = String.fromCharCode(65 + i); // A-Z
+              const isAvailable = availableLetters.includes(letter);
+              const isSelected = selectedLetter === letter;
+              
+              return (
+                <button
+                  key={letter}
+                  onClick={() => isAvailable && setSelectedLetter(letter)}
+                  disabled={!isAvailable}
+                  className={`px-2 sm:px-2.5 py-1 text-xs sm:text-sm font-medium rounded border transition-colors ${
+                    isSelected
+                      ? 'bg-blue-600 text-white border-blue-600'
+                      : isAvailable
+                      ? 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100'
+                      : 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'
+                  }`}
+                >
+                  {letter}
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
       
