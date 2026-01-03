@@ -217,7 +217,7 @@ export default function MarkdownTextarea({
         onPaste={handlePaste}
         onFocus={handleFocus}
         onBlur={handleBlur}
-        onContextMenu={onContextMenu}
+        onContextMenu={onContextMenu ? (e: React.MouseEvent<HTMLDivElement>) => onContextMenu(e as React.MouseEvent<HTMLElement>) : undefined}
         className={`${className} w-full border border-gray-300 rounded p-2 resize-none overflow-hidden`}
         style={{
           ...style,
