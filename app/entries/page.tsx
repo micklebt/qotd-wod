@@ -195,7 +195,14 @@ export default function EntriesPage() {
             </label>
             <select
               value={selectedType}
-              onChange={(e) => setSelectedType(e.target.value as 'all' | 'word' | 'quote')}
+              onChange={(e) => {
+                const newType = e.target.value as 'all' | 'word' | 'quote';
+                setSelectedType(newType);
+                // Clear letter filter when switching to quotes
+                if (newType === 'quote') {
+                  setSelectedLetter('all');
+                }
+              }}
               className="w-full text-sm border border-gray-300 rounded px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="all">All Types</option>
@@ -223,9 +230,10 @@ export default function EntriesPage() {
           </div>
         </div>
 
-        {/* Alphabet Filter */}
-        <div className="mt-3 pt-3 border-t border-gray-200">
-          <div className="flex flex-wrap gap-1 sm:gap-1.5 justify-center">
+        {/* Alphabet Filter - Only show for Words */}
+        {selectedType !== 'quote' && (
+          <div className="mt-3 pt-3 border-t border-gray-200">
+            <div className="flex flex-wrap gap-1 sm:gap-1.5 justify-center">
             <button
               onClick={() => setSelectedLetter('all')}
               className={`px-2 sm:px-2.5 py-1 text-xs sm:text-sm font-medium rounded border transition-colors ${
@@ -296,6 +304,7 @@ export default function EntriesPage() {
             })}
           </div>
         </div>
+        )}
 
         {/* Results count */}
         <div className="mt-3 pt-3 border-t border-gray-200">
