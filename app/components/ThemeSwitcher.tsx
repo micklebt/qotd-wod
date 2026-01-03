@@ -41,7 +41,7 @@ export default function ThemeSwitcher() {
   return (
     <button
       onClick={toggleTheme}
-      className="p-2 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+      className="p-2 rounded-md border border-gray-300 dark:border-[#30363d] bg-white dark:bg-[#161b22] text-gray-900 dark:text-[#c9d1d9] hover:bg-gray-100 dark:hover:bg-[#21262d] transition-colors"
       aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
       title={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
     >

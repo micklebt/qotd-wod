@@ -136,32 +136,32 @@ export default function EntriesPage() {
     return (
       <div className="max-w-4xl mx-auto px-3 sm:px-4 py-3 sm:py-4">
         <div className="text-center py-8">
-          <p className="text-black dark:text-white text-sm sm:text-base font-bold">Loading entries...</p>
+          <p className="text-black dark:text-[#c9d1d9] text-sm sm:text-base font-bold">Loading entries...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-3 sm:px-4 py-3 sm:py-4 bg-white dark:bg-black">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-2 mb-3 sm:mb-4">
-        <h1 className="text-2xl sm:text-3xl font-bold text-black dark:text-white">All Entries</h1>
-        <Link
-          href="/entries/new"
-          className="bg-black dark:bg-white text-white dark:text-black font-bold px-3 sm:px-4 py-2 rounded hover:bg-gray-800 dark:hover:bg-gray-200 border-2 border-black dark:border-white transition-colors text-sm sm:text-base whitespace-nowrap text-center"
-        >
-          Create New Entry
-        </Link>
-      </div>
+      <div className="max-w-4xl mx-auto px-3 sm:px-4 py-3 sm:py-4 bg-white dark:bg-[#0d1117]">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-2 mb-3 sm:mb-4">
+          <h1 className="text-2xl sm:text-3xl font-bold text-black dark:text-[#c9d1d9]">All Entries</h1>
+          <Link
+            href="/entries/new"
+            className="bg-black dark:bg-[#21262d] text-white dark:text-[#c9d1d9] font-bold px-3 sm:px-4 py-2 rounded hover:bg-gray-800 dark:hover:bg-[#30363d] border-2 border-black dark:border-[#30363d] transition-colors text-sm sm:text-base whitespace-nowrap text-center"
+          >
+            Create New Entry
+          </Link>
+        </div>
 
       {/* Filter Section */}
-      <div className="bg-white dark:bg-black border-2 border-black dark:border-white rounded-lg p-2.5 sm:p-3 mb-3 sm:mb-4">
+      <div className="bg-white dark:bg-[#161b22] border-2 border-black dark:border-[#30363d] rounded-lg p-2.5 sm:p-3 mb-3 sm:mb-4">
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-xs sm:text-sm font-bold text-black dark:text-white">Filters</h2>
+          <h2 className="text-xs sm:text-sm font-bold text-black dark:text-[#c9d1d9]">Filters</h2>
           {hasActiveFilters && (
             <button
               onClick={clearFilters}
-              className="text-xs text-blue-700 dark:text-blue-300 hover:text-blue-900 dark:hover:text-blue-100 hover:underline touch-target font-bold"
+              className="text-xs text-blue-700 dark:text-[#58a6ff] hover:text-blue-900 dark:hover:text-[#79c0ff] hover:underline touch-target font-bold"
             >
               Clear all
             </button>
@@ -171,13 +171,13 @@ export default function EntriesPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Participant Filter */}
           <div>
-            <label className="block text-xs font-bold text-black dark:text-white mb-1">
+            <label className="block text-xs font-bold text-black dark:text-[#c9d1d9] mb-1">
               Participant
             </label>
             <select
               value={selectedParticipant}
               onChange={(e) => setSelectedParticipant(e.target.value)}
-              className="w-full text-sm border-2 border-black dark:border-white rounded px-3 py-2 bg-white dark:bg-black text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-700 dark:focus:ring-blue-300 focus:border-transparent font-semibold"
+              className="w-full text-sm border-2 border-black dark:border-[#30363d] rounded px-3 py-2 bg-white dark:bg-[#0d1117] text-black dark:text-[#c9d1d9] focus:outline-none focus:ring-2 focus:ring-blue-700 dark:focus:ring-[#58a6ff] focus:border-transparent font-semibold"
             >
               <option value="all">All Participants</option>
               {participants.map((participant) => (
@@ -190,7 +190,7 @@ export default function EntriesPage() {
 
           {/* Type Filter */}
           <div>
-            <label className="block text-xs font-bold text-black dark:text-white mb-1">
+            <label className="block text-xs font-bold text-black dark:text-[#c9d1d9] mb-1">
               Type
             </label>
             <select
@@ -203,7 +203,7 @@ export default function EntriesPage() {
                   setSelectedLetter('all');
                 }
               }}
-              className="w-full text-sm border-2 border-black dark:border-white rounded px-3 py-2 bg-white dark:bg-black text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-700 dark:focus:ring-blue-300 focus:border-transparent font-semibold"
+              className="w-full text-sm border-2 border-black dark:border-[#30363d] rounded px-3 py-2 bg-white dark:bg-[#0d1117] text-black dark:text-[#c9d1d9] focus:outline-none focus:ring-2 focus:ring-blue-700 dark:focus:ring-[#58a6ff] focus:border-transparent font-semibold"
             >
               <option value="all">All Types</option>
               <option value="word">Words</option>
@@ -213,13 +213,13 @@ export default function EntriesPage() {
 
           {/* Date Filter */}
           <div>
-            <label className="block text-xs font-bold text-black dark:text-white mb-1">
+            <label className="block text-xs font-bold text-black dark:text-[#c9d1d9] mb-1">
               Date
             </label>
             <select
               value={selectedDate}
               onChange={(e) => setSelectedDate(e.target.value)}
-              className="w-full text-sm border-2 border-black dark:border-white rounded px-3 py-2 bg-white dark:bg-black text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-700 dark:focus:ring-blue-300 focus:border-transparent font-semibold"
+              className="w-full text-sm border-2 border-black dark:border-[#30363d] rounded px-3 py-2 bg-white dark:bg-[#0d1117] text-black dark:text-[#c9d1d9] focus:outline-none focus:ring-2 focus:ring-blue-700 dark:focus:ring-[#58a6ff] focus:border-transparent font-semibold"
             >
               <option value="all">All Dates</option>
               <option value="today">Today</option>
@@ -232,14 +232,14 @@ export default function EntriesPage() {
 
         {/* Alphabet Filter - Only show for Words */}
         {selectedType !== 'quote' && (
-          <div className="mt-3 pt-3 border-t-2 border-black dark:border-white">
+          <div className="mt-3 pt-3 border-t-2 border-black dark:border-[#30363d]">
             <div className="flex flex-wrap gap-1 sm:gap-1.5 justify-center">
             <button
               onClick={() => setSelectedLetter('all')}
               className={`px-2 sm:px-2.5 py-1 text-xs sm:text-sm font-bold rounded border-2 transition-colors ${
                 selectedLetter === 'all'
-                  ? 'bg-blue-700 dark:bg-blue-300 text-white dark:text-black border-blue-900 dark:border-blue-100'
-                  : 'bg-white dark:bg-black text-black dark:text-white border-black dark:border-white hover:bg-gray-100 dark:hover:bg-gray-900'
+                  ? 'bg-blue-700 dark:bg-[#1f6feb] text-white dark:text-[#c9d1d9] border-blue-900 dark:border-[#58a6ff]'
+                  : 'bg-white dark:bg-[#161b22] text-black dark:text-[#c9d1d9] border-black dark:border-[#30363d] hover:bg-gray-100 dark:hover:bg-[#21262d]'
               }`}
             >
               All
@@ -259,8 +259,8 @@ export default function EntriesPage() {
                   onClick={() => setSelectedLetter(letter)}
                   className={`px-2 sm:px-2.5 py-1 text-xs sm:text-sm font-bold rounded border-2 transition-colors ${
                     isSelected
-                      ? 'bg-blue-700 dark:bg-blue-300 text-white dark:text-black border-blue-900 dark:border-blue-100'
-                      : 'bg-white dark:bg-black text-black dark:text-white border-black dark:border-white hover:bg-gray-100 dark:hover:bg-gray-900'
+                      ? 'bg-blue-700 dark:bg-[#1f6feb] text-white dark:text-[#c9d1d9] border-blue-900 dark:border-[#58a6ff]'
+                      : 'bg-white dark:bg-[#161b22] text-black dark:text-[#c9d1d9] border-black dark:border-[#30363d] hover:bg-gray-100 dark:hover:bg-[#21262d]'
                   }`}
                 >
                   {letter}
@@ -292,8 +292,8 @@ export default function EntriesPage() {
                   }}
                   className={`px-2 sm:px-2.5 py-1 text-xs sm:text-sm font-bold rounded border-2 transition-colors ${
                     isSelected
-                      ? 'bg-blue-700 dark:bg-blue-300 text-white dark:text-black border-blue-900 dark:border-blue-100'
-                      : 'bg-white dark:bg-black text-black dark:text-white border-black dark:border-white hover:bg-gray-100 dark:hover:bg-gray-900'
+                      ? 'bg-blue-700 dark:bg-[#1f6feb] text-white dark:text-[#c9d1d9] border-blue-900 dark:border-[#58a6ff]'
+                      : 'bg-white dark:bg-[#161b22] text-black dark:text-[#c9d1d9] border-black dark:border-[#30363d] hover:bg-gray-100 dark:hover:bg-[#21262d]'
                   }`}
                 >
                   {pair}
@@ -306,7 +306,7 @@ export default function EntriesPage() {
 
         {/* Results count */}
         <div className="mt-3 pt-3 border-t-2 border-black dark:border-white">
-          <p className="text-xs text-black dark:text-white font-bold">
+          <p className="text-xs text-black dark:text-[#c9d1d9] font-bold">
             Showing <span className="font-bold">{filteredEntries.length}</span> of{' '}
             <span className="font-bold">{entries.length}</span> entries
           </p>
@@ -315,7 +315,7 @@ export default function EntriesPage() {
 
       {/* Words List - Hyperlinks */}
       <div className="mb-4 sm:mb-6">
-        <h2 className="text-base sm:text-lg font-bold text-black dark:text-white mb-3">Words</h2>
+        <h2 className="text-base sm:text-lg font-bold text-black dark:text-[#c9d1d9] mb-3">Words</h2>
         <div className="flex flex-wrap gap-2 sm:gap-3">
           {entries
             .filter(entry => {
@@ -353,7 +353,7 @@ export default function EntriesPage() {
               <Link
                 key={entry.id}
                 href={`/entries/${entry.id}`}
-                className="text-base sm:text-lg text-blue-700 dark:text-blue-300 hover:text-blue-900 dark:hover:text-blue-100 hover:underline font-medium"
+                className="text-base sm:text-lg text-blue-700 dark:text-[#58a6ff] hover:text-blue-900 dark:hover:text-[#79c0ff] hover:underline font-medium"
               >
                 {entry.content}
               </Link>
@@ -368,14 +368,14 @@ export default function EntriesPage() {
             <EntryCard key={entry.id} entry={entry} />
           ))
         ) : (
-          <div className="text-center py-12 bg-white dark:bg-black rounded-lg border-2 border-black dark:border-white">
-            <p className="text-black dark:text-white mb-2 font-bold">
+          <div className="text-center py-12 bg-white dark:bg-[#161b22] rounded-lg border-2 border-black dark:border-[#30363d]">
+            <p className="text-black dark:text-[#c9d1d9] mb-2 font-bold">
               {hasActiveFilters ? 'No entries match your filters.' : 'No entries yet.'}
             </p>
             {hasActiveFilters ? (
               <button
                 onClick={clearFilters}
-                className="text-blue-700 dark:text-blue-300 hover:text-blue-900 dark:hover:text-blue-100 hover:underline text-sm font-bold"
+                className="text-blue-700 dark:text-[#58a6ff] hover:text-blue-900 dark:hover:text-[#79c0ff] hover:underline text-sm font-bold"
               >
                 Clear filters to see all entries
               </button>
