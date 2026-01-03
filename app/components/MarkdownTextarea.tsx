@@ -44,11 +44,16 @@ export default function MarkdownTextarea({
     }
   }, [value, isFocused, markdownValue]);
 
-  // Sync height
+  // Sync height - expand to show all content or minimize to one line if empty
   useEffect(() => {
     if (editorRef.current) {
       editorRef.current.style.height = 'auto';
-      editorRef.current.style.height = `${editorRef.current.scrollHeight}px`;
+      const scrollHeight = editorRef.current.scrollHeight;
+      if (markdownValue.trim() || editorRef.current.textContent?.trim()) {
+        editorRef.current.style.height = `${Math.max(scrollHeight, 40)}px`; // At least 40px (one line)
+      } else {
+        editorRef.current.style.height = '40px'; // One line height when empty
+      }
     }
   }, [markdownValue, isFocused]);
 
@@ -168,6 +173,14 @@ export default function MarkdownTextarea({
         if (editorRef.current) {
           const renderedHtml = renderMarkdown(markdown) || '<br>';
           editorRef.current.innerHTML = renderedHtml;
+          // Update height after re-rendering
+          editorRef.current.style.height = 'auto';
+          const scrollHeight = editorRef.current.scrollHeight;
+          if (markdown.trim()) {
+            editorRef.current.style.height = `${Math.max(scrollHeight, 40)}px`;
+          } else {
+            editorRef.current.style.height = '40px';
+          }
         }
         isUpdatingRef.current = false;
       }, 0);
