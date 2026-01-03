@@ -238,7 +238,7 @@ export default function EntryForm() {
 
   const handleContextMenu = (
     e: React.MouseEvent<HTMLTextAreaElement | HTMLDivElement>,
-    textareaRef: React.RefObject<HTMLTextAreaElement | HTMLElement>,
+    textareaRef: React.RefObject<HTMLTextAreaElement | HTMLElement | null>,
     setValue: (value: string) => void
   ) => {
     e.preventDefault();
@@ -824,7 +824,7 @@ export default function EntryForm() {
                   onChange={setDefinition}
                   onContextMenu={(e) => {
                     const target = e.currentTarget;
-                    const fakeRef = { current: target } as React.RefObject<HTMLTextAreaElement>;
+                    const fakeRef = { current: target } as React.RefObject<HTMLTextAreaElement | HTMLElement>;
                     handleContextMenu(e as any, fakeRef, setDefinition);
                   }}
                   placeholder="Definition (Right-click selected text for formatting: **bold**, *italic*, <u>underline</u>)"
@@ -878,7 +878,7 @@ export default function EntryForm() {
                   onChange={setExampleSentence}
                   onContextMenu={(e) => {
                     const target = e.currentTarget;
-                    const fakeRef = { current: target } as React.RefObject<HTMLTextAreaElement>;
+                    const fakeRef = { current: target } as React.RefObject<HTMLTextAreaElement | HTMLElement>;
                     handleContextMenu(e as any, fakeRef, setExampleSentence);
                   }}
                   placeholder="Use in Sentence (Right-click selected text for formatting) - e.g., The word 'example' was used in a sentence..."
@@ -915,7 +915,7 @@ export default function EntryForm() {
               onChange={setEtymology}
               onContextMenu={(e) => {
                 const target = e.currentTarget;
-                const fakeRef = { current: target } as React.RefObject<HTMLTextAreaElement>;
+                const fakeRef = { current: target } as React.RefObject<HTMLTextAreaElement | HTMLElement>;
                 handleContextMenu(e as any, fakeRef, setEtymology);
               }}
               placeholder="Etymology (Right-click selected text for formatting)"

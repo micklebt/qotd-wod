@@ -27,15 +27,15 @@ export default function EntryPage() {
   
   // Refs for auto-resizing and markdown fields
   const contentTextareaRef = useRef<HTMLTextAreaElement>(null);
-  const definitionTextareaRef = useRef<HTMLElement>(null);
-  const exampleSentenceTextareaRef = useRef<HTMLElement>(null);
-  const etymologyTextareaRef = useRef<HTMLElement>(null);
+  const definitionTextareaRef = useRef<HTMLDivElement>(null);
+  const exampleSentenceTextareaRef = useRef<HTMLDivElement>(null);
+  const etymologyTextareaRef = useRef<HTMLDivElement>(null);
   const quoteContentTextareaRef = useRef<HTMLTextAreaElement>(null);
 
   const [contextMenu, setContextMenu] = useState<{
     x: number;
     y: number;
-    textareaRef: React.RefObject<HTMLElement>;
+    textareaRef: React.RefObject<HTMLDivElement | null>;
     setValue: (value: string) => void;
   } | null>(null);
 
@@ -165,7 +165,7 @@ export default function EntryPage() {
 
   const handleContextMenu = (
     e: React.MouseEvent<HTMLDivElement>,
-    textareaRef: React.RefObject<HTMLElement>,
+    textareaRef: React.RefObject<HTMLDivElement | null>,
     setValue: (value: string) => void
   ) => {
     e.preventDefault();

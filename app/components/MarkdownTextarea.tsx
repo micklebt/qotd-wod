@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useEffect, useState } from 'react';
+import { useRef, useEffect, useState, forwardRef } from 'react';
 import { renderMarkdown } from '@/lib/markdown';
 
 interface MarkdownTextareaProps {
@@ -13,7 +13,7 @@ interface MarkdownTextareaProps {
   onContextMenu?: (e: React.MouseEvent<HTMLDivElement>) => void;
 }
 
-export default function MarkdownTextarea({
+const MarkdownTextarea = forwardRef<HTMLDivElement, MarkdownTextareaProps>(({
   value,
   onChange,
   placeholder,
@@ -21,12 +21,21 @@ export default function MarkdownTextarea({
   className = '',
   style,
   onContextMenu,
-}: MarkdownTextareaProps) {
+}, ref) => {
   const editorRef = useRef<HTMLDivElement>(null);
   const [isFocused, setIsFocused] = useState(false);
   const [markdownValue, setMarkdownValue] = useState(value);
   const isUpdatingRef = useRef(false);
   const isFormattingRef = useRef(false);
+
+  const setRefs = (node: HTMLDivElement | null) => {
+    editorRef.current = node;
+    if (typeof ref === 'function') {
+      ref(node);
+    } else if (ref) {
+      (ref as React.MutableRefObject<HTMLDivElement | null>).current = node;
+    }
+  };
 
   // Update markdown value when prop changes (when not focused)
   useEffect(() => {
@@ -211,7 +220,7 @@ export default function MarkdownTextarea({
   return (
     <div className="relative">
       <div
-        ref={editorRef}
+        ref={setRefs}
         contentEditable
         onInput={handleInput}
         onPaste={handlePaste}
@@ -254,5 +263,8 @@ export default function MarkdownTextarea({
       `}} />
     </div>
   );
-}
+});
 
+MarkdownTextarea.displayName = 'MarkdownTextarea';
+
+export default MarkdownTextarea;
