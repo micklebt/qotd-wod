@@ -314,6 +314,25 @@ export default function EntriesPage() {
           </p>
         </div>
       </div>
+
+      {/* Words List - Hyperlinks */}
+      <div className="mb-4 sm:mb-6">
+        <h2 className="text-base sm:text-lg font-bold text-black dark:text-white mb-3">Words</h2>
+        <div className="flex flex-wrap gap-2 sm:gap-3">
+          {entries
+            .filter(entry => entry.type === 'word')
+            .sort((a, b) => a.content.localeCompare(b.content))
+            .map((entry: Entry) => (
+              <Link
+                key={entry.id}
+                href={`/entries/${entry.id}`}
+                className="text-base sm:text-lg text-blue-700 dark:text-blue-300 hover:text-blue-900 dark:hover:text-blue-100 hover:underline font-medium"
+              >
+                {entry.content}
+              </Link>
+            ))}
+        </div>
+      </div>
       
       {/* Entries List */}
       <div className="space-y-4">
