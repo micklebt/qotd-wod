@@ -10,7 +10,7 @@ interface MarkdownTextareaProps {
   required?: boolean;
   className?: string;
   style?: React.CSSProperties;
-  onContextMenu?: (e: React.MouseEvent<HTMLElement>) => void;
+  onContextMenu?: (e: React.MouseEvent<HTMLDivElement>) => void;
 }
 
 export default function MarkdownTextarea({
@@ -217,7 +217,7 @@ export default function MarkdownTextarea({
         onPaste={handlePaste}
         onFocus={handleFocus}
         onBlur={handleBlur}
-        onContextMenu={onContextMenu ? (e: React.MouseEvent<HTMLDivElement>) => onContextMenu(e as React.MouseEvent<HTMLElement>) : undefined}
+        onContextMenu={onContextMenu}
         className={`${className} w-full border border-gray-300 rounded p-2 resize-none overflow-hidden`}
         style={{
           ...style,

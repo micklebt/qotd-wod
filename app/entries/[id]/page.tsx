@@ -164,7 +164,7 @@ export default function EntryPage() {
   };
 
   const handleContextMenu = (
-    e: React.MouseEvent<HTMLElement>,
+    e: React.MouseEvent<HTMLDivElement>,
     textareaRef: React.RefObject<HTMLElement>,
     setValue: (value: string) => void
   ) => {
@@ -329,7 +329,7 @@ export default function EntryPage() {
                 <MarkdownTextarea
                   value={definition}
                   onChange={setDefinition}
-                  onContextMenu={(e) => handleContextMenu(e as React.MouseEvent<HTMLElement>, definitionTextareaRef, setDefinition)}
+                  onContextMenu={(e) => handleContextMenu(e, definitionTextareaRef, setDefinition)}
                   placeholder="Definition (Right-click selected text for formatting: **bold**, *italic*, <u>underline</u>)"
                   className="w-full border-2 border-black dark:border-[#30363d] rounded p-2 resize-none overflow-hidden bg-white dark:bg-[#0d1117] text-black dark:text-[#c9d1d9]"
                   style={{ minHeight: '2.5rem' }}
@@ -363,7 +363,7 @@ export default function EntryPage() {
                 <MarkdownTextarea
                   value={exampleSentence}
                   onChange={setExampleSentence}
-                  onContextMenu={(e) => handleContextMenu(e as React.MouseEvent<HTMLElement>, exampleSentenceTextareaRef, setExampleSentence)}
+                  onContextMenu={(e) => handleContextMenu(e, exampleSentenceTextareaRef, setExampleSentence)}
                   placeholder="Use in Sentence (Right-click selected text for formatting) - e.g., The word 'example' was used in a sentence..."
                   className="w-full border-2 border-black dark:border-[#30363d] rounded p-2 resize-none overflow-hidden bg-white dark:bg-[#0d1117] text-black dark:text-[#c9d1d9]"
                   style={{ minHeight: '2.5rem' }}
@@ -375,7 +375,7 @@ export default function EntryPage() {
                 <MarkdownTextarea
                   value={etymology}
                   onChange={setEtymology}
-                  onContextMenu={(e) => handleContextMenu(e as React.MouseEvent<HTMLElement>, etymologyTextareaRef, setEtymology)}
+                  onContextMenu={(e) => handleContextMenu(e, etymologyTextareaRef, setEtymology)}
                   placeholder="Etymology (Right-click selected text for formatting)"
                   className="w-full border-2 border-black dark:border-[#30363d] rounded p-2 resize-none overflow-hidden bg-white dark:bg-[#0d1117] text-black dark:text-[#c9d1d9]"
                   style={{ minHeight: '2.5rem' }}
