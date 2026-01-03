@@ -164,7 +164,7 @@ export default function EntryPage() {
   };
 
   const handleContextMenu = (
-    e: React.MouseEvent<HTMLTextAreaElement | HTMLDivElement>,
+    e: React.MouseEvent<HTMLElement>,
     textareaRef: React.RefObject<HTMLElement>,
     setValue: (value: string) => void
   ) => {
@@ -264,7 +264,7 @@ export default function EntryPage() {
 
   return (
     <>
-      <div className="max-w-2xl mx-auto px-3 sm:px-4 py-3 sm:py-4 bg-white dark:bg-[#0d1117]">
+      <div className="max-w-4xl mx-auto px-3 sm:px-4 py-3 sm:py-4 bg-white dark:bg-[#0d1117]">
         <h1 className="text-2xl sm:text-3xl font-bold mb-3 sm:mb-4 text-black dark:text-[#c9d1d9]">Edit Entry</h1>
 
         {error && (
