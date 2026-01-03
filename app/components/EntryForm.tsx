@@ -379,15 +379,37 @@ export default function EntryForm() {
     }
   };
 
+  // Normalize word content: lowercase unless it's a proper noun
+  // Proper nouns are detected by: all caps, or capitals in the middle
+  const normalizeWordContent = (word: string): string => {
+    const trimmed = word.trim();
+    if (!trimmed) return trimmed;
+    
+    // If all uppercase (like "NASA"), keep it
+    if (trimmed === trimmed.toUpperCase() && trimmed.length > 1) {
+      return trimmed;
+    }
+    
+    // If has capitals beyond the first letter (like "iPhone", "McDonald"), keep it
+    const restOfWord = trimmed.slice(1);
+    if (restOfWord !== restOfWord.toLowerCase()) {
+      return trimmed;
+    }
+    
+    // Otherwise, lowercase it
+    return trimmed.toLowerCase();
+  };
+
   const checkForDuplicate = async (): Promise<Entry | null> => {
     if (!content.trim() || type !== 'word') return null;
 
     try {
+      const normalizedContent = normalizeWordContent(content);
       const { data, error } = await supabase
         .from('entries')
         .select('*, word_metadata(*), quote_metadata(*)')
         .eq('type', 'word')
-        .ilike('content', content.trim())
+        .ilike('content', normalizedContent)
         .limit(1)
         .single();
 
@@ -435,12 +457,15 @@ export default function EntryForm() {
     try {
       const userId = selectedParticipant;
 
+      // Normalize word content (lowercase unless proper noun)
+      const normalizedContent = type === 'word' ? normalizeWordContent(content) : content;
+
       // Insert entry
       const { data: entryData, error: entryError } = await supabase
         .from('entries')
         .insert({
           type,
-          content,
+          content: normalizedContent,
           participant_id: userId,
         })
         .select()

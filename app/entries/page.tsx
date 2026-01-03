@@ -244,30 +244,30 @@ export default function EntriesPage() {
             >
               All
             </button>
-            {/* Single letters A-N */}
+            {/* Single letters A-N - only show if available */}
             {Array.from({ length: 14 }, (_, i) => {
               const letter = String.fromCharCode(65 + i); // A-N
               const isAvailable = availableLetters.includes(letter);
               const isSelected = selectedLetter === letter;
               
+              // Only render if available
+              if (!isAvailable) return null;
+              
               return (
                 <button
                   key={letter}
-                  onClick={() => isAvailable && setSelectedLetter(letter)}
-                  disabled={!isAvailable}
+                  onClick={() => setSelectedLetter(letter)}
                   className={`px-2 sm:px-2.5 py-1 text-xs sm:text-sm font-bold rounded border-2 transition-colors ${
                     isSelected
                       ? 'bg-blue-700 dark:bg-blue-300 text-white dark:text-black border-blue-900 dark:border-blue-100'
-                      : isAvailable
-                      ? 'bg-white dark:bg-black text-black dark:text-white border-black dark:border-white hover:bg-gray-100 dark:hover:bg-gray-900'
-                      : 'bg-gray-200 dark:bg-gray-800 text-gray-500 dark:text-gray-400 border-gray-400 dark:border-gray-600 cursor-not-allowed'
+                      : 'bg-white dark:bg-black text-black dark:text-white border-black dark:border-white hover:bg-gray-100 dark:hover:bg-gray-900'
                   }`}
                 >
                   {letter}
                 </button>
               );
             })}
-            {/* Combined letter pairs O-Z */}
+            {/* Combined letter pairs O-Z - only show if available */}
             {[
               { pair: 'OP', letters: ['O', 'P'] },
               { pair: 'QR', letters: ['Q', 'R'] },
@@ -277,25 +277,23 @@ export default function EntriesPage() {
               { pair: 'YZ', letters: ['Y', 'Z'] }
             ].map(({ pair, letters }) => {
               const isAvailable = letters.some(letter => availableLetters.includes(letter));
-              const isSelected = letters.includes(selectedLetter);
+              const isSelected = letters.some(letter => selectedLetter === letter);
+              
+              // Only render if available
+              if (!isAvailable) return null;
               
               return (
                 <button
                   key={pair}
                   onClick={() => {
-                    if (isAvailable) {
-                      // If clicked, set to the first available letter in the pair
-                      const firstAvailable = letters.find(letter => availableLetters.includes(letter));
-                      if (firstAvailable) setSelectedLetter(firstAvailable);
-                    }
+                    // If clicked, set to the first available letter in the pair
+                    const firstAvailable = letters.find(letter => availableLetters.includes(letter));
+                    if (firstAvailable) setSelectedLetter(firstAvailable);
                   }}
-                  disabled={!isAvailable}
                   className={`px-2 sm:px-2.5 py-1 text-xs sm:text-sm font-bold rounded border-2 transition-colors ${
                     isSelected
                       ? 'bg-blue-700 dark:bg-blue-300 text-white dark:text-black border-blue-900 dark:border-blue-100'
-                      : isAvailable
-                      ? 'bg-white dark:bg-black text-black dark:text-white border-black dark:border-white hover:bg-gray-100 dark:hover:bg-gray-900'
-                      : 'bg-gray-200 dark:bg-gray-800 text-gray-500 dark:text-gray-400 border-gray-400 dark:border-gray-600 cursor-not-allowed'
+                      : 'bg-white dark:bg-black text-black dark:text-white border-black dark:border-white hover:bg-gray-100 dark:hover:bg-gray-900'
                   }`}
                 >
                   {pair}
@@ -320,7 +318,36 @@ export default function EntriesPage() {
         <h2 className="text-base sm:text-lg font-bold text-black dark:text-white mb-3">Words</h2>
         <div className="flex flex-wrap gap-2 sm:gap-3">
           {entries
-            .filter(entry => entry.type === 'word')
+            .filter(entry => {
+              if (entry.type !== 'word') return false;
+              
+              // Apply alphabet filter if selected
+              if (selectedLetter !== 'all' && entry.content && entry.content.length > 0) {
+                const firstLetter = entry.content.charAt(0).toUpperCase();
+                // Handle combined letter pairs
+                const letterPairs: Record<string, string[]> = {
+                  'O': ['O', 'P'],
+                  'P': ['O', 'P'],
+                  'Q': ['Q', 'R'],
+                  'R': ['Q', 'R'],
+                  'S': ['S', 'T'],
+                  'T': ['S', 'T'],
+                  'U': ['U', 'V'],
+                  'V': ['U', 'V'],
+                  'W': ['W', 'X'],
+                  'X': ['W', 'X'],
+                  'Y': ['Y', 'Z'],
+                  'Z': ['Y', 'Z']
+                };
+                
+                if (letterPairs[selectedLetter]) {
+                  return letterPairs[selectedLetter].includes(firstLetter);
+                }
+                return firstLetter === selectedLetter;
+              }
+              
+              return true;
+            })
             .sort((a, b) => a.content.localeCompare(b.content))
             .map((entry: Entry) => (
               <Link
