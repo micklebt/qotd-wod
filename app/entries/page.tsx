@@ -277,7 +277,7 @@ export default function EntriesPage() {
               { pair: 'YZ', letters: ['Y', 'Z'] }
             ].map(({ pair, letters }) => {
               const isAvailable = letters.some(letter => availableLetters.includes(letter));
-              const isSelected = letters.some(letter => selectedLetter === letter);
+              const isSelected = letters.some(letter => selectedLetter === letter) || selectedLetter === pair;
               
               // Only render if available
               if (!isAvailable) return null;
