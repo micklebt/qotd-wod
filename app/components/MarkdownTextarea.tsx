@@ -121,6 +121,17 @@ export default function MarkdownTextarea({
             }
           }
         }
+        // Update height - expand to show all content or minimize to one line if empty
+        if (editorRef.current) {
+          editorRef.current.style.height = 'auto';
+          const scrollHeight = editorRef.current.scrollHeight;
+          const hasContent = markdown.trim() || editorRef.current.textContent?.trim();
+          if (hasContent) {
+            editorRef.current.style.height = `${Math.max(scrollHeight, 40)}px`;
+          } else {
+            editorRef.current.style.height = '40px';
+          }
+        }
         isUpdatingRef.current = false;
       });
     }
