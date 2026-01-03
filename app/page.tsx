@@ -50,7 +50,7 @@ export default async function Home() {
     <div className="min-h-screen bg-white dark:bg-[#0d1117]">
       <div className="max-w-4xl mx-auto px-3 sm:px-4 py-3 sm:py-4 space-y-3 sm:space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-2 mb-3 sm:mb-4">
-          <h1 className="text-2xl sm:text-3xl font-bold text-black dark:text-[#c9d1d9]">Today's Featured</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-black dark:text-[#c9d1d9]">Today&apos;s Featured</h1>
           <div className="flex gap-2">
             <WordChallengeTrigger />
             <Link
@@ -90,7 +90,7 @@ export default async function Home() {
               <h2 className="text-base sm:text-lg font-bold text-black dark:text-[#c9d1d9]">Quote of the Day</h2>
               <p className="text-xs sm:text-sm text-black dark:text-[#8b949e] font-semibold">Submitted by {quoteParticipantName}</p>
             </div>
-            <p className="text-lg sm:text-xl italic mb-3 sm:mb-4 break-words text-black dark:text-[#c9d1d9]">"{quote.content}"</p>
+            <p className="text-lg sm:text-xl italic mb-3 sm:mb-4 break-words text-black dark:text-[#c9d1d9]">&quot;{quote.content}&quot;</p>
             {quote.quote_metadata && quote.quote_metadata[0] && (
               <div className="text-xs sm:text-sm space-y-1 text-black dark:text-[#c9d1d9]">
                 {quote.quote_metadata[0].author && (
