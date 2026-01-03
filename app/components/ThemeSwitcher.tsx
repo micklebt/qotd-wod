@@ -1,9 +1,42 @@
 'use client';
 
 import { useTheme } from '@/contexts/ThemeContext';
+import { useState, useEffect } from 'react';
 
 export default function ThemeSwitcher() {
+  const [mounted, setMounted] = useState(false);
   const { theme, toggleTheme } = useTheme();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Don't render until mounted to avoid hydration mismatch
+  if (!mounted) {
+    return (
+      <button
+        className="p-2 rounded-md border border-gray-300 bg-white text-gray-900 hover:bg-gray-100 transition-colors"
+        aria-label="Theme switcher"
+        title="Theme switcher"
+        disabled
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          strokeWidth={2}
+          stroke="currentColor"
+          className="w-5 h-5"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M21.752 15.002A9.72 9.72 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z"
+          />
+        </svg>
+      </button>
+    );
+  }
 
   return (
     <button
