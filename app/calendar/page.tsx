@@ -5,6 +5,7 @@ import type { Entry } from '@/lib/supabase';
 import { getParticipantsAsync, getCurrentParticipantId, type Participant } from '@/lib/participants';
 import { getDateStringEST, getYearEST, toEST } from '@/lib/dateUtils';
 import { useState, useEffect } from 'react';
+import StreakDisplay from '@/components/StreakDisplay';
 
 interface MonthDay {
   day: number;
@@ -318,16 +319,20 @@ export default function CalendarPage() {
           </select>
         </div>
 
-        <div className="grid grid-cols-2 gap-2 sm:gap-3">
-          <div className="bg-white dark:bg-black rounded p-2 sm:p-3 border border-black dark:border-white">
-                        <p className="text-xs text-black dark:text-[#b0b0b0] font-bold mb-1 sm:mb-0.5">Current Streak</p>
-                        <p className="text-lg sm:text-xl font-bold text-blue-700 dark:text-[#3b82f6]">{currentStreak}</p>
+        {selectedParticipant !== 'all' ? (
+          <StreakDisplay participantId={selectedParticipant} className="mb-2 sm:mb-3" />
+        ) : (
+          <div className="grid grid-cols-2 gap-2 sm:gap-3">
+            <div className="bg-white dark:bg-black rounded p-2 sm:p-3 border border-black dark:border-white">
+                          <p className="text-xs text-black dark:text-[#b0b0b0] font-bold mb-1 sm:mb-0.5">Current Streak</p>
+                          <p className="text-lg sm:text-xl font-bold text-blue-700 dark:text-[#3b82f6]">{currentStreak}</p>
+            </div>
+            <div className="bg-white dark:bg-black rounded p-2 sm:p-3 border border-black dark:border-white">
+                          <p className="text-xs text-black dark:text-[#b0b0b0] font-bold mb-1 sm:mb-0.5">Longest Streak</p>
+                          <p className="text-lg sm:text-xl font-bold text-green-700 dark:text-[#22c55e]">{longestStreak}</p>
+            </div>
           </div>
-          <div className="bg-white dark:bg-black rounded p-2 sm:p-3 border border-black dark:border-white">
-                        <p className="text-xs text-black dark:text-[#b0b0b0] font-bold mb-1 sm:mb-0.5">Longest Streak</p>
-                        <p className="text-lg sm:text-xl font-bold text-green-700 dark:text-[#22c55e]">{longestStreak}</p>
-          </div>
-        </div>
+        )}
       </div>
 
                   <div className="bg-white dark:bg-[#0a0a0a] border border-black dark:border-[#333333] rounded p-2 sm:p-3 overflow-x-auto">

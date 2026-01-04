@@ -535,6 +535,20 @@ export default function EntryForm() {
         }
       }
 
+      // Update streak after successful entry creation
+      try {
+        const response = await fetch('/api/update-streak', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ participantId: userId }),
+        });
+        if (!response.ok) {
+          console.warn('Failed to update streak, but entry was created successfully');
+        }
+      } catch (streakError) {
+        console.warn('Error updating streak:', streakError);
+      }
+
       router.push('/entries');
     } catch (err) {
       console.error('Error creating entry:', err);
