@@ -38,6 +38,8 @@ export default function StreakDisplay({ participantId: propParticipantId, classN
   const [streak, setStreak] = useState<ParticipantStreak | null>(null);
   const [badges, setBadges] = useState<ParticipantBadge[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showSaveConfirm, setShowSaveConfirm] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     const fetchStreakData = async () => {
@@ -67,6 +69,41 @@ export default function StreakDisplay({ participantId: propParticipantId, classN
 
     fetchStreakData();
   }, [propParticipantId]);
+
+  const handleUseStreakSave = async () => {
+    const pid = propParticipantId || getCurrentParticipantId();
+    if (!pid || !streak || streak.streak_saves_available <= 0) {
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const response = await fetch('/api/use-streak-save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ participantId: pid }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        alert(data.error || 'Failed to use streak save');
+        return;
+      }
+
+      setShowSaveConfirm(false);
+      
+      const refreshResponse = await fetch(`/api/streak-data?participantId=${encodeURIComponent(pid)}`);
+      if (refreshResponse.ok) {
+        const data = await refreshResponse.json();
+        setStreak(data.streak);
+      }
+    } catch (error) {
+      console.error('Error using streak save:', error);
+      alert('Failed to use streak save');
+    } finally {
+      setSaving(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -118,7 +155,46 @@ export default function StreakDisplay({ participantId: propParticipantId, classN
             {nextMilestone - currentStreak} day{nextMilestone - currentStreak !== 1 ? 's' : ''} to {BADGE_MILESTONES.bronze === nextMilestone ? 'Bronze' : BADGE_MILESTONES.silver === nextMilestone ? 'Silver' : BADGE_MILESTONES.gold === nextMilestone ? 'Gold' : BADGE_MILESTONES.diamond === nextMilestone ? 'Diamond' : 'Legendary'}
           </div>
         )}
+
+        {streak.streak_saves_available > 0 && (
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setShowSaveConfirm(true)}
+              className="text-xs sm:text-sm px-2 py-1 bg-green-600 dark:bg-green-500 text-white font-bold rounded hover:bg-green-700 dark:hover:bg-green-600 border border-green-700 dark:border-green-600"
+              title="Use your streak save to protect your current streak if you miss a day"
+            >
+              🛡️ Streak Save Available
+            </button>
+          </div>
+        )}
       </div>
+
+      {showSaveConfirm && (
+        <div className="mt-3 p-3 bg-yellow-100 dark:bg-yellow-900 border border-yellow-600 dark:border-yellow-500 rounded">
+          <p className="text-sm font-bold text-black dark:text-white mb-2">
+            Use your streak save now?
+          </p>
+          <p className="text-xs text-black dark:text-[#b0b0b0] mb-3">
+            This will preserve your current streak of {currentStreak} day{currentStreak !== 1 ? 's' : ''}. You can only use one save per month.
+          </p>
+          <div className="flex gap-2">
+            <button
+              onClick={handleUseStreakSave}
+              disabled={saving}
+              className="text-xs px-3 py-1 bg-green-600 dark:bg-green-500 text-white font-bold rounded hover:bg-green-700 dark:hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {saving ? 'Using...' : 'Use Save'}
+            </button>
+            <button
+              onClick={() => setShowSaveConfirm(false)}
+              disabled={saving}
+              className="text-xs px-3 py-1 bg-gray-600 dark:bg-gray-500 text-white font-bold rounded hover:bg-gray-700 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

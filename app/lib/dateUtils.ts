@@ -80,3 +80,46 @@ export function getYearEST(date: Date | string): number {
   return estDate.getFullYear();
 }
 
+/**
+ * Gets the month from a date in EST/EDT timezone (0-11)
+ */
+export function getMonthEST(date: Date | string): number {
+  const estDate = toEST(date);
+  return estDate.getMonth();
+}
+
+/**
+ * Gets the first day of a month as a date string (YYYY-MM-01) in EST/EDT timezone
+ */
+export function getMonthStartEST(year: number, month: number): string {
+  return `${year}-${String(month + 1).padStart(2, '0')}-01`;
+}
+
+/**
+ * Gets the first day of the current month in EST/EDT timezone
+ */
+export function getCurrentMonthStartEST(): string {
+  const today = new Date();
+  const estDate = toEST(today);
+  const year = estDate.getFullYear();
+  const month = estDate.getMonth();
+  return getMonthStartEST(year, month);
+}
+
+/**
+ * Gets the first day of the previous month in EST/EDT timezone
+ */
+export function getPreviousMonthStartEST(): string {
+  const today = new Date();
+  const estDate = toEST(today);
+  let year = estDate.getFullYear();
+  let month = estDate.getMonth() - 1;
+  
+  if (month < 0) {
+    month = 11;
+    year -= 1;
+  }
+  
+  return getMonthStartEST(year, month);
+}
+
