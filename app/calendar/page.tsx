@@ -3,6 +3,7 @@
 import { supabase } from '@/lib/supabase';
 import type { Entry } from '@/lib/supabase';
 import { getParticipantsAsync, getCurrentParticipantId, type Participant } from '@/lib/participants';
+import { getDateStringEST, getYearEST, toEST } from '@/lib/dateUtils';
 import { useState, useEffect } from 'react';
 
 interface MonthDay {
@@ -78,7 +79,7 @@ export default function CalendarPage() {
               id: sampleEntry.id,
               participant_id: sampleEntry.participant_id,
               created_at: sampleEntry.created_at,
-              date: new Date(sampleEntry.created_at).toISOString().split('T')[0]
+              date: getDateStringEST(sampleEntry.created_at)
             });
           }
         });
@@ -90,14 +91,14 @@ export default function CalendarPage() {
             id: e.id,
             participant_id: e.participant_id,
             created_at: e.created_at,
-            date: new Date(e.created_at).toISOString().split('T')[0]
+            date: getDateStringEST(e.created_at)
           })));
         }
         
         // Find all years that have entries
         const years = new Set<number>();
         normalizedEntries.forEach(entry => {
-          const year = new Date(entry.created_at).getFullYear();
+          const year = getYearEST(entry.created_at);
           years.add(year);
         });
         const sortedYears = Array.from(years).sort((a, b) => b - a); // Most recent first
@@ -129,15 +130,16 @@ export default function CalendarPage() {
 
     for (let day = 1; day <= daysInMonth; day++) {
       const date = new Date(year, month, day);
-      const dateStr = date.toISOString().split('T')[0];
+      // Convert calendar date to EST date string for comparison
+      const dateStr = getDateStringEST(date);
 
       const dayEntries = selectedParticipant === 'all'
         ? entries.filter(entry => {
-            const entryDate = new Date(entry.created_at).toISOString().split('T')[0];
+            const entryDate = getDateStringEST(entry.created_at);
             return entryDate === dateStr;
           })
         : entries.filter(entry => {
-            const entryDate = new Date(entry.created_at).toISOString().split('T')[0];
+            const entryDate = getDateStringEST(entry.created_at);
             return entryDate === dateStr && entry.participant_id === selectedParticipant;
           });
 
@@ -174,18 +176,21 @@ export default function CalendarPage() {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    let currentDate = new Date(today);
+    // Convert today to EST for streak calculation
+    const todayEST = toEST(today);
+    todayEST.setHours(0, 0, 0, 0);
+    let currentDate = new Date(todayEST);
     let streak = 0;
 
     while (true) {
-      const dateStr = currentDate.toISOString().split('T')[0];
+      const dateStr = getDateStringEST(currentDate);
       const hasEntry = selectedParticipant === 'all'
         ? entries.some(entry => {
-            const entryDate = new Date(entry.created_at).toISOString().split('T')[0];
+            const entryDate = getDateStringEST(entry.created_at);
             return entryDate === dateStr;
           })
         : entries.some(entry => {
-            const entryDate = new Date(entry.created_at).toISOString().split('T')[0];
+            const entryDate = getDateStringEST(entry.created_at);
             return entryDate === dateStr && entry.participant_id === selectedParticipant;
           });
 
@@ -206,7 +211,7 @@ export default function CalendarPage() {
     const sortedEntries = [...entries]
       .filter(entry => selectedParticipant === 'all' || entry.participant_id === selectedParticipant)
       .map(entry => ({
-        date: new Date(entry.created_at).toISOString().split('T')[0],
+        date: getDateStringEST(entry.created_at),
       }))
       .sort((a, b) => a.date.localeCompare(b.date));
 

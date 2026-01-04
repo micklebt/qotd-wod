@@ -10,6 +10,7 @@ import { lookupQuote } from '@/lib/quoteLookup';
 import { getParticipantName, getParticipantsAsync, preloadParticipants, type Participant as DbParticipant } from '@/lib/participants';
 import { formatIPA } from '@/lib/pronunciation';
 import { formatExampleSentences } from '@/lib/formatExampleSentence';
+import { formatDateEST } from '@/lib/dateUtils';
 import MarkdownContextMenu from './MarkdownContextMenu';
 import MarkdownTextarea from './MarkdownTextarea';
 
@@ -577,7 +578,7 @@ export default function EntryForm() {
                 <h3 className="font-bold text-lg mb-3 text-gray-700">Existing Entry</h3>
                 <div className="space-y-2 text-sm">
                   <p><span className="font-semibold">Submitted by:</span> {getParticipantName(existingEntry.participant_id)}</p>
-                  <p><span className="font-semibold">Date:</span> {new Date(existingEntry.created_at).toLocaleDateString()}</p>
+                  <p><span className="font-semibold">Date:</span> {formatDateEST(existingEntry.created_at)}</p>
                   {existingEntry.word_metadata?.[0] && (
                     <>
                       <p><span className="font-semibold">Pronunciation:</span> {existingEntry.word_metadata[0].pronunciation_respelling || existingEntry.word_metadata[0].pronunciation_ipa || existingEntry.word_metadata[0].pronunciation || 'N/A'}</p>
@@ -602,7 +603,7 @@ export default function EntryForm() {
                 <h3 className="font-bold text-lg mb-3 text-blue-700">Proposed Entry</h3>
                 <div className="space-y-2 text-sm">
                   <p><span className="font-semibold">Submitted by:</span> {getParticipantName(selectedParticipant)}</p>
-                  <p><span className="font-semibold">Date:</span> {new Date().toLocaleDateString()}</p>
+                  <p><span className="font-semibold">Date:</span> {formatDateEST(new Date())}</p>
                   <p><span className="font-semibold">Pronunciation:</span> {pronunciation || 'N/A'}</p>
                   <p><span className="font-semibold">Part of Speech:</span> {partOfSpeech || 'N/A'}</p>
                   <div>

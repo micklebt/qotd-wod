@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { Entry } from '@/lib/supabase';
 import { getParticipantName } from '@/lib/participants';
+import { formatDateEST } from '@/lib/dateUtils';
 
 export default function EntryCard({ entry }: { entry: Entry }) {
   return (
@@ -25,7 +26,7 @@ export default function EntryCard({ entry }: { entry: Entry }) {
             )}
           </>
         )}
-        <p className="text-xs text-black dark:text-[#b0b0b0] font-semibold mt-2 sm:mt-3">{new Date(entry.created_at).toLocaleDateString()}</p>
+        <p className="text-xs text-black dark:text-[#b0b0b0] font-semibold mt-2 sm:mt-3">{formatDateEST(entry.created_at)}</p>
       </div>
     </Link>
   );
