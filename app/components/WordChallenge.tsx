@@ -240,32 +240,25 @@ export default function WordChallenge({ isOpen, onClose }: WordChallengeProps) {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-70 dark:bg-opacity-80 flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-[#161b22] rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border-2 border-black dark:border-[#30363d]">
-        <div className="sticky top-0 bg-white dark:bg-[#161b22] z-10 border-b-2 border-black dark:border-[#30363d]">
+      <div className="bg-white dark:bg-[#0a0a0a] rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border-2 border-black dark:border-[#333333]">
+        <div className="sticky top-0 bg-white dark:bg-[#0a0a0a] z-10 border-b-2 border-black dark:border-[#333333]">
           <Navigation />
         </div>
         <div className="p-4 sm:p-6">
-          <div className="mb-4 sm:mb-6">
-            <h2 className="text-xl sm:text-2xl font-bold mb-2 sm:mb-3 text-black dark:text-[#c9d1d9]">Word Challenge</h2>
-          </div>
-
           {loading ? (
             <div className="text-center py-8 sm:py-12">
-              <p className="text-black dark:text-[#c9d1d9] font-bold">Loading random word...</p>
+              <p className="text-black dark:text-[#ffffff] font-bold">Loading random word...</p>
             </div>
           ) : randomWord ? (
             <div className="space-y-4 sm:space-y-6">
               <div className="text-center">
-                <p className="text-4xl sm:text-5xl font-bold mb-3 sm:mb-4 text-black dark:text-[#c9d1d9]">{randomWord.content}</p>
-                <p className="text-xs sm:text-sm text-black dark:text-[#c9d1d9] font-semibold mb-3 sm:mb-4">
-                  Do you have confident knowledge and use of this word?
-                </p>
+                <p className="text-4xl sm:text-5xl font-bold mb-3 sm:mb-4 text-black dark:text-[#ffffff]">{randomWord.content}</p>
                 
                 <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 justify-center mb-4 sm:mb-6">
                   <button
                     onClick={() => handleConfirmation(true)}
                     disabled={saving || !currentParticipantId}
-                    className={`px-4 sm:px-6 py-2 sm:py-3 font-bold rounded border-2 transition-colors text-sm sm:text-base ${
+                    className={`px-3 sm:px-4 py-1.5 sm:py-2 font-bold rounded border-2 transition-colors text-xs sm:text-sm ${
                       stats?.currentUserResponse === true
                         ? 'bg-green-700 dark:bg-green-500 text-white dark:text-black border-green-900 dark:border-green-300'
                         : 'bg-green-100 dark:bg-green-900 text-green-900 dark:text-green-100 border-green-700 dark:border-green-300 hover:bg-green-200 dark:hover:bg-green-800'
@@ -276,7 +269,7 @@ export default function WordChallenge({ isOpen, onClose }: WordChallengeProps) {
                   <button
                     onClick={() => handleConfirmation(false)}
                     disabled={saving || !currentParticipantId}
-                    className={`px-4 sm:px-6 py-2 sm:py-3 font-bold rounded border-2 transition-colors text-sm sm:text-base ${
+                    className={`px-3 sm:px-4 py-1.5 sm:py-2 font-bold rounded border-2 transition-colors text-xs sm:text-sm ${
                       stats?.currentUserResponse === false
                         ? 'bg-red-700 dark:bg-red-500 text-white dark:text-black border-red-900 dark:border-red-300'
                         : 'bg-red-100 dark:bg-red-900 text-red-900 dark:text-red-100 border-red-700 dark:border-red-300 hover:bg-red-200 dark:hover:bg-red-800'
@@ -284,34 +277,38 @@ export default function WordChallenge({ isOpen, onClose }: WordChallengeProps) {
                   >
                     {saving ? 'Saving...' : stats?.currentUserResponse === false ? '✗ Not Yet Confident' : 'Not Yet Confident'}
                   </button>
-                </div>
-
-                {!showMetadata && (
-                  <div className="flex justify-center">
+                  {!showMetadata && (
                     <button
                       onClick={() => setShowMetadata(true)}
-                      className="px-4 sm:px-6 py-2 sm:py-3 bg-blue-100 dark:bg-blue-900 text-blue-900 dark:text-blue-100 font-bold rounded border-2 border-blue-700 dark:border-blue-300 hover:bg-blue-200 dark:hover:bg-blue-800 transition-colors text-sm sm:text-base"
+                      className="px-3 sm:px-4 py-1.5 sm:py-2 bg-blue-100 dark:bg-blue-900 text-blue-900 dark:text-blue-100 font-bold rounded border-2 border-blue-700 dark:border-blue-300 hover:bg-blue-200 dark:hover:bg-blue-800 transition-colors text-xs sm:text-sm"
                     >
-                      Show Definition & Details
+                      Help
                     </button>
-                  </div>
-                )}
+                  )}
+                </div>
 
                 {/* Statistics Display */}
                 {stats && (
-                  <div                               className="bg-white dark:bg-[#0d1117] rounded-lg p-3 sm:p-4 mb-3 sm:mb-4 border-2 border-black dark:border-[#30363d]">
-                                <p className="text-xs sm:text-sm font-bold text-black dark:text-[#c9d1d9] mb-2">Word Challenge Statistics</p>
+                  <div                               className="bg-white dark:bg-[#0a0a0a] rounded-lg p-3 sm:p-4 mb-3 sm:mb-4">
+                                <div className="flex flex-col items-center mb-2">
+                                  <p className="text-xs sm:text-sm font-bold text-black dark:text-[#ffffff]">Word Challenge Statistics</p>
+                                  {currentParticipantId && (
+                                    <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 font-normal">
+                                      {getParticipantName(currentParticipantId)}
+                                    </p>
+                                  )}
+                                </div>
                     <div className="grid grid-cols-3 gap-2 sm:gap-4 text-center">
                       <div>
-                                    <p className="text-xl sm:text-2xl font-bold text-black dark:text-[#c9d1d9]">{stats.totalAppearances}</p>
+                                    <p className="text-xl sm:text-2xl font-bold text-black dark:text-[#ffffff]">{stats.totalAppearances}</p>
                         <p className="text-xs text-black dark:text-white font-semibold">Total Appearances</p>
                       </div>
                       <div>
-                                    <p className="text-xl sm:text-2xl font-bold text-green-700 dark:text-[#3fb950]">{stats.confirmedKnown}</p>
+                                    <p className="text-xl sm:text-2xl font-bold text-green-700 dark:text-[#22c55e]">{stats.confirmedKnown}</p>
                         <p className="text-xs text-black dark:text-white font-semibold">Confirmed Known</p>
                       </div>
                       <div>
-                                    <p className="text-xl sm:text-2xl font-bold text-red-700 dark:text-[#f85149]">{stats.confirmedNotKnown}</p>
+                                    <p className="text-xl sm:text-2xl font-bold text-red-700 dark:text-[#ef4444]">{stats.confirmedNotKnown}</p>
                         <p className="text-xs text-black dark:text-white font-semibold">Not Yet Confident</p>
                       </div>
                     </div>
@@ -322,20 +319,20 @@ export default function WordChallenge({ isOpen, onClose }: WordChallengeProps) {
                   <button
                     onClick={fetchRandomWord}
                     disabled={loading}
-                    className="px-4 sm:px-6 py-2 sm:py-3 bg-white dark:bg-black text-black dark:text-white rounded border-2 border-black dark:border-white hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base font-bold"
+                    className="px-3 sm:px-4 py-1.5 sm:py-2 bg-white dark:bg-black text-black dark:text-white rounded border-2 border-black dark:border-white hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-xs sm:text-sm font-bold"
                   >
                     {loading ? 'Loading...' : 'New Word'}
                   </button>
                   <button
                     onClick={onClose}
-                    className="px-4 sm:px-6 py-2 sm:py-3 bg-white dark:bg-black text-black dark:text-white rounded border-2 border-black dark:border-white hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors text-sm sm:text-base font-bold"
+                    className="px-3 sm:px-4 py-1.5 sm:py-2 bg-white dark:bg-black text-black dark:text-white rounded border-2 border-black dark:border-white hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors text-xs sm:text-sm font-bold"
                   >
                     Close
                   </button>
                 </div>
 
                 {/* Participant Selection */}
-                <div className="border-t-2 border-black dark:border-white pt-4 mt-4">
+                <div className="pt-4 mt-4">
                   <label className="block text-sm font-bold text-black dark:text-white mb-2">Select Participant</label>
                   <select
                     value={currentParticipantId || ''}
@@ -351,14 +348,6 @@ export default function WordChallenge({ isOpen, onClose }: WordChallengeProps) {
                   </select>
                 </div>
 
-                {/* Tracking Progress - Moved to Bottom */}
-                {currentParticipantId && (
-                  <div className="bg-blue-100 dark:bg-blue-900 border-2 border-blue-700 dark:border-blue-300 rounded-lg p-2 sm:p-3 mt-4">
-                    <p className="text-sm text-blue-900 dark:text-blue-100 font-bold">
-                      Tracking progress for: <span className="font-bold">{getParticipantName(currentParticipantId)}</span>
-                    </p>
-                  </div>
-                )}
               </div>
 
               {showMetadata && randomWord.word_metadata && randomWord.word_metadata[0] && (
@@ -386,7 +375,7 @@ export default function WordChallenge({ isOpen, onClose }: WordChallengeProps) {
             </div>
           ) : (
             <div className="text-center py-12">
-              <p className="text-black dark:text-[#c9d1d9] font-bold">No words found in the database.</p>
+              <p className="text-black dark:text-[#ffffff] font-bold">No words found in the database.</p>
               <p className="text-sm text-black dark:text-white mt-2 font-semibold">Add some words to start the challenge!</p>
             </div>
           )}

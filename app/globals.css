@@ -9,23 +9,23 @@
 }
 
 .dark {
-  /* Modern dark mode color scheme - inspired by GitHub Dark and VS Code */
-  --background: #0d1117;
-  --foreground: #c9d1d9;
-  --border: #30363d;
-  --muted-bg: #161b22;
-  --muted-text: #8b949e;
+  /* Warm Modern Dark mode color scheme - follows best practices for dark mode */
+  --background: #000000;
+  --foreground: #ffffff;
+  --border: #333333;
+  --muted-bg: #1a1a1a;
+  --muted-text: #b0b0b0;
   
   /* Additional dark mode colors */
-  --card-bg: #161b22;
-  --card-border: #30363d;
-  --hover-bg: #21262d;
-  --input-bg: #0d1117;
-  --input-border: #30363d;
-  --accent-blue: #58a6ff;
-  --accent-green: #3fb950;
-  --accent-red: #f85149;
-  --accent-yellow: #d29922;
+  --card-bg: #1a1a1a;
+  --card-border: #333333;
+  --hover-bg: #2a2a2a;
+  --input-bg: #0a0a0a;
+  --input-border: #404040;
+  --accent-blue: #3b82f6;
+  --accent-green: #22c55e;
+  --accent-red: #ef4444;
+  --accent-yellow: #eab308;
 }
 
 @theme inline {

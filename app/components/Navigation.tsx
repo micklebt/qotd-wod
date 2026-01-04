@@ -6,16 +6,16 @@ import ThemeSwitcher from './ThemeSwitcher';
 
 export default function Navigation() {
   return (
-    <nav className="border-b border-black dark:border-[#30363d] bg-white dark:bg-[#0d1117] sticky top-0 z-40">
+    <nav className="border-b border-black dark:border-[#333333] bg-white dark:bg-[#000000] sticky top-0 z-40">
       <div className="w-full">
         {/* App Name - Left aligned to margin */}
         <div className="px-3 sm:px-4 py-2 sm:py-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center">
-              <Link href="/" className="text-lg sm:text-xl font-bold text-black dark:text-[#c9d1d9] hover:text-gray-700 dark:hover:text-[#e5e5e5]">
+              <Link href="/" className="text-lg sm:text-xl font-bold text-black dark:text-[#ffffff] hover:text-gray-700 dark:hover:text-[#e5e5e5]">
                 QOTD & WOD
               </Link>
-              <span className="text-xs text-gray-700 dark:text-[#8b949e] font-mono hidden sm:inline ml-2 sm:ml-3">v{APP_VERSION}</span>
+              <span className="text-xs text-gray-700 dark:text-[#b0b0b0] font-mono hidden sm:inline ml-2 sm:ml-3">v{APP_VERSION}</span>
             </div>
             <ThemeSwitcher />
           </div>
@@ -26,25 +26,25 @@ export default function Navigation() {
           <div className="flex flex-wrap gap-2 sm:gap-3 md:gap-4 lg:gap-6">
             <Link
               href="/"
-              className="text-black dark:text-[#c9d1d9] hover:text-gray-700 dark:hover:text-[#e5e5e5] font-semibold text-sm sm:text-base py-1"
+              className="text-black dark:text-[#ffffff] hover:text-gray-700 dark:hover:text-[#e5e5e5] font-semibold text-sm sm:text-base py-1"
             >
               Home
             </Link>
             <Link
               href="/entries"
-              className="text-black dark:text-[#c9d1d9] hover:text-gray-700 dark:hover:text-[#e5e5e5] font-semibold text-sm sm:text-base py-1"
+              className="text-black dark:text-[#ffffff] hover:text-gray-700 dark:hover:text-[#e5e5e5] font-semibold text-sm sm:text-base py-1"
             >
               All Entries
             </Link>
             <Link
               href="/calendar"
-              className="text-black dark:text-[#c9d1d9] hover:text-gray-700 dark:hover:text-[#e5e5e5] font-semibold text-sm sm:text-base py-1"
+              className="text-black dark:text-[#ffffff] hover:text-gray-700 dark:hover:text-[#e5e5e5] font-semibold text-sm sm:text-base py-1"
             >
               Calendar
             </Link>
             <Link
               href="/entries/new"
-              className="text-blue-700 dark:text-[#58a6ff] hover:text-blue-900 dark:hover:text-[#79c0ff] font-semibold text-sm sm:text-base py-1"
+              className="text-blue-700 dark:text-[#3b82f6] hover:text-blue-900 dark:hover:text-[#60a5fa] font-semibold text-sm sm:text-base py-1"
             >
               New Entry
             </Link>

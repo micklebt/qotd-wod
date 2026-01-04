@@ -321,6 +321,12 @@ export default function EntryForm() {
         // Set etymology - ensure it's set even if empty string (to clear previous values)
         setEtymology(result.etymology || '');
         setPronunciationAudio(result.audioUrl || '');
+        // Debug: log audio URL
+        if (result.audioUrl) {
+          console.log('Audio URL found:', result.audioUrl);
+        } else {
+          console.log('No audio URL returned from lookup');
+        }
         setExampleSentence(result.exampleSentence || '');
         setSourceUrl(result.sourceUrl || '');
         setWordnikSourceUrl(result.wordnikSourceUrl || '');
@@ -686,7 +692,7 @@ export default function EntryForm() {
 
       {/* Type Toggle */}
       <div className="flex items-center justify-center mb-3 sm:mb-4">
-        <div className="flex items-center gap-2 sm:gap-3 bg-gray-100 rounded-lg p-1">
+        <div className="flex items-center gap-2 sm:gap-3 bg-gray-100 dark:bg-[#1a1a1a] rounded-lg p-1">
           <button
             type="button"
             onClick={() => {
@@ -696,8 +702,8 @@ export default function EntryForm() {
             }}
             className={`px-4 sm:px-6 py-2 rounded-md font-medium transition-all text-sm sm:text-base ${
               type === 'word'
-                ? 'bg-white text-blue-600 shadow-sm'
-                : 'text-gray-600 hover:text-gray-900'
+                ? 'bg-white dark:bg-[#0a0a0a] text-blue-600 dark:text-[#3b82f6] shadow-sm'
+                : 'text-gray-600 dark:text-[#b0b0b0] hover:text-gray-900 dark:hover:text-[#ffffff]'
             }`}
           >
             Word
@@ -711,8 +717,8 @@ export default function EntryForm() {
             }}
             className={`px-4 sm:px-6 py-2 rounded-md font-medium transition-all text-sm sm:text-base ${
               type === 'quote'
-                ? 'bg-white text-blue-600 shadow-sm'
-                : 'text-gray-600 hover:text-gray-900'
+                ? 'bg-white dark:bg-[#0a0a0a] text-blue-600 dark:text-[#3b82f6] shadow-sm'
+                : 'text-gray-600 dark:text-[#b0b0b0] hover:text-gray-900 dark:hover:text-[#ffffff]'
             }`}
           >
             Quote
@@ -729,9 +735,46 @@ export default function EntryForm() {
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
                 placeholder="Word"
-                className="flex-1 border border-gray-300 rounded p-2.5 sm:p-2 bg-blue-50 text-base sm:text-sm"
+                className="flex-1 border border-gray-300 dark:border-[#404040] rounded p-2.5 sm:p-2 bg-blue-50 dark:bg-[#1a1a1a] text-black dark:text-[#ffffff] text-base sm:text-sm"
                 required
               />
+              {pronunciation && (
+                <input
+                  type="text"
+                  value={pronunciation}
+                  onChange={(e) => setPronunciation(e.target.value)}
+                  placeholder="Pronunciation (IPA)"
+                  className="flex-1 border border-gray-300 dark:border-[#404040] rounded p-2 dark:bg-[#1a1a1a] dark:text-[#ffffff] font-mono text-sm"
+                  style={{ fontFamily: 'monospace, "Courier New", monospace' }}
+                />
+              )}
+              {pronunciationAudio && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    const audio = new Audio(pronunciationAudio);
+                    audio.play().catch(err => console.error('Audio play failed:', err));
+                  }}
+                  className="p-2 bg-blue-100 dark:bg-[#1a1a1a] hover:bg-blue-200 dark:hover:bg-[#2a2a2a] rounded border border-blue-300 dark:border-[#404040] flex items-center justify-center"
+                  title="Play pronunciation"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={1.5}
+                    stroke="currentColor"
+                    className="w-5 h-5 text-blue-600 dark:text-[#3b82f6]"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M19.114 5.636a9 9 0 010 12.728M16.463 8.288a5.25 5.25 0 010 7.424M6.75 8.25l4.72-4.72a.75.75 0 011.28.53v15.88a.75.75 0 01-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.01 9.01 0 012.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75z"
+                    />
+                  </svg>
+                </button>
+              )}
             <button
               type="button"
               onClick={handleLookupWord}
@@ -739,7 +782,7 @@ export default function EntryForm() {
               className="px-3 sm:px-4 py-2.5 sm:py-2 bg-green-600 text-white font-semibold rounded hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed whitespace-nowrap text-sm sm:text-base"
               title="Auto-fill word details from dictionary"
             >
-              {lookupLoading ? 'Looking up...' : 'Lookup Word'}
+              {lookupLoading ? 'Looking up...' : 'Lookup'}
             </button>
             </div>
             {sourceUrl && (
@@ -780,7 +823,7 @@ export default function EntryForm() {
                   target.style.height = `${target.scrollHeight}px`;
                 }}
                 placeholder="Quote (1 sentence to 1 paragraph)"
-                className="flex-1 border border-gray-300 rounded p-2.5 sm:p-2 bg-blue-50 resize-none overflow-hidden text-base sm:text-sm"
+                className="flex-1 border border-gray-300 dark:border-[#404040] rounded p-2.5 sm:p-2 bg-blue-50 dark:bg-[#1a1a1a] dark:text-[#ffffff] resize-none overflow-hidden text-base sm:text-sm"
                 style={{ minHeight: '2.5rem' }}
                 required
               />
@@ -810,7 +853,7 @@ export default function EntryForm() {
           </div>
         )}
         {type === 'word' && (
-          <p className="text-xs text-gray-500 mt-1">Click "Lookup Word" to auto-fill definition, pronunciation, and part of speech</p>
+          <p className="text-xs text-gray-500 dark:text-[#b0b0b0] mt-1">Click "Lookup" to auto-fill definition, pronunciation, and part of speech</p>
         )}
       </div>
 
@@ -831,46 +874,6 @@ export default function EntryForm() {
                   style={{ minHeight: '2.5rem' }}
                   required
                 />
-              </div>
-              <div>
-                <div className="flex gap-2 items-center">
-                  <input
-                    type="text"
-                    value={pronunciation}
-                    onChange={(e) => setPronunciation(e.target.value)}
-                    placeholder="Pronunciation (IPA) - e.g., /dɪsˈkɔː(ɹ)s/"
-                    className="flex-1 border border-gray-300 rounded p-2 font-mono"
-                    style={{ fontFamily: 'monospace, "Courier New", monospace' }}
-                    required
-                  />
-                  {pronunciationAudio && (
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        const audio = new Audio(pronunciationAudio);
-                        audio.play().catch(err => console.error('Audio play failed:', err));
-                      }}
-                      className="p-2 bg-blue-100 hover:bg-blue-200 rounded border border-blue-300 flex items-center justify-center"
-                      title="Play pronunciation"
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        strokeWidth={1.5}
-                        stroke="currentColor"
-                        className="w-5 h-5 text-blue-600"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M19.114 5.636a9 9 0 010 12.728M16.463 8.288a5.25 5.25 0 010 7.424M6.75 8.25l4.72-4.72a.75.75 0 011.28.53v15.88a.75.75 0 01-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.01 9.01 0 012.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75z"
-                        />
-                      </svg>
-                    </button>
-                  )}
-                </div>
               </div>
               <div>
                 <MarkdownTextarea
@@ -906,7 +909,7 @@ export default function EntryForm() {
               value={partOfSpeech}
               onChange={(e) => setPartOfSpeech(e.target.value)}
               placeholder="Part of Speech - e.g., noun, verb, adjective"
-              className="w-full border border-gray-300 rounded p-2"
+              className="w-full border border-gray-300 dark:border-[#404040] rounded p-2 dark:bg-[#1a1a1a] dark:text-[#ffffff]"
             />
           </div>
           <div>
@@ -933,7 +936,7 @@ export default function EntryForm() {
                   value={author}
                   onChange={(e) => setAuthor(e.target.value)}
                   placeholder="Author (leave blank for idioms/expressions)"
-                  className="w-full border border-gray-300 rounded p-2"
+                  className="w-full border border-gray-300 dark:border-[#404040] rounded p-2 dark:bg-[#1a1a1a] dark:text-[#ffffff]"
                 />
               </div>
               <div>
@@ -942,7 +945,7 @@ export default function EntryForm() {
                   value={source}
                   onChange={(e) => setSource(e.target.value)}
                   placeholder="Source - e.g., Stanford Commencement Address, 2005 or 'Common idiom'"
-                  className="w-full border border-gray-300 rounded p-2"
+                  className="w-full border border-gray-300 dark:border-[#404040] rounded p-2 dark:bg-[#1a1a1a] dark:text-[#ffffff]"
                 />
               </div>
               {quoteSourceType && (
@@ -967,7 +970,7 @@ export default function EntryForm() {
                     target.style.height = `${target.scrollHeight}px`;
                   }}
                   placeholder="Context - When and where the quote was originally said, or its usage context"
-                  className="w-full border border-gray-300 rounded p-2 resize-none overflow-hidden"
+                  className="w-full border border-gray-300 dark:border-[#404040] rounded p-2 dark:bg-[#1a1a1a] dark:text-[#ffffff] resize-none overflow-hidden"
                   style={{ minHeight: '2.5rem' }}
                 />
               </div>
@@ -988,7 +991,7 @@ export default function EntryForm() {
                     target.style.height = `${target.scrollHeight}px`;
                   }}
                   placeholder="Background - Historical background, origin, or what was happening at the time"
-                  className="w-full border border-gray-300 rounded p-2 resize-none overflow-hidden"
+                  className="w-full border border-gray-300 dark:border-[#404040] rounded p-2 dark:bg-[#1a1a1a] dark:text-[#ffffff] resize-none overflow-hidden"
                   style={{ minHeight: '2.5rem' }}
                 />
               </div>
@@ -1009,7 +1012,7 @@ export default function EntryForm() {
                     target.style.height = `${target.scrollHeight}px`;
                   }}
                   placeholder="Interpretation - What the quote means and its significance"
-                  className="w-full border border-gray-300 rounded p-2 resize-none overflow-hidden"
+                  className="w-full border border-gray-300 dark:border-[#404040] rounded p-2 dark:bg-[#1a1a1a] dark:text-[#ffffff] resize-none overflow-hidden"
                   style={{ minHeight: '2.5rem' }}
                 />
               </div>
@@ -1030,7 +1033,7 @@ export default function EntryForm() {
                     target.style.height = `${target.scrollHeight}px`;
                   }}
                   placeholder="Significance - Why this quote is notable, impactful, or important"
-                  className="w-full border border-gray-300 rounded p-2 resize-none overflow-hidden"
+                  className="w-full border border-gray-300 dark:border-[#404040] rounded p-2 dark:bg-[#1a1a1a] dark:text-[#ffffff] resize-none overflow-hidden"
                   style={{ minHeight: '2.5rem' }}
                 />
               </div>
@@ -1049,7 +1052,7 @@ export default function EntryForm() {
         <select
           value={selectedParticipant}
           onChange={(e) => handleParticipantChange(e.target.value)}
-          className="w-full border border-gray-300 rounded p-2 text-gray-700 bg-white"
+          className="w-full border border-gray-300 dark:border-[#404040] rounded p-2 text-gray-700 dark:text-[#ffffff] bg-white dark:bg-[#1a1a1a]"
           required
         >
           <option value="">Select participant (your selection will be remembered)</option>

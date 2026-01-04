@@ -258,9 +258,9 @@ export default function CalendarPage() {
   }
 
   return (
-                <div className="max-w-4xl mx-auto px-3 sm:px-4 py-3 sm:py-4 bg-white dark:bg-[#0d1117]">
+                <div className="max-w-4xl mx-auto px-3 sm:px-4 py-3 sm:py-4 bg-white dark:bg-[#000000]">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-2 mb-3 sm:mb-4">
-                    <h1 className="text-2xl sm:text-3xl font-bold text-black dark:text-[#c9d1d9]">Participation Calendar <span className="text-black dark:text-[#c9d1d9]">{currentYear}</span></h1>
+                    <h1 className="text-2xl sm:text-3xl font-bold text-black dark:text-[#ffffff]">Participation Calendar <span className="text-black dark:text-[#ffffff]">{currentYear}</span></h1>
         <div className="flex gap-1 items-center flex-wrap">
           <button
             onClick={() => setCurrentYear(currentYear - 1)}
@@ -297,7 +297,7 @@ export default function CalendarPage() {
         </div>
       </div>
 
-                  <div className="bg-white dark:bg-[#161b22] border-2 border-black dark:border-[#30363d] rounded p-2.5 sm:p-3 mb-3 sm:mb-4">
+                  <div className="bg-white dark:bg-[#0a0a0a] border-2 border-black dark:border-[#333333] rounded p-2.5 sm:p-3 mb-3 sm:mb-4">
         <div className="mb-2 sm:mb-3">
           <select
             value={selectedParticipant}
@@ -315,24 +315,24 @@ export default function CalendarPage() {
 
         <div className="grid grid-cols-2 gap-2 sm:gap-3">
           <div className="bg-white dark:bg-black rounded p-2 sm:p-3 border-2 border-black dark:border-white">
-                        <p className="text-xs text-black dark:text-[#8b949e] font-bold mb-1 sm:mb-0.5">Current Streak</p>
-                        <p className="text-lg sm:text-xl font-bold text-blue-700 dark:text-[#58a6ff]">{currentStreak}</p>
+                        <p className="text-xs text-black dark:text-[#b0b0b0] font-bold mb-1 sm:mb-0.5">Current Streak</p>
+                        <p className="text-lg sm:text-xl font-bold text-blue-700 dark:text-[#3b82f6]">{currentStreak}</p>
           </div>
           <div className="bg-white dark:bg-black rounded p-2 sm:p-3 border-2 border-black dark:border-white">
-                        <p className="text-xs text-black dark:text-[#8b949e] font-bold mb-1 sm:mb-0.5">Longest Streak</p>
-                        <p className="text-lg sm:text-xl font-bold text-green-700 dark:text-[#3fb950]">{longestStreak}</p>
+                        <p className="text-xs text-black dark:text-[#b0b0b0] font-bold mb-1 sm:mb-0.5">Longest Streak</p>
+                        <p className="text-lg sm:text-xl font-bold text-green-700 dark:text-[#22c55e]">{longestStreak}</p>
           </div>
         </div>
       </div>
 
-                  <div className="bg-white dark:bg-[#161b22] border-2 border-black dark:border-[#30363d] rounded p-2 sm:p-3 overflow-x-auto">
+                  <div className="bg-white dark:bg-[#0a0a0a] border-2 border-black dark:border-[#333333] rounded p-2 sm:p-3 overflow-x-auto">
         <div className="inline-block min-w-full">
           <div className="grid grid-cols-[auto_repeat(12,1fr)] gap-1 mb-1">
             <div className="w-8"></div>
             {monthNames.map((month, monthIdx) => (
               <div
                 key={monthIdx}
-                            className="text-center text-xs font-bold text-black dark:text-[#c9d1d9] py-1"
+                            className="text-center text-xs font-bold text-black dark:text-[#ffffff] py-1"
               >
                 {month}
               </div>
@@ -346,7 +346,7 @@ export default function CalendarPage() {
                 return (
                   <div
                     key={dayIdx}
-                                className="w-8 h-4 flex items-center justify-end pr-1 text-[10px] font-bold text-black dark:text-[#c9d1d9]"
+                                className="w-8 h-4 flex items-center justify-end pr-1 text-[10px] font-bold text-black dark:text-[#ffffff]"
                   >
                     {day}
                   </div>
@@ -432,7 +432,7 @@ export default function CalendarPage() {
                         key={dayIdx}
                           className={`
                           w-full h-4 rounded border-2 flex items-center justify-center gap-1
-                                      ${isFuture ? 'bg-gray-200 dark:bg-[#161b22]' : 'bg-white dark:bg-[#161b22]'}
+                                      ${isFuture ? 'bg-gray-200 dark:bg-[#0a0a0a]' : 'bg-white dark:bg-[#0a0a0a]'}
                           ${borderClass}
                           ${isToday ? 'ring-2 ring-blue-700 dark:ring-blue-300' : ''}
                         `}

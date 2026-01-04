@@ -259,28 +259,28 @@ export default function EntryPage() {
     }
   };
 
-  if (loading) return <div className="p-4 text-black dark:text-[#c9d1d9] font-bold">Loading...</div>;
-  if (!entry) return <div className="p-4 text-black dark:text-[#c9d1d9] font-bold">Entry not found</div>;
+  if (loading) return <div className="p-4 text-black dark:text-[#ffffff] font-bold">Loading...</div>;
+  if (!entry) return <div className="p-4 text-black dark:text-[#ffffff] font-bold">Entry not found</div>;
 
   return (
     <>
-      <div className="max-w-4xl mx-auto px-3 sm:px-4 py-3 sm:py-4 bg-white dark:bg-[#0d1117]">
-        <h1 className="text-2xl sm:text-3xl font-bold mb-3 sm:mb-4 text-black dark:text-[#c9d1d9]">Edit Entry</h1>
+      <div className="max-w-4xl mx-auto px-3 sm:px-4 py-3 sm:py-4 bg-white dark:bg-[#000000]">
+        <h1 className="text-2xl sm:text-3xl font-bold mb-3 sm:mb-4 text-black dark:text-[#ffffff]">Edit Entry</h1>
 
         {error && (
-          <div className="bg-red-100 dark:bg-[#1c2128] border-2 border-red-700 dark:border-[#f85149] text-red-900 dark:text-[#f85149] p-3 rounded mb-4 font-bold">
+          <div className="bg-red-100 dark:bg-[#0a0a0a] border-2 border-red-700 dark:border-[#ef4444] text-red-900 dark:text-[#ef4444] p-3 rounded mb-4 font-bold">
             {error}
           </div>
         )}
 
         <form onSubmit={handleUpdate} className="space-y-4">
           <div>
-            <label className="block text-sm font-bold mb-2 text-black dark:text-[#c9d1d9]">Type</label>
-            <p className="text-sm text-black dark:text-[#c9d1d9] capitalize font-semibold">{entry.type}</p>
+            <label className="block text-sm font-bold mb-2 text-black dark:text-[#ffffff]">Type</label>
+            <p className="text-sm text-black dark:text-[#ffffff] capitalize font-semibold">{entry.type}</p>
           </div>
 
           <div>
-            <label className="block text-sm font-bold mb-2 text-black dark:text-[#c9d1d9]">
+            <label className="block text-sm font-bold mb-2 text-black dark:text-[#ffffff]">
               {entry.type === 'word' ? 'Word' : 'Quote'}
             </label>
             {entry.type === 'word' ? (
@@ -315,7 +315,7 @@ export default function EntryPage() {
                     target.style.height = '2.5rem';
                   }
                 }}
-                className="w-full border-2 border-black dark:border-[#30363d] rounded p-2 bg-white dark:bg-[#0d1117] text-black dark:text-[#c9d1d9] resize-none overflow-hidden"
+                className="w-full border-2 border-black dark:border-[#333333] rounded p-2 bg-white dark:bg-[#0a0a0a] text-black dark:text-[#ffffff] resize-none overflow-hidden"
                 style={{ minHeight: '2.5rem' }}
                 required
               />
@@ -325,20 +325,20 @@ export default function EntryPage() {
           {entry.type === 'word' ? (
             <>
               <div>
-                <label className="block text-sm font-bold mb-2 text-black dark:text-[#c9d1d9]">Definition</label>
+                <label className="block text-sm font-bold mb-2 text-black dark:text-[#ffffff]">Definition</label>
                 <MarkdownTextarea
                   value={definition}
                   onChange={setDefinition}
                   onContextMenu={(e) => handleContextMenu(e, definitionTextareaRef, setDefinition)}
                   placeholder="Definition (Right-click selected text for formatting: **bold**, *italic*, <u>underline</u>)"
-                  className="w-full border-2 border-black dark:border-[#30363d] rounded p-2 resize-none overflow-hidden bg-white dark:bg-[#0d1117] text-black dark:text-[#c9d1d9]"
+                  className="w-full border-2 border-black dark:border-[#333333] rounded p-2 resize-none overflow-hidden bg-white dark:bg-[#0a0a0a] text-black dark:text-[#ffffff]"
                   style={{ minHeight: '2.5rem' }}
                   required
                   ref={definitionTextareaRef}
                 />
               </div>
               <div>
-                <label className="block text-sm font-bold mb-2 text-black dark:text-[#c9d1d9]">Pronunciation</label>
+                <label className="block text-sm font-bold mb-2 text-black dark:text-[#ffffff]">Pronunciation</label>
                 <input
                   type="text"
                   value={pronunciation}
@@ -349,7 +349,7 @@ export default function EntryPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-bold mb-2 text-black dark:text-[#c9d1d9]">Part of Speech</label>
+                <label className="block text-sm font-bold mb-2 text-black dark:text-[#ffffff]">Part of Speech</label>
                 <input
                   type="text"
                   value={partOfSpeech}
@@ -359,25 +359,25 @@ export default function EntryPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-bold mb-2 text-black dark:text-[#c9d1d9]">Use in Sentence</label>
+                <label className="block text-sm font-bold mb-2 text-black dark:text-[#ffffff]">Use in Sentence</label>
                 <MarkdownTextarea
                   value={exampleSentence}
                   onChange={setExampleSentence}
                   onContextMenu={(e) => handleContextMenu(e, exampleSentenceTextareaRef, setExampleSentence)}
                   placeholder="Use in Sentence (Right-click selected text for formatting) - e.g., The word 'example' was used in a sentence..."
-                  className="w-full border-2 border-black dark:border-[#30363d] rounded p-2 resize-none overflow-hidden bg-white dark:bg-[#0d1117] text-black dark:text-[#c9d1d9]"
+                  className="w-full border-2 border-black dark:border-[#333333] rounded p-2 resize-none overflow-hidden bg-white dark:bg-[#0a0a0a] text-black dark:text-[#ffffff]"
                   style={{ minHeight: '2.5rem' }}
                   ref={exampleSentenceTextareaRef}
                 />
               </div>
               <div>
-                <label className="block text-sm font-bold mb-2 text-black dark:text-[#c9d1d9]">Etymology</label>
+                <label className="block text-sm font-bold mb-2 text-black dark:text-[#ffffff]">Etymology</label>
                 <MarkdownTextarea
                   value={etymology}
                   onChange={setEtymology}
                   onContextMenu={(e) => handleContextMenu(e, etymologyTextareaRef, setEtymology)}
                   placeholder="Etymology (Right-click selected text for formatting)"
-                  className="w-full border-2 border-black dark:border-[#30363d] rounded p-2 resize-none overflow-hidden bg-white dark:bg-[#0d1117] text-black dark:text-[#c9d1d9]"
+                  className="w-full border-2 border-black dark:border-[#333333] rounded p-2 resize-none overflow-hidden bg-white dark:bg-[#0a0a0a] text-black dark:text-[#ffffff]"
                   style={{ minHeight: '2.5rem' }}
                   ref={etymologyTextareaRef}
                 />
@@ -386,7 +386,7 @@ export default function EntryPage() {
           ) : (
             <>
               <div>
-                <label className="block text-sm font-bold mb-2 text-black dark:text-[#c9d1d9]">Author</label>
+                <label className="block text-sm font-bold mb-2 text-black dark:text-[#ffffff]">Author</label>
                 <input
                   type="text"
                   value={author}
@@ -396,7 +396,7 @@ export default function EntryPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-bold mb-2 text-black dark:text-[#c9d1d9]">Source</label>
+                <label className="block text-sm font-bold mb-2 text-black dark:text-[#ffffff]">Source</label>
                 <input
                   type="text"
                   value={source}
@@ -412,14 +412,14 @@ export default function EntryPage() {
             <button
               type="submit"
               disabled={updating}
-              className="flex-1 bg-black dark:bg-[#21262d] text-white dark:text-[#c9d1d9] font-bold py-3 sm:py-2.5 rounded hover:bg-gray-800 dark:hover:bg-[#30363d] border-2 border-black dark:border-[#30363d] disabled:bg-gray-400 dark:disabled:bg-gray-600 text-sm sm:text-base"
+              className="flex-1 bg-black dark:bg-[#0a0a0a] text-white dark:text-[#ffffff] font-bold py-3 sm:py-2.5 rounded hover:bg-gray-800 dark:hover:bg-[#1a1a1a] border-2 border-black dark:border-[#333333] disabled:bg-gray-400 dark:disabled:bg-gray-600 text-sm sm:text-base"
             >
               {updating ? 'Saving...' : 'Save Changes'}
             </button>
             <button
               type="button"
               onClick={handleDelete}
-              className="flex-1 bg-red-700 dark:bg-[#f85149] text-white dark:text-[#0d1117] font-bold py-3 sm:py-2.5 rounded hover:bg-red-800 dark:hover:bg-[#da3633] border-2 border-red-900 dark:border-[#f85149] text-sm sm:text-base"
+              className="flex-1 bg-red-700 dark:bg-[#ef4444] text-white dark:text-[#000000] font-bold py-3 sm:py-2.5 rounded hover:bg-red-800 dark:hover:bg-[#dc2626] border-2 border-red-900 dark:border-[#ef4444] text-sm sm:text-base"
             >
               Delete Entry
             </button>

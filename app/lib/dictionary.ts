@@ -89,7 +89,16 @@ export async function lookupWord(word: string): Promise<{
 
       // Get audio URL from first entry that has it
       if (!audioUrl) {
-        audioUrl = entry.phonetics?.find(p => p.audio)?.audio || '';
+        // Look for audio in phonetics array - check all entries, not just first
+        const phoneticWithAudio = entry.phonetics?.find(p => p.audio && p.audio.trim() !== '');
+        const audioPath = phoneticWithAudio?.audio || '';
+        // Convert relative URLs to absolute URLs (dictionaryapi.dev usually returns full URLs, but handle both)
+        if (audioPath && audioPath.trim() !== '') {
+          audioUrl = audioPath.startsWith('http') 
+            ? audioPath 
+            : `https://api.dictionaryapi.dev${audioPath.startsWith('/') ? '' : '/'}${audioPath}`;
+          console.log('Found audio URL:', audioUrl);
+        }
       }
     });
 
@@ -111,7 +120,12 @@ export async function lookupWord(word: string): Promise<{
               pronunciation = singularEntry.phonetic || 
                             singularEntry.phonetics?.find(p => p.text)?.text || 
                             '';
-              audioUrl = singularEntry.phonetics?.find(p => p.audio)?.audio || '';
+              const audioPath = singularEntry.phonetics?.find(p => p.audio)?.audio || '';
+              if (audioPath && !audioUrl) {
+                audioUrl = audioPath.startsWith('http') 
+                  ? audioPath 
+                  : `https://api.dictionaryapi.dev${audioPath.startsWith('/') ? '' : '/'}${audioPath}`;
+              }
             }
           }
         } catch (e) {
@@ -134,7 +148,12 @@ export async function lookupWord(word: string): Promise<{
                               '';
               }
               if (!audioUrl) {
-                audioUrl = singularEntry.phonetics?.find(p => p.audio)?.audio || '';
+                const audioPath = singularEntry.phonetics?.find(p => p.audio)?.audio || '';
+                if (audioPath) {
+                  audioUrl = audioPath.startsWith('http') 
+                    ? audioPath 
+                    : `https://api.dictionaryapi.dev${audioPath.startsWith('/') ? '' : '/'}${audioPath}`;
+                }
               }
             }
           }
@@ -356,7 +375,7 @@ export async function lookupWord(word: string): Promise<{
       }
     }
 
-    return {
+    const result = {
       definition: definition || '',
       pronunciation: pronunciation || '',
       partOfSpeech: partOfSpeech || '',
@@ -366,6 +385,8 @@ export async function lookupWord(word: string): Promise<{
       sourceUrl: sourceUrl || undefined,
       wordnikSourceUrl: wordnikSourceUrl || undefined,
     };
+    console.log('Lookup result for', word, '- audioUrl:', result.audioUrl || 'NONE');
+    return result;
   } catch (error) {
     return {
       definition: '',

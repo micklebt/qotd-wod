@@ -227,7 +227,7 @@ const MarkdownTextarea = forwardRef<HTMLDivElement, MarkdownTextareaProps>(({
         onFocus={handleFocus}
         onBlur={handleBlur}
         onContextMenu={onContextMenu}
-        className={`${className} w-full border border-gray-300 rounded p-2 resize-none overflow-hidden`}
+        className={`${className} w-full border border-gray-300 dark:border-[#404040] rounded p-2 dark:bg-[#1a1a1a] dark:text-[#ffffff] resize-none overflow-hidden`}
         style={{
           ...style,
           minHeight: style?.minHeight || '2.5rem',
@@ -243,6 +243,9 @@ const MarkdownTextarea = forwardRef<HTMLDivElement, MarkdownTextareaProps>(({
           content: attr(data-placeholder);
           color: #9ca3af;
           pointer-events: none;
+        }
+        .dark div[contenteditable][data-placeholder]:empty:before {
+          color: #6b7280;
         }
         div[contenteditable]:focus {
           outline: 2px solid #3b82f6;
