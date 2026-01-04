@@ -102,7 +102,7 @@ export default async function Home() {
             <WordChallengeTrigger />
             <Link
               href="/entries/new"
-              className="bg-black dark:bg-[#0a0a0a] text-white dark:text-[#ffffff] font-bold px-3 sm:px-4 py-2 rounded hover:bg-gray-800 dark:hover:bg-[#1a1a1a] border-2 border-black dark:border-[#333333] text-sm sm:text-base whitespace-nowrap"
+              className="bg-black dark:bg-[#0a0a0a] text-white dark:text-[#ffffff] font-bold px-3 sm:px-4 py-2 rounded hover:bg-gray-800 dark:hover:bg-[#1a1a1a] border border-black dark:border-[#333333] text-sm sm:text-base whitespace-nowrap"
             >
               Create New Entry
             </Link>
@@ -111,7 +111,7 @@ export default async function Home() {
 
         {/* Word of the Day */}
         {word && (
-          <div className="border-2 border-black dark:border-[#333333] rounded p-3 sm:p-4 bg-white dark:bg-[#0a0a0a]">
+          <div className="border border-black dark:border-[#333333] rounded p-3 sm:p-4 bg-white dark:bg-[#0a0a0a]">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-2 mb-3 sm:mb-2">
               <h2 className="text-base sm:text-lg font-bold text-black dark:text-[#ffffff]">Word of the Day</h2>
               <p className="text-xs sm:text-sm text-black dark:text-[#b0b0b0] font-semibold">Submitted by {wordParticipantName}</p>
@@ -119,7 +119,7 @@ export default async function Home() {
             <p className="text-2xl sm:text-3xl font-bold mb-3 sm:mb-4 break-words text-black dark:text-[#ffffff]">{word.content}</p>
             {word.word_metadata && word.word_metadata[0] && (
               <div className="space-y-2 text-xs sm:text-sm text-black dark:text-[#ffffff]">
-                <p><span className="font-bold">Pronunciation:</span> {word.word_metadata[0].pronunciation}</p>
+                <p><span className="font-bold">Pronunciation:</span> {word.word_metadata[0].pronunciation_respelling || word.word_metadata[0].pronunciation_ipa || word.word_metadata[0].pronunciation}</p>
                 <p><span className="font-bold">Part of Speech:</span> {word.word_metadata[0].part_of_speech}</p>
                 <p><span className="font-bold">Definition:</span> {word.word_metadata[0].definition}</p>
                 {word.word_metadata[0].etymology && (
@@ -132,7 +132,7 @@ export default async function Home() {
 
         {/* Quote of the Day */}
         {quote && (
-          <div className="border-2 border-black dark:border-[#333333] rounded p-3 sm:p-4 bg-white dark:bg-[#0a0a0a]">
+          <div className="border border-black dark:border-[#333333] rounded p-3 sm:p-4 bg-white dark:bg-[#0a0a0a]">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-2 mb-3 sm:mb-4">
               <h2 className="text-base sm:text-lg font-bold text-black dark:text-[#ffffff]">Quote of the Day</h2>
               <p className="text-xs sm:text-sm text-black dark:text-[#b0b0b0] font-semibold">Submitted by {quoteParticipantName}</p>
@@ -151,7 +151,7 @@ export default async function Home() {
           </div>
         )}
 
-        <div className="mt-6 sm:mt-8 pt-4 sm:pt-6 border-t-2 border-black dark:border-[#333333]">
+        <div className="mt-6 sm:mt-8 pt-4 sm:pt-6 border-t border-black dark:border-[#333333]">
           <Link href="/entries" className="text-blue-700 dark:text-[#3b82f6] hover:underline font-bold text-sm sm:text-base">
             View all entries →
           </Link>

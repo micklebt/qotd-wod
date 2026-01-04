@@ -25,7 +25,9 @@ export interface Entry {
     id: number;
     entry_id: number;
     definition: string;
-    pronunciation: string;
+    pronunciation: string; // Legacy field - kept for backward compatibility
+    pronunciation_respelling?: string | null; // Dictionary-style respelling (e.g., MYND-fuhl)
+    pronunciation_ipa?: string | null; // IPA format (e.g., /ˈmaɪnd.fəl/)
     part_of_speech: string;
     etymology: string;
   }[];

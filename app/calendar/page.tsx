@@ -264,21 +264,21 @@ export default function CalendarPage() {
         <div className="flex gap-1 items-center flex-wrap">
           <button
             onClick={() => setCurrentYear(currentYear - 1)}
-            className="text-xs sm:text-sm px-2 py-1 border-2 border-black dark:border-white rounded hover:bg-gray-100 dark:hover:bg-gray-900 touch-target bg-white dark:bg-black text-black dark:text-white font-bold"
+            className="text-xs sm:text-sm px-2 py-1 border border-black dark:border-white rounded hover:bg-gray-100 dark:hover:bg-gray-900 touch-target bg-white dark:bg-black text-black dark:text-white font-bold"
             aria-label="Previous year"
           >
             ←
           </button>
           <button
             onClick={() => setCurrentYear(new Date().getFullYear())}
-            className="text-xs sm:text-sm px-2 py-1 border-2 border-black dark:border-white rounded hover:bg-gray-100 dark:hover:bg-gray-900 touch-target bg-white dark:bg-black text-black dark:text-white font-bold"
+            className="text-xs sm:text-sm px-2 py-1 border border-black dark:border-white rounded hover:bg-gray-100 dark:hover:bg-gray-900 touch-target bg-white dark:bg-black text-black dark:text-white font-bold"
             aria-label="Current year"
           >
             Today
           </button>
           <button
             onClick={() => setCurrentYear(currentYear + 1)}
-            className="text-xs sm:text-sm px-2 py-1 border-2 border-black dark:border-white rounded hover:bg-gray-100 dark:hover:bg-gray-900 touch-target bg-white dark:bg-black text-black dark:text-white font-bold"
+            className="text-xs sm:text-sm px-2 py-1 border border-black dark:border-white rounded hover:bg-gray-100 dark:hover:bg-gray-900 touch-target bg-white dark:bg-black text-black dark:text-white font-bold"
             aria-label="Next year"
           >
             →
@@ -287,7 +287,7 @@ export default function CalendarPage() {
             <select
               value={currentYear}
               onChange={(e) => setCurrentYear(Number(e.target.value))}
-              className="text-xs sm:text-sm px-2 py-1 border-2 border-black dark:border-white rounded bg-white dark:bg-black text-black dark:text-white ml-1 sm:ml-2 font-bold"
+              className="text-xs sm:text-sm px-2 py-1 border border-black dark:border-white rounded bg-white dark:bg-black text-black dark:text-white ml-1 sm:ml-2 font-bold"
             >
               {yearsWithEntries.map(year => (
                 <option key={year} value={year}>{year}</option>
@@ -297,12 +297,12 @@ export default function CalendarPage() {
         </div>
       </div>
 
-                  <div className="bg-white dark:bg-[#0a0a0a] border-2 border-black dark:border-[#333333] rounded p-2.5 sm:p-3 mb-3 sm:mb-4">
+                  <div className="bg-white dark:bg-[#0a0a0a] border border-black dark:border-[#333333] rounded p-2.5 sm:p-3 mb-3 sm:mb-4">
         <div className="mb-2 sm:mb-3">
           <select
             value={selectedParticipant}
             onChange={(e) => setSelectedParticipant(e.target.value)}
-            className="w-full text-sm border-2 border-black dark:border-white rounded px-3 py-2 bg-white dark:bg-black text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-700 dark:focus:ring-blue-300 font-bold"
+            className="w-full text-sm border border-black dark:border-white rounded px-3 py-2 bg-white dark:bg-black text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-700 dark:focus:ring-blue-300 font-bold"
           >
             <option value="all">All Participants</option>
             {participants.map((participant) => (
@@ -314,18 +314,18 @@ export default function CalendarPage() {
         </div>
 
         <div className="grid grid-cols-2 gap-2 sm:gap-3">
-          <div className="bg-white dark:bg-black rounded p-2 sm:p-3 border-2 border-black dark:border-white">
+          <div className="bg-white dark:bg-black rounded p-2 sm:p-3 border border-black dark:border-white">
                         <p className="text-xs text-black dark:text-[#b0b0b0] font-bold mb-1 sm:mb-0.5">Current Streak</p>
                         <p className="text-lg sm:text-xl font-bold text-blue-700 dark:text-[#3b82f6]">{currentStreak}</p>
           </div>
-          <div className="bg-white dark:bg-black rounded p-2 sm:p-3 border-2 border-black dark:border-white">
+          <div className="bg-white dark:bg-black rounded p-2 sm:p-3 border border-black dark:border-white">
                         <p className="text-xs text-black dark:text-[#b0b0b0] font-bold mb-1 sm:mb-0.5">Longest Streak</p>
                         <p className="text-lg sm:text-xl font-bold text-green-700 dark:text-[#22c55e]">{longestStreak}</p>
           </div>
         </div>
       </div>
 
-                  <div className="bg-white dark:bg-[#0a0a0a] border-2 border-black dark:border-[#333333] rounded p-2 sm:p-3 overflow-x-auto">
+                  <div className="bg-white dark:bg-[#0a0a0a] border border-black dark:border-[#333333] rounded p-2 sm:p-3 overflow-x-auto">
         <div className="inline-block min-w-full">
           <div className="grid grid-cols-[auto_repeat(12,1fr)] gap-1 mb-1">
             <div className="w-8"></div>
@@ -371,7 +371,7 @@ export default function CalendarPage() {
                       return (
                         <div
                           key={dayIdx}
-                          className="w-full h-4 bg-gray-200 dark:bg-gray-800 border-2 border-gray-400 dark:border-gray-600 rounded"
+                          className="w-full h-4 bg-gray-200 dark:bg-gray-800 border border-gray-400 dark:border-gray-600 rounded"
                         />
                       );
                     }
@@ -431,7 +431,7 @@ export default function CalendarPage() {
                       <div
                         key={dayIdx}
                           className={`
-                          w-full h-4 rounded border-2 flex items-center justify-center gap-1
+                          w-full h-4 rounded border flex items-center justify-center gap-1
                                       ${isFuture ? 'bg-gray-200 dark:bg-[#0a0a0a]' : 'bg-white dark:bg-[#0a0a0a]'}
                           ${borderClass}
                           ${isToday ? 'ring-2 ring-blue-700 dark:ring-blue-300' : ''}
@@ -478,11 +478,11 @@ export default function CalendarPage() {
               <span className="text-black dark:text-white font-bold">Participant made entry</span>
             </div>
             <div className="flex items-center gap-1">
-              <div className="w-4 h-4 bg-white dark:bg-black border-2 border-red-700 dark:border-red-300 rounded"></div>
+              <div className="w-4 h-4 bg-white dark:bg-black border border-red-700 dark:border-red-300 rounded"></div>
               <span className="text-black dark:text-white font-bold">No symbols = No entries</span>
             </div>
             <div className="flex items-center gap-1">
-              <div className="w-4 h-4 bg-gray-200 dark:bg-gray-800 border-2 border-gray-600 dark:border-gray-400 rounded"></div>
+              <div className="w-4 h-4 bg-gray-200 dark:bg-gray-800 border border-gray-600 dark:border-gray-400 rounded"></div>
               <span className="text-black dark:text-white font-bold">Future</span>
             </div>
           </div>

@@ -54,7 +54,7 @@ export default function EntryPage() {
         setContent(data.content);
         if (data.word_metadata?.[0]) {
           setDefinition(data.word_metadata[0].definition || '');
-          setPronunciation(data.word_metadata[0].pronunciation || '');
+          setPronunciation(data.word_metadata[0].pronunciation_respelling || data.word_metadata[0].pronunciation_ipa || data.word_metadata[0].pronunciation || '');
           setPartOfSpeech(data.word_metadata[0].part_of_speech || '');
           setEtymology(data.word_metadata[0].etymology || '');
           // Note: example_sentence may not exist in database yet
@@ -268,7 +268,7 @@ export default function EntryPage() {
         <h1 className="text-2xl sm:text-3xl font-bold mb-3 sm:mb-4 text-black dark:text-[#ffffff]">Edit Entry</h1>
 
         {error && (
-          <div className="bg-red-100 dark:bg-[#0a0a0a] border-2 border-red-700 dark:border-[#ef4444] text-red-900 dark:text-[#ef4444] p-3 rounded mb-4 font-bold">
+          <div className="bg-red-100 dark:bg-[#0a0a0a] border border-red-700 dark:border-[#ef4444] text-red-900 dark:text-[#ef4444] p-3 rounded mb-4 font-bold">
             {error}
           </div>
         )}
@@ -288,7 +288,7 @@ export default function EntryPage() {
                 type="text"
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
-                className="w-full border-2 border-black dark:border-white rounded p-2 bg-white dark:bg-black text-black dark:text-white font-semibold"
+                className="w-full border border-black dark:border-white rounded p-2 bg-white dark:bg-black text-black dark:text-white font-semibold"
                 required
               />
             ) : (
@@ -315,7 +315,7 @@ export default function EntryPage() {
                     target.style.height = '2.5rem';
                   }
                 }}
-                className="w-full border-2 border-black dark:border-[#333333] rounded p-2 bg-white dark:bg-[#0a0a0a] text-black dark:text-[#ffffff] resize-none overflow-hidden"
+                className="w-full border border-black dark:border-[#333333] rounded p-2 bg-white dark:bg-[#0a0a0a] text-black dark:text-[#ffffff] resize-none overflow-hidden"
                 style={{ minHeight: '2.5rem' }}
                 required
               />
@@ -331,7 +331,7 @@ export default function EntryPage() {
                   onChange={setDefinition}
                   onContextMenu={(e) => handleContextMenu(e, definitionTextareaRef, setDefinition)}
                   placeholder="Definition (Right-click selected text for formatting: **bold**, *italic*, <u>underline</u>)"
-                  className="w-full border-2 border-black dark:border-[#333333] rounded p-2 resize-none overflow-hidden bg-white dark:bg-[#0a0a0a] text-black dark:text-[#ffffff]"
+                  className="w-full border border-black dark:border-[#333333] rounded p-2 resize-none overflow-hidden bg-white dark:bg-[#0a0a0a] text-black dark:text-[#ffffff]"
                   style={{ minHeight: '2.5rem' }}
                   required
                   ref={definitionTextareaRef}
@@ -343,9 +343,8 @@ export default function EntryPage() {
                   type="text"
                   value={pronunciation}
                   onChange={(e) => setPronunciation(e.target.value)}
-                  placeholder="Pronunciation (IPA) - e.g., /dɪsˈkɔː(ɹ)s/"
-                  className="w-full border-2 border-black dark:border-white rounded p-2 bg-white dark:bg-black text-black dark:text-white font-mono"
-                  style={{ fontFamily: 'monospace, "Courier New", monospace' }}
+                  placeholder="Pronunciation (e.g., MYND-fuhl or /ˈmaɪnd.fəl/)"
+                  className="w-full border border-black dark:border-white rounded p-2 bg-white dark:bg-black text-black dark:text-white"
                 />
               </div>
               <div>
@@ -355,7 +354,7 @@ export default function EntryPage() {
                   value={partOfSpeech}
                   onChange={(e) => setPartOfSpeech(e.target.value)}
                   placeholder="e.g., noun, verb, adjective"
-                  className="w-full border-2 border-black dark:border-white rounded p-2 bg-white dark:bg-black text-black dark:text-white font-semibold"
+                  className="w-full border border-black dark:border-white rounded p-2 bg-white dark:bg-black text-black dark:text-white font-semibold"
                 />
               </div>
               <div>
@@ -365,7 +364,7 @@ export default function EntryPage() {
                   onChange={setExampleSentence}
                   onContextMenu={(e) => handleContextMenu(e, exampleSentenceTextareaRef, setExampleSentence)}
                   placeholder="Use in Sentence (Right-click selected text for formatting) - e.g., The word 'example' was used in a sentence..."
-                  className="w-full border-2 border-black dark:border-[#333333] rounded p-2 resize-none overflow-hidden bg-white dark:bg-[#0a0a0a] text-black dark:text-[#ffffff]"
+                  className="w-full border border-black dark:border-[#333333] rounded p-2 resize-none overflow-hidden bg-white dark:bg-[#0a0a0a] text-black dark:text-[#ffffff]"
                   style={{ minHeight: '2.5rem' }}
                   ref={exampleSentenceTextareaRef}
                 />
@@ -377,7 +376,7 @@ export default function EntryPage() {
                   onChange={setEtymology}
                   onContextMenu={(e) => handleContextMenu(e, etymologyTextareaRef, setEtymology)}
                   placeholder="Etymology (Right-click selected text for formatting)"
-                  className="w-full border-2 border-black dark:border-[#333333] rounded p-2 resize-none overflow-hidden bg-white dark:bg-[#0a0a0a] text-black dark:text-[#ffffff]"
+                  className="w-full border border-black dark:border-[#333333] rounded p-2 resize-none overflow-hidden bg-white dark:bg-[#0a0a0a] text-black dark:text-[#ffffff]"
                   style={{ minHeight: '2.5rem' }}
                   ref={etymologyTextareaRef}
                 />
@@ -392,7 +391,7 @@ export default function EntryPage() {
                   value={author}
                   onChange={(e) => setAuthor(e.target.value)}
                   placeholder="e.g., Steve Jobs"
-                  className="w-full border-2 border-black dark:border-white rounded p-2 bg-white dark:bg-black text-black dark:text-white font-semibold"
+                  className="w-full border border-black dark:border-white rounded p-2 bg-white dark:bg-black text-black dark:text-white font-semibold"
                 />
               </div>
               <div>
@@ -402,7 +401,7 @@ export default function EntryPage() {
                   value={source}
                   onChange={(e) => setSource(e.target.value)}
                   placeholder="e.g., Stanford Commencement Address, 2005"
-                  className="w-full border-2 border-black dark:border-white rounded p-2 bg-white dark:bg-black text-black dark:text-white font-semibold"
+                  className="w-full border border-black dark:border-white rounded p-2 bg-white dark:bg-black text-black dark:text-white font-semibold"
                 />
               </div>
             </>
@@ -412,14 +411,14 @@ export default function EntryPage() {
             <button
               type="submit"
               disabled={updating}
-              className="flex-1 bg-black dark:bg-[#0a0a0a] text-white dark:text-[#ffffff] font-bold py-3 sm:py-2.5 rounded hover:bg-gray-800 dark:hover:bg-[#1a1a1a] border-2 border-black dark:border-[#333333] disabled:bg-gray-400 dark:disabled:bg-gray-600 text-sm sm:text-base"
+              className="flex-1 bg-black dark:bg-[#0a0a0a] text-white dark:text-[#ffffff] font-bold py-3 sm:py-2.5 rounded hover:bg-gray-800 dark:hover:bg-[#1a1a1a] border border-black dark:border-[#333333] disabled:bg-gray-400 dark:disabled:bg-gray-600 text-sm sm:text-base"
             >
               {updating ? 'Saving...' : 'Save Changes'}
             </button>
             <button
               type="button"
               onClick={handleDelete}
-              className="flex-1 bg-red-700 dark:bg-[#ef4444] text-white dark:text-[#000000] font-bold py-3 sm:py-2.5 rounded hover:bg-red-800 dark:hover:bg-[#dc2626] border-2 border-red-900 dark:border-[#ef4444] text-sm sm:text-base"
+              className="flex-1 bg-red-700 dark:bg-[#ef4444] text-white dark:text-[#000000] font-bold py-3 sm:py-2.5 rounded hover:bg-red-800 dark:hover:bg-[#dc2626] border border-red-900 dark:border-[#ef4444] text-sm sm:text-base"
             >
               Delete Entry
             </button>

@@ -27,7 +27,9 @@ export default function EntryForm() {
   const [type, setType] = useState<'word' | 'quote'>('word');
   const [content, setContent] = useState('');
   const [definition, setDefinition] = useState('');
-  const [pronunciation, setPronunciation] = useState('');
+  const [pronunciation, setPronunciation] = useState(''); // Legacy - for backward compatibility
+  const [pronunciationRespelling, setPronunciationRespelling] = useState(''); // Dictionary-style respelling (e.g., MYND-fuhl)
+  const [pronunciationIpa, setPronunciationIpa] = useState(''); // IPA format (e.g., /ˈmaɪnd.fəl/)
   const [pronunciationAudio, setPronunciationAudio] = useState<string>('');
   const [partOfSpeech, setPartOfSpeech] = useState('');
   const [etymology, setEtymology] = useState('');
@@ -312,11 +314,11 @@ export default function EntryForm() {
         }
       } else {
         setDefinition(result.definition);
-        // Format IPA (removes brackets, preserves IPA symbols and diacritics)
-        const formattedPronunciation = result.pronunciation 
-          ? formatIPA(result.pronunciation)
-          : '';
-        setPronunciation(formattedPronunciation);
+        // Set IPA pronunciation (already formatted in lookupWord)
+        setPronunciationIpa(result.pronunciationIpa || result.pronunciation || '');
+        setPronunciation(result.pronunciationIpa || result.pronunciation || ''); // Legacy field
+        // Respelling not available from API - leave empty for manual entry
+        setPronunciationRespelling(result.pronunciationRespelling || '');
         setPartOfSpeech(result.partOfSpeech);
         // Set etymology - ensure it's set even if empty string (to clear previous values)
         setEtymology(result.etymology || '');
@@ -486,7 +488,9 @@ export default function EntryForm() {
           .insert({
             entry_id: entryData.id,
             definition: definition || null,
-            pronunciation: pronunciation || null,
+            pronunciation: pronunciationIpa || pronunciation || null, // Legacy field
+            pronunciation_ipa: pronunciationIpa || null,
+            pronunciation_respelling: pronunciationRespelling || null,
             part_of_speech: partOfSpeech || null,
             etymology: etymology || null,
           });
@@ -576,7 +580,7 @@ export default function EntryForm() {
                   <p><span className="font-semibold">Date:</span> {new Date(existingEntry.created_at).toLocaleDateString()}</p>
                   {existingEntry.word_metadata?.[0] && (
                     <>
-                      <p><span className="font-semibold">Pronunciation:</span> {existingEntry.word_metadata[0].pronunciation || 'N/A'}</p>
+                      <p><span className="font-semibold">Pronunciation:</span> {existingEntry.word_metadata[0].pronunciation_respelling || existingEntry.word_metadata[0].pronunciation_ipa || existingEntry.word_metadata[0].pronunciation || 'N/A'}</p>
                       <p><span className="font-semibold">Part of Speech:</span> {existingEntry.word_metadata[0].part_of_speech || 'N/A'}</p>
                       <div>
                         <span className="font-semibold">Definition:</span>
@@ -738,14 +742,13 @@ export default function EntryForm() {
                 className="flex-1 border border-gray-300 dark:border-[#404040] rounded p-2.5 sm:p-2 bg-blue-50 dark:bg-[#1a1a1a] text-black dark:text-[#ffffff] text-base sm:text-sm"
                 required
               />
-              {pronunciation && (
+              {pronunciationIpa && (
                 <input
                   type="text"
-                  value={pronunciation}
-                  onChange={(e) => setPronunciation(e.target.value)}
-                  placeholder="Pronunciation (IPA)"
-                  className="flex-1 border border-gray-300 dark:border-[#404040] rounded p-2 dark:bg-[#1a1a1a] dark:text-[#ffffff] font-mono text-sm"
-                  style={{ fontFamily: 'monospace, "Courier New", monospace' }}
+                  value={pronunciationRespelling}
+                  onChange={(e) => setPronunciationRespelling(e.target.value)}
+                  placeholder="Pronunciation (e.g., pruh-NOUN-see-AY-shuhn)"
+                  className="flex-1 border border-gray-300 dark:border-[#404040] rounded p-2 dark:bg-[#1a1a1a] dark:text-[#ffffff] text-sm"
                 />
               )}
               {pronunciationAudio && (

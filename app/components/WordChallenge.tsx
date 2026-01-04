@@ -240,8 +240,8 @@ export default function WordChallenge({ isOpen, onClose }: WordChallengeProps) {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-70 dark:bg-opacity-80 flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-[#0a0a0a] rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border-2 border-black dark:border-[#333333]">
-        <div className="sticky top-0 bg-white dark:bg-[#0a0a0a] z-10 border-b-2 border-black dark:border-[#333333]">
+      <div className="bg-white dark:bg-[#0a0a0a] rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-black dark:border-[#333333]">
+        <div className="sticky top-0 bg-white dark:bg-[#0a0a0a] z-10 border-b border-black dark:border-[#333333]">
           <Navigation />
         </div>
         <div className="p-4 sm:p-6">
@@ -258,7 +258,7 @@ export default function WordChallenge({ isOpen, onClose }: WordChallengeProps) {
                   <button
                     onClick={() => handleConfirmation(true)}
                     disabled={saving || !currentParticipantId}
-                    className={`px-3 sm:px-4 py-1.5 sm:py-2 font-bold rounded border-2 transition-colors text-xs sm:text-sm ${
+                    className={`px-3 sm:px-4 py-1.5 sm:py-2 font-bold rounded border transition-colors text-xs sm:text-sm ${
                       stats?.currentUserResponse === true
                         ? 'bg-green-700 dark:bg-green-500 text-white dark:text-black border-green-900 dark:border-green-300'
                         : 'bg-green-100 dark:bg-green-900 text-green-900 dark:text-green-100 border-green-700 dark:border-green-300 hover:bg-green-200 dark:hover:bg-green-800'
@@ -269,7 +269,7 @@ export default function WordChallenge({ isOpen, onClose }: WordChallengeProps) {
                   <button
                     onClick={() => handleConfirmation(false)}
                     disabled={saving || !currentParticipantId}
-                    className={`px-3 sm:px-4 py-1.5 sm:py-2 font-bold rounded border-2 transition-colors text-xs sm:text-sm ${
+                    className={`px-3 sm:px-4 py-1.5 sm:py-2 font-bold rounded border transition-colors text-xs sm:text-sm ${
                       stats?.currentUserResponse === false
                         ? 'bg-red-700 dark:bg-red-500 text-white dark:text-black border-red-900 dark:border-red-300'
                         : 'bg-red-100 dark:bg-red-900 text-red-900 dark:text-red-100 border-red-700 dark:border-red-300 hover:bg-red-200 dark:hover:bg-red-800'
@@ -280,7 +280,7 @@ export default function WordChallenge({ isOpen, onClose }: WordChallengeProps) {
                   {!showMetadata && (
                     <button
                       onClick={() => setShowMetadata(true)}
-                      className="px-3 sm:px-4 py-1.5 sm:py-2 bg-blue-100 dark:bg-blue-900 text-blue-900 dark:text-blue-100 font-bold rounded border-2 border-blue-700 dark:border-blue-300 hover:bg-blue-200 dark:hover:bg-blue-800 transition-colors text-xs sm:text-sm"
+                      className="px-3 sm:px-4 py-1.5 sm:py-2 bg-blue-100 dark:bg-blue-900 text-blue-900 dark:text-blue-100 font-bold rounded border border-blue-700 dark:border-blue-300 hover:bg-blue-200 dark:hover:bg-blue-800 transition-colors text-xs sm:text-sm"
                     >
                       Help
                     </button>
@@ -319,13 +319,13 @@ export default function WordChallenge({ isOpen, onClose }: WordChallengeProps) {
                   <button
                     onClick={fetchRandomWord}
                     disabled={loading}
-                    className="px-3 sm:px-4 py-1.5 sm:py-2 bg-white dark:bg-black text-black dark:text-white rounded border-2 border-black dark:border-white hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-xs sm:text-sm font-bold"
+                    className="px-3 sm:px-4 py-1.5 sm:py-2 bg-white dark:bg-black text-black dark:text-white rounded border border-black dark:border-white hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-xs sm:text-sm font-bold"
                   >
                     {loading ? 'Loading...' : 'New Word'}
                   </button>
                   <button
                     onClick={onClose}
-                    className="px-3 sm:px-4 py-1.5 sm:py-2 bg-white dark:bg-black text-black dark:text-white rounded border-2 border-black dark:border-white hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors text-xs sm:text-sm font-bold"
+                    className="px-3 sm:px-4 py-1.5 sm:py-2 bg-white dark:bg-black text-black dark:text-white rounded border border-black dark:border-white hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors text-xs sm:text-sm font-bold"
                   >
                     Close
                   </button>
@@ -337,7 +337,7 @@ export default function WordChallenge({ isOpen, onClose }: WordChallengeProps) {
                   <select
                     value={currentParticipantId || ''}
                     onChange={(e) => handleParticipantChange(e.target.value)}
-                    className="w-full border-2 border-black dark:border-white rounded p-2 text-black dark:text-white bg-white dark:bg-black font-semibold"
+                    className="w-full border border-black dark:border-white rounded p-2 text-black dark:text-white bg-white dark:bg-black font-semibold"
                   >
                     <option value="">Select participant (your selection will be remembered)</option>
                     {participants.map((participant) => (
@@ -351,10 +351,10 @@ export default function WordChallenge({ isOpen, onClose }: WordChallengeProps) {
               </div>
 
               {showMetadata && randomWord.word_metadata && randomWord.word_metadata[0] && (
-                <div className="border-t-2 border-black dark:border-white pt-6 space-y-4">
+                <div className="border-t border-black dark:border-white pt-6 space-y-4">
                   <div>
                     <p className="text-sm font-bold text-black dark:text-white mb-1">Pronunciation</p>
-                    <p className="text-lg text-black dark:text-white">{randomWord.word_metadata[0].pronunciation || 'N/A'}</p>
+                    <p className="text-lg text-black dark:text-white">{randomWord.word_metadata[0].pronunciation_respelling || randomWord.word_metadata[0].pronunciation_ipa || randomWord.word_metadata[0].pronunciation || 'N/A'}</p>
                   </div>
                   <div>
                     <p className="text-sm font-bold text-black dark:text-white mb-1">Part of Speech</p>

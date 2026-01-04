@@ -19,7 +19,9 @@ interface DictionaryResponse {
 
 export async function lookupWord(word: string): Promise<{
   definition: string;
-  pronunciation: string;
+  pronunciation: string; // Legacy - IPA format
+  pronunciationIpa?: string; // IPA format (e.g., /ˈmaɪnd.fəl/)
+  pronunciationRespelling?: string; // Dictionary-style respelling (e.g., MYND-fuhl)
   partOfSpeech: string;
   etymology: string;
   audioUrl?: string;
@@ -40,6 +42,8 @@ export async function lookupWord(word: string): Promise<{
       return {
         definition: '',
         pronunciation: '',
+        pronunciationIpa: undefined,
+        pronunciationRespelling: undefined,
         partOfSpeech: '',
         etymology: '',
         audioUrl: undefined,
@@ -59,6 +63,8 @@ export async function lookupWord(word: string): Promise<{
         return {
           definition: '',
           pronunciation: '',
+          pronunciationIpa: undefined,
+          pronunciationRespelling: undefined,
           partOfSpeech: '',
           etymology: '',
           audioUrl: undefined,
@@ -375,9 +381,22 @@ export async function lookupWord(word: string): Promise<{
       }
     }
 
+    // Format IPA: wrap in / /, ensure proper stress marks (ˈ for primary, ˌ for secondary)
+    let formattedIpa = pronunciation || '';
+    if (formattedIpa) {
+      // Remove existing brackets if present
+      formattedIpa = formattedIpa.replace(/^\/|\/$/g, '').trim();
+      // Replace ASCII stress marks with Unicode
+      formattedIpa = formattedIpa.replace(/'/g, 'ˈ').replace(/,/g, 'ˌ');
+      // Add brackets
+      formattedIpa = `/${formattedIpa}/`;
+    }
+
     const result = {
       definition: definition || '',
-      pronunciation: pronunciation || '',
+      pronunciation: formattedIpa, // Legacy - keep for backward compatibility
+      pronunciationIpa: formattedIpa, // IPA format with proper formatting
+      pronunciationRespelling: undefined, // Respelling not available from API - needs manual entry or conversion
       partOfSpeech: partOfSpeech || '',
       etymology: etymology || '',
       audioUrl: audioUrl || undefined,
@@ -391,6 +410,8 @@ export async function lookupWord(word: string): Promise<{
     return {
       definition: '',
       pronunciation: '',
+      pronunciationIpa: undefined,
+      pronunciationRespelling: undefined,
       partOfSpeech: '',
       etymology: '',
       audioUrl: undefined,
