@@ -118,11 +118,13 @@ export default function StreakDisplay({ participantId: propParticipantId, classN
   const nextMilestone = getNextBadgeMilestone(currentStreak);
   const highestBadge = badges.length > 0 ? badges[0] : null;
 
+  // Always show component if there's a streak OR badges
   if (!streak && badges.length === 0) {
     return null;
   }
 
-  // Determine which badge to display - prefer current badge if it exists, otherwise show highest earned badge
+  // Determine which badge to display - prefer current badge if streak qualifies, otherwise show highest earned badge
+  // Always show a badge if one exists in the database
   const displayBadge = currentBadge || (highestBadge ? highestBadge.badge_type : null);
 
   return (
@@ -137,11 +139,11 @@ export default function StreakDisplay({ participantId: propParticipantId, classN
           </div>
         )}
 
-        {displayBadge && (
+        {(displayBadge || highestBadge) && (
           <div className="flex items-center gap-2">
-            <span className="text-xl sm:text-2xl">{BADGE_EMOJIS[displayBadge]}</span>
+            <span className="text-xl sm:text-2xl">{BADGE_EMOJIS[displayBadge || highestBadge!.badge_type]}</span>
             <span className="text-sm sm:text-base font-bold text-black dark:text-[#ffffff]">
-              {BADGE_NAMES[displayBadge]}
+              {BADGE_NAMES[displayBadge || highestBadge!.badge_type]}
             </span>
           </div>
         )}
