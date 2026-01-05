@@ -128,9 +128,10 @@ export default function StreakDisplay({ participantId: propParticipantId, classN
     hasStreak: !!streak
   });
 
-  // Always show component if there's a streak OR badges
-  if (!streak && badges.length === 0) {
-    console.log('StreakDisplay: Returning null - no streak and no badges');
+  // Always show component if there's a streak OR badges OR if we have a participantId (show loading/empty state)
+  // Only return null if we have no participantId and no data
+  if (!propParticipantId && !getCurrentParticipantId() && !streak && badges.length === 0) {
+    console.log('StreakDisplay: Returning null - no participant and no data');
     return null;
   }
 
@@ -143,10 +144,17 @@ export default function StreakDisplay({ participantId: propParticipantId, classN
   return (
     <div className={className}>
       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
-        {streak && (
+        {streak ? (
           <div className="flex items-center gap-2">
             <div className="text-lg sm:text-xl font-bold text-blue-700 dark:text-[#3b82f6]">
               {currentStreak} day{currentStreak !== 1 ? 's' : ''}
+            </div>
+            <span className="text-xs text-black dark:text-[#b0b0b0] font-bold">streak</span>
+          </div>
+        ) : (
+          <div className="flex items-center gap-2">
+            <div className="text-lg sm:text-xl font-bold text-blue-700 dark:text-[#3b82f6]">
+              0 days
             </div>
             <span className="text-xs text-black dark:text-[#b0b0b0] font-bold">streak</span>
           </div>
