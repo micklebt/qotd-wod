@@ -113,24 +113,26 @@ export default function StreakDisplay({ participantId: propParticipantId, classN
     );
   }
 
-  if (!streak) {
-    return null;
-  }
-
-  const currentStreak = streak.current_streak || 0;
+  const currentStreak = streak?.current_streak || 0;
   const currentBadge = getBadgeForStreak(currentStreak);
   const nextMilestone = getNextBadgeMilestone(currentStreak);
   const highestBadge = badges.length > 0 ? badges[0] : null;
 
+  if (!streak && badges.length === 0) {
+    return null;
+  }
+
   return (
     <div className={className}>
       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
-        <div className="flex items-center gap-2">
-          <div className="text-lg sm:text-xl font-bold text-blue-700 dark:text-[#3b82f6]">
-            {currentStreak} day{currentStreak !== 1 ? 's' : ''}
+        {streak && (
+          <div className="flex items-center gap-2">
+            <div className="text-lg sm:text-xl font-bold text-blue-700 dark:text-[#3b82f6]">
+              {currentStreak} day{currentStreak !== 1 ? 's' : ''}
+            </div>
+            <span className="text-xs text-black dark:text-[#b0b0b0] font-bold">streak</span>
           </div>
-          <span className="text-xs text-black dark:text-[#b0b0b0] font-bold">streak</span>
-        </div>
+        )}
 
         {currentBadge && (
           <div className="flex items-center gap-2">
@@ -141,11 +143,11 @@ export default function StreakDisplay({ participantId: propParticipantId, classN
           </div>
         )}
 
-        {highestBadge && highestBadge.badge_type !== currentBadge && (
+        {highestBadge && (!currentBadge || highestBadge.badge_type !== currentBadge) && (
           <div className="flex items-center gap-2">
             <span className="text-lg sm:text-xl">{BADGE_EMOJIS[highestBadge.badge_type]}</span>
             <span className="text-xs sm:text-sm text-black dark:text-[#b0b0b0] font-bold">
-              Highest: {BADGE_NAMES[highestBadge.badge_type]}
+              {currentBadge ? 'Highest: ' : ''}{BADGE_NAMES[highestBadge.badge_type]}
             </span>
           </div>
         )}
@@ -156,7 +158,7 @@ export default function StreakDisplay({ participantId: propParticipantId, classN
           </div>
         )}
 
-        {streak.streak_saves_available > 0 && (
+        {streak && streak.streak_saves_available > 0 && (
           <div className="flex items-center gap-2">
             <button
               onClick={() => setShowSaveConfirm(true)}
@@ -175,7 +177,7 @@ export default function StreakDisplay({ participantId: propParticipantId, classN
             Use your streak save now?
           </p>
           <p className="text-xs text-black dark:text-[#b0b0b0] mb-3">
-            This will preserve your current streak of {currentStreak} day{currentStreak !== 1 ? 's' : ''}. You can only use one save per month.
+            This will preserve your current streak of {streak?.current_streak || 0} day{(streak?.current_streak || 0) !== 1 ? 's' : ''}. You can only use one save per month.
           </p>
           <div className="flex gap-2">
             <button
