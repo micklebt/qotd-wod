@@ -4,7 +4,6 @@ import { getParticipantNameAsync, preloadParticipants, getParticipantsAsync } fr
 import Link from 'next/link';
 import WordChallengeTrigger from '@/components/WordChallengeTrigger';
 import StreakDisplay from '@/components/StreakDisplay';
-import { APP_VERSION } from '@/lib/version';
 
 export default async function Home() {
   let word: Entry | null = null;
