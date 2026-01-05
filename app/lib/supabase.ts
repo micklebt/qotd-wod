@@ -38,3 +38,33 @@ export interface Entry {
     source: string;
   }[];
 }
+
+export type BadgeType = 'bronze' | 'silver' | 'gold' | 'diamond' | 'legendary';
+
+export interface ParticipantStreak {
+  id: number;
+  participant_id: string;
+  current_streak: number;
+  longest_streak: number;
+  last_activity_date: string | null;
+  streak_saves_available: number;
+  last_streak_save_month: string | null;
+  updated_at: string;
+}
+
+export interface ParticipantBadge {
+  id: number;
+  participant_id: string;
+  badge_type: BadgeType;
+  earned_date: string;
+  streak_length: number;
+  created_at: string;
+}
+
+export interface StreakSaveUsage {
+  id: number;
+  participant_id: string;
+  used_date: string;
+  saved_streak_length: number;
+  created_at: string;
+}

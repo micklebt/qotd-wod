@@ -3,6 +3,7 @@ import type { Entry } from '@/lib/supabase';
 import { getParticipantNameAsync, preloadParticipants, getParticipantsAsync } from '@/lib/participants';
 import Link from 'next/link';
 import WordChallengeTrigger from '@/components/WordChallengeTrigger';
+import StreakDisplay from '@/components/StreakDisplay';
 
 export default async function Home() {
   let word: Entry | null = null;
@@ -108,6 +109,8 @@ export default async function Home() {
             </Link>
           </div>
         </div>
+
+        <StreakDisplay className="mb-3 sm:mb-4" />
 
         {/* Word of the Day */}
         {word && (

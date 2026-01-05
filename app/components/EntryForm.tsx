@@ -484,19 +484,32 @@ export default function EntryForm() {
 
       // Insert metadata
       if (type === 'word') {
+        const metadata: any = {
+          entry_id: entryData.id,
+          definition: definition || null,
+          pronunciation: pronunciationIpa || pronunciation || null, // Legacy field
+          part_of_speech: partOfSpeech || null,
+          etymology: etymology || null,
+        };
+
+        // Only include new pronunciation fields if they have values
+        // This allows the code to work even if the migration hasn't been run yet
+        if (pronunciationIpa) {
+          metadata.pronunciation_ipa = pronunciationIpa;
+        }
+        if (pronunciationRespelling) {
+          metadata.pronunciation_respelling = pronunciationRespelling;
+        }
+
         const { error: metaError } = await supabase
           .from('word_metadata')
-          .insert({
-            entry_id: entryData.id,
-            definition: definition || null,
-            pronunciation: pronunciationIpa || pronunciation || null, // Legacy field
-            pronunciation_ipa: pronunciationIpa || null,
-            pronunciation_respelling: pronunciationRespelling || null,
-            part_of_speech: partOfSpeech || null,
-            etymology: etymology || null,
-          });
+          .insert(metadata);
         if (metaError) {
           console.error('Word metadata insert error:', metaError);
+          // If error is about missing columns, provide helpful message
+          if (metaError.message?.includes('pronunciation') || metaError.message?.includes('column')) {
+            throw new Error(`Failed to save word metadata: ${metaError.message}. Please run the migration: add_pronunciation_fields.sql`);
+          }
           throw new Error(`Failed to save word metadata: ${metaError.message}`);
         }
       } else {
@@ -533,6 +546,20 @@ export default function EntryForm() {
             throw metaError;
           }
         }
+      }
+
+      // Update streak after successful entry creation
+      try {
+        const response = await fetch('/api/update-streak', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ participantId: userId }),
+        });
+        if (!response.ok) {
+          console.warn('Failed to update streak, but entry was created successfully');
+        }
+      } catch (streakError) {
+        console.warn('Error updating streak:', streakError);
       }
 
       router.push('/entries');
@@ -755,10 +782,27 @@ export default function EntryForm() {
               {pronunciationAudio && (
                 <button
                   type="button"
-                  onClick={(e) => {
+                  onClick={async (e) => {
                     e.preventDefault();
-                    const audio = new Audio(pronunciationAudio);
-                    audio.play().catch(err => console.error('Audio play failed:', err));
+                    try {
+                      const audio = new Audio(pronunciationAudio);
+                      
+                      // Handle audio loading errors
+                      audio.addEventListener('error', (event) => {
+                        console.warn('Audio file not available:', pronunciationAudio);
+                      });
+                      
+                      // Handle play errors
+                      try {
+                        await audio.play();
+                      } catch (playError) {
+                        // Audio play failed - file may not be available or browser blocked autoplay
+                        console.warn('Could not play audio:', playError);
+                      }
+                    } catch (error) {
+                      // Audio creation or loading failed - file may not be available
+                      console.warn('Audio file not available:', pronunciationAudio);
+                    }
                   }}
                   className="p-2 bg-blue-100 dark:bg-[#1a1a1a] hover:bg-blue-200 dark:hover:bg-[#2a2a2a] rounded border border-blue-300 dark:border-[#404040] flex items-center justify-center"
                   title="Play pronunciation"
