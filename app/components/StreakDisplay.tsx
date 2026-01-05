@@ -122,6 +122,9 @@ export default function StreakDisplay({ participantId: propParticipantId, classN
     return null;
   }
 
+  // Determine which badge to display - prefer current badge if it exists, otherwise show highest earned badge
+  const displayBadge = currentBadge || (highestBadge ? highestBadge.badge_type : null);
+
   return (
     <div className={className}>
       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
@@ -134,20 +137,11 @@ export default function StreakDisplay({ participantId: propParticipantId, classN
           </div>
         )}
 
-        {currentBadge && (
+        {displayBadge && (
           <div className="flex items-center gap-2">
-            <span className="text-xl sm:text-2xl">{BADGE_EMOJIS[currentBadge]}</span>
+            <span className="text-xl sm:text-2xl">{BADGE_EMOJIS[displayBadge]}</span>
             <span className="text-sm sm:text-base font-bold text-black dark:text-[#ffffff]">
-              {BADGE_NAMES[currentBadge]}
-            </span>
-          </div>
-        )}
-
-        {highestBadge && (!currentBadge || highestBadge.badge_type !== currentBadge) && (
-          <div className="flex items-center gap-2">
-            <span className="text-lg sm:text-xl">{BADGE_EMOJIS[highestBadge.badge_type]}</span>
-            <span className="text-xs sm:text-sm text-black dark:text-[#b0b0b0] font-bold">
-              {currentBadge ? 'Highest: ' : ''}{BADGE_NAMES[highestBadge.badge_type]}
+              {BADGE_NAMES[displayBadge]}
             </span>
           </div>
         )}
