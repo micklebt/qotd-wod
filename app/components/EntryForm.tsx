@@ -562,6 +562,30 @@ export default function EntryForm() {
         console.warn('Error updating streak:', streakError);
       }
 
+      // Send SMS notifications to all participants
+      try {
+        const smsResponse = await fetch('/api/notify-entry-sms', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            entryId: entryData.id,
+            entryType: type,
+            entryContent: normalizedContent,
+            participantId: userId,
+          }),
+        });
+        if (smsResponse.ok) {
+          const smsData = await smsResponse.json();
+          if (smsData.sent > 0) {
+            console.log(`SMS notifications sent: ${smsData.sent}/${smsData.total}`);
+          }
+        } else {
+          console.warn('Failed to send SMS notifications, but entry was created successfully');
+        }
+      } catch (smsError) {
+        console.warn('Error sending SMS notifications:', smsError);
+      }
+
       router.push('/entries');
     } catch (err) {
       console.error('Error creating entry:', err);
