@@ -112,6 +112,15 @@ export default async function Home() {
 
         <StreakDisplay className="mb-3 sm:mb-4" />
 
+        <div className="mb-3 sm:mb-4">
+          <Link 
+            href="/badges-demo" 
+            className="text-blue-700 dark:text-[#3b82f6] hover:underline font-bold text-sm sm:text-base inline-block"
+          >
+            View Badge Showcase →
+          </Link>
+        </div>
+
         {/* Word of the Day */}
         {word && (
           <div className="border border-black dark:border-[#333333] rounded p-3 sm:p-4 bg-white dark:bg-[#0a0a0a]">
