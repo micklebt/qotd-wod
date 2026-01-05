@@ -5,6 +5,8 @@ import Link from 'next/link';
 import WordChallengeTrigger from '@/components/WordChallengeTrigger';
 import StreakDisplay from '@/components/StreakDisplay';
 
+export const dynamic = 'force-dynamic';
+
 export default async function Home() {
   let word: Entry | null = null;
   let quote: Entry | null = null;
@@ -73,17 +75,18 @@ export default async function Home() {
       }
     }
 
-    // Fetch latest quote
-    const { data: quoteData, error: quoteError } = await supabase
+    // Fetch all quotes and select a random one
+    const { data: allQuotes, error: quoteError } = await supabase
       .from('entries')
       .select('id, type, content, created_at, updated_at, participant_id, quote_metadata(*)')
-      .eq('type', 'quote')
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .single();
+      .eq('type', 'quote');
 
     if (quoteError) throw quoteError;
-    quote = quoteData;
+
+    if (allQuotes && allQuotes.length > 0) {
+      const randomIndex = Math.floor(Math.random() * allQuotes.length);
+      quote = allQuotes[randomIndex];
+    }
   } catch (err) {
     error = err instanceof Error ? err.message : 'Failed to load data';
   }
