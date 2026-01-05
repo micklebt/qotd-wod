@@ -52,12 +52,13 @@ export default function StreakDisplay({ participantId: propParticipantId, classN
       try {
         const response = await fetch(`/api/streak-data?participantId=${encodeURIComponent(pid)}`);
         if (!response.ok) {
-          console.error('Failed to fetch streak data');
+          console.error('Failed to fetch streak data', response.status, response.statusText);
           setLoading(false);
           return;
         }
 
         const data = await response.json();
+        console.log('StreakDisplay: Fetched data for participant', pid, data);
         setStreak(data.streak);
         setBadges(data.badges || []);
       } catch (error) {
@@ -118,14 +119,26 @@ export default function StreakDisplay({ participantId: propParticipantId, classN
   const nextMilestone = getNextBadgeMilestone(currentStreak);
   const highestBadge = badges.length > 0 ? badges[0] : null;
 
+  console.log('StreakDisplay: Render state', {
+    participantId: propParticipantId,
+    currentStreak,
+    currentBadge,
+    badgesCount: badges.length,
+    highestBadge,
+    hasStreak: !!streak
+  });
+
   // Always show component if there's a streak OR badges
   if (!streak && badges.length === 0) {
+    console.log('StreakDisplay: Returning null - no streak and no badges');
     return null;
   }
 
   // Determine which badge to display - prefer current badge if streak qualifies, otherwise show highest earned badge
   // Always show a badge if one exists in the database
   const displayBadge = currentBadge || (highestBadge ? highestBadge.badge_type : null);
+  
+  console.log('StreakDisplay: Display badge', displayBadge);
 
   return (
     <div className={className}>
@@ -139,7 +152,7 @@ export default function StreakDisplay({ participantId: propParticipantId, classN
           </div>
         )}
 
-        {(displayBadge || highestBadge) && (
+        {badges.length > 0 && (
           <div className="flex items-center gap-2">
             <span className="text-xl sm:text-2xl">{BADGE_EMOJIS[displayBadge || highestBadge!.badge_type]}</span>
             <span className="text-sm sm:text-base font-bold text-black dark:text-[#ffffff]">
