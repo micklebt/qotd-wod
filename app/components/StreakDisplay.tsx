@@ -51,18 +51,23 @@ export default function StreakDisplay({ participantId: propParticipantId, classN
 
       try {
         const response = await fetch(`/api/streak-data?participantId=${encodeURIComponent(pid)}`);
-        if (!response.ok) {
-          console.error('Failed to fetch streak data', response.status, response.statusText);
-          setLoading(false);
-          return;
-        }
-
         const data = await response.json();
-        console.log('StreakDisplay: Fetched data for participant', pid, data);
-        setStreak(data.streak);
-        setBadges(data.badges || []);
+        
+        if (!response.ok) {
+          console.error('Failed to fetch streak data', response.status, response.statusText, data);
+          // Still try to set data if it exists in the error response
+          if (data.streak) setStreak(data.streak);
+          if (data.badges) setBadges(data.badges || []);
+        } else {
+          console.log('StreakDisplay: Fetched data for participant', pid, data);
+          setStreak(data.streak || null);
+          setBadges(data.badges || []);
+        }
       } catch (error) {
         console.error('Error fetching streak data:', error);
+        // On error, set empty state so component still renders
+        setStreak(null);
+        setBadges([]);
       } finally {
         setLoading(false);
       }
