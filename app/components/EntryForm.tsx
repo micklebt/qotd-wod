@@ -782,10 +782,27 @@ export default function EntryForm() {
               {pronunciationAudio && (
                 <button
                   type="button"
-                  onClick={(e) => {
+                  onClick={async (e) => {
                     e.preventDefault();
-                    const audio = new Audio(pronunciationAudio);
-                    audio.play().catch(err => console.error('Audio play failed:', err));
+                    try {
+                      const audio = new Audio(pronunciationAudio);
+                      
+                      // Handle audio loading errors
+                      audio.addEventListener('error', (event) => {
+                        console.warn('Audio file not available:', pronunciationAudio);
+                      });
+                      
+                      // Handle play errors
+                      try {
+                        await audio.play();
+                      } catch (playError) {
+                        // Audio play failed - file may not be available or browser blocked autoplay
+                        console.warn('Could not play audio:', playError);
+                      }
+                    } catch (error) {
+                      // Audio creation or loading failed - file may not be available
+                      console.warn('Audio file not available:', pronunciationAudio);
+                    }
                   }}
                   className="p-2 bg-blue-100 dark:bg-[#1a1a1a] hover:bg-blue-200 dark:hover:bg-[#2a2a2a] rounded border border-blue-300 dark:border-[#404040] flex items-center justify-center"
                   title="Play pronunciation"
