@@ -4,6 +4,7 @@ import { getParticipantNameAsync, preloadParticipants, getParticipantsAsync } fr
 import Link from 'next/link';
 import WordChallengeTrigger from '@/components/WordChallengeTrigger';
 import StreakDisplay from '@/components/StreakDisplay';
+import { APP_VERSION } from '@/lib/version';
 
 export default async function Home() {
   let word: Entry | null = null;
@@ -111,6 +112,15 @@ export default async function Home() {
         </div>
 
         <StreakDisplay className="mb-3 sm:mb-4" />
+
+        <div className="mb-3 sm:mb-4">
+          <Link 
+            href="/badges-demo" 
+            className="text-blue-700 dark:text-[#3b82f6] hover:underline font-bold text-sm sm:text-base inline-block"
+          >
+            View Badge Showcase →
+          </Link>
+        </div>
 
         {/* Word of the Day */}
         {word && (
