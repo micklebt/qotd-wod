@@ -121,17 +121,19 @@ export default function StreakDisplay({ participantId: propParticipantId, classN
 
   console.log('StreakDisplay: Render state', {
     participantId: propParticipantId,
+    streak,
     currentStreak,
     currentBadge,
     badgesCount: badges.length,
+    badges,
     highestBadge,
     hasStreak: !!streak
   });
 
-  // Always show component if there's a streak OR badges OR if we have a participantId (show loading/empty state)
-  // Only return null if we have no participantId and no data
-  if (!propParticipantId && !getCurrentParticipantId() && !streak && badges.length === 0) {
-    console.log('StreakDisplay: Returning null - no participant and no data');
+  // Always show component if we have a participantId
+  const pid = propParticipantId || getCurrentParticipantId();
+  if (!pid) {
+    console.log('StreakDisplay: Returning null - no participant ID');
     return null;
   }
 
@@ -139,32 +141,23 @@ export default function StreakDisplay({ participantId: propParticipantId, classN
   // Always show a badge if one exists in the database
   const displayBadge = currentBadge || (highestBadge ? highestBadge.badge_type : null);
   
-  console.log('StreakDisplay: Display badge', displayBadge);
+  console.log('StreakDisplay: Display badge', displayBadge, 'from badges:', badges);
 
   return (
     <div className={className}>
       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
-        {streak ? (
-          <div className="flex items-center gap-2">
-            <div className="text-lg sm:text-xl font-bold text-blue-700 dark:text-[#3b82f6]">
-              {currentStreak} day{currentStreak !== 1 ? 's' : ''}
-            </div>
-            <span className="text-xs text-black dark:text-[#b0b0b0] font-bold">streak</span>
+        <div className="flex items-center gap-2">
+          <div className="text-lg sm:text-xl font-bold text-blue-700 dark:text-[#3b82f6]">
+            {currentStreak} day{currentStreak !== 1 ? 's' : ''}
           </div>
-        ) : (
-          <div className="flex items-center gap-2">
-            <div className="text-lg sm:text-xl font-bold text-blue-700 dark:text-[#3b82f6]">
-              0 days
-            </div>
-            <span className="text-xs text-black dark:text-[#b0b0b0] font-bold">streak</span>
-          </div>
-        )}
+          <span className="text-xs text-black dark:text-[#b0b0b0] font-bold">streak</span>
+        </div>
 
-        {badges.length > 0 && (
+        {badges.length > 0 && highestBadge && (
           <div className="flex items-center gap-2">
-            <span className="text-xl sm:text-2xl">{BADGE_EMOJIS[displayBadge || highestBadge!.badge_type]}</span>
+            <span className="text-xl sm:text-2xl">{BADGE_EMOJIS[displayBadge || highestBadge.badge_type]}</span>
             <span className="text-sm sm:text-base font-bold text-black dark:text-[#ffffff]">
-              {BADGE_NAMES[displayBadge || highestBadge!.badge_type]}
+              {BADGE_NAMES[displayBadge || highestBadge.badge_type]}
             </span>
           </div>
         )}
