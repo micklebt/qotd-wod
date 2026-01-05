@@ -227,7 +227,7 @@ const MarkdownTextarea = forwardRef<HTMLDivElement, MarkdownTextareaProps>(({
         onFocus={handleFocus}
         onBlur={handleBlur}
         onContextMenu={onContextMenu}
-        className={`${className} w-full border border-gray-300 dark:border-[#404040] rounded p-2 dark:bg-[#1a1a1a] dark:text-[#ffffff] resize-none overflow-hidden`}
+        className={`${className} w-full rounded p-2 resize-none overflow-hidden bg-input-bg text-input-text border-input-border`}
         style={{
           ...style,
           minHeight: style?.minHeight || '2.5rem',
@@ -241,15 +241,13 @@ const MarkdownTextarea = forwardRef<HTMLDivElement, MarkdownTextareaProps>(({
       <style dangerouslySetInnerHTML={{ __html: `
         div[contenteditable][data-placeholder]:empty:before {
           content: attr(data-placeholder);
-          color: #9ca3af;
+          color: var(--input-placeholder);
           pointer-events: none;
         }
-        .dark div[contenteditable][data-placeholder]:empty:before {
-          color: #6b7280;
-        }
         div[contenteditable]:focus {
-          outline: 2px solid #3b82f6;
-          outline-offset: -2px;
+          outline: none;
+          border-color: var(--input-focus-border);
+          box-shadow: 0 0 0 3px var(--input-focus-ring);
         }
         div[contenteditable] strong,
         div[contenteditable] b {

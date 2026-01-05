@@ -791,7 +791,7 @@ export default function EntryForm() {
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
                 placeholder="Word"
-                className="flex-1 border border-gray-300 dark:border-[#404040] rounded p-2.5 sm:p-2 bg-blue-50 dark:bg-[#1a1a1a] text-black dark:text-[#ffffff] text-base sm:text-sm"
+                className="flex-1 rounded p-2.5 sm:p-2 text-base sm:text-sm bg-input-bg text-input-text border-input-border placeholder:text-input-placeholder"
                 required
               />
               {pronunciationIpa && (
@@ -800,7 +800,7 @@ export default function EntryForm() {
                   value={pronunciationRespelling}
                   onChange={(e) => setPronunciationRespelling(e.target.value)}
                   placeholder="Pronunciation (e.g., pruh-NOUN-see-AY-shuhn)"
-                  className="flex-1 border border-gray-300 dark:border-[#404040] rounded p-2 dark:bg-[#1a1a1a] dark:text-[#ffffff] text-sm"
+                  className="flex-1 rounded p-2 text-sm bg-input-bg text-input-text border-input-border placeholder:text-input-placeholder"
                 />
               )}
               {pronunciationAudio && (
@@ -1008,7 +1008,7 @@ export default function EntryForm() {
                   value={author}
                   onChange={(e) => setAuthor(e.target.value)}
                   placeholder="Author (leave blank for idioms/expressions)"
-                  className="w-full border border-gray-300 dark:border-[#404040] rounded p-2 dark:bg-[#1a1a1a] dark:text-[#ffffff]"
+                  className="w-full rounded p-2 bg-input-bg text-input-text border-input-border placeholder:text-input-placeholder"
                 />
               </div>
               <div>
@@ -1017,7 +1017,7 @@ export default function EntryForm() {
                   value={source}
                   onChange={(e) => setSource(e.target.value)}
                   placeholder="Source - e.g., Stanford Commencement Address, 2005 or 'Common idiom'"
-                  className="w-full border border-gray-300 dark:border-[#404040] rounded p-2 dark:bg-[#1a1a1a] dark:text-[#ffffff]"
+                  className="w-full rounded p-2 bg-input-bg text-input-text border-input-border placeholder:text-input-placeholder"
                 />
               </div>
               {quoteSourceType && (
@@ -1042,7 +1042,7 @@ export default function EntryForm() {
                     target.style.height = `${target.scrollHeight}px`;
                   }}
                   placeholder="Context - When and where the quote was originally said, or its usage context"
-                  className="w-full border border-gray-300 dark:border-[#404040] rounded p-2 dark:bg-[#1a1a1a] dark:text-[#ffffff] resize-none overflow-hidden"
+                  className="w-full rounded p-2 resize-none overflow-hidden bg-input-bg text-input-text border-input-border placeholder:text-input-placeholder"
                   style={{ minHeight: '2.5rem' }}
                 />
               </div>

@@ -331,7 +331,7 @@ export default function EntryPage() {
                   onChange={setDefinition}
                   onContextMenu={(e) => handleContextMenu(e, definitionTextareaRef, setDefinition)}
                   placeholder="Definition (Right-click selected text for formatting: **bold**, *italic*, <u>underline</u>)"
-                  className="w-full border border-black dark:border-[#333333] rounded p-2 resize-none overflow-hidden bg-white dark:bg-[#0a0a0a] text-black dark:text-[#ffffff]"
+                  className="w-full rounded p-2 resize-none overflow-hidden bg-input-bg text-input-text border-input-border"
                   style={{ minHeight: '2.5rem' }}
                   required
                   ref={definitionTextareaRef}
@@ -344,7 +344,7 @@ export default function EntryPage() {
                   value={pronunciation}
                   onChange={(e) => setPronunciation(e.target.value)}
                   placeholder="Pronunciation (e.g., MYND-fuhl or /ˈmaɪnd.fəl/)"
-                  className="w-full border border-black dark:border-white rounded p-2 bg-white dark:bg-black text-black dark:text-white"
+                  className="w-full rounded p-2 bg-input-bg text-input-text border-input-border placeholder:text-input-placeholder"
                 />
               </div>
               <div>
@@ -354,7 +354,7 @@ export default function EntryPage() {
                   value={partOfSpeech}
                   onChange={(e) => setPartOfSpeech(e.target.value)}
                   placeholder="e.g., noun, verb, adjective"
-                  className="w-full border border-black dark:border-white rounded p-2 bg-white dark:bg-black text-black dark:text-white font-semibold"
+                  className="w-full rounded p-2 font-semibold bg-input-bg text-input-text border-input-border placeholder:text-input-placeholder"
                 />
               </div>
               <div>
@@ -364,7 +364,7 @@ export default function EntryPage() {
                   onChange={setExampleSentence}
                   onContextMenu={(e) => handleContextMenu(e, exampleSentenceTextareaRef, setExampleSentence)}
                   placeholder="Use in Sentence (Right-click selected text for formatting) - e.g., The word 'example' was used in a sentence..."
-                  className="w-full border border-black dark:border-[#333333] rounded p-2 resize-none overflow-hidden bg-white dark:bg-[#0a0a0a] text-black dark:text-[#ffffff]"
+                  className="w-full rounded p-2 resize-none overflow-hidden bg-input-bg text-input-text border-input-border"
                   style={{ minHeight: '2.5rem' }}
                   ref={exampleSentenceTextareaRef}
                 />
@@ -376,7 +376,7 @@ export default function EntryPage() {
                   onChange={setEtymology}
                   onContextMenu={(e) => handleContextMenu(e, etymologyTextareaRef, setEtymology)}
                   placeholder="Etymology (Right-click selected text for formatting)"
-                  className="w-full border border-black dark:border-[#333333] rounded p-2 resize-none overflow-hidden bg-white dark:bg-[#0a0a0a] text-black dark:text-[#ffffff]"
+                  className="w-full rounded p-2 resize-none overflow-hidden bg-input-bg text-input-text border-input-border"
                   style={{ minHeight: '2.5rem' }}
                   ref={etymologyTextareaRef}
                 />
