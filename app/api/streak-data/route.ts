@@ -4,6 +4,15 @@ import type { ParticipantStreak, ParticipantBadge } from '@/lib/supabase';
 
 export async function GET(request: NextRequest) {
   try {
+    // Check environment variables
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+      console.error('Missing Supabase environment variables');
+      return NextResponse.json(
+        { error: 'Server configuration error', details: 'Missing Supabase credentials' },
+        { status: 500 }
+      );
+    }
+
     const searchParams = request.nextUrl.searchParams;
     const participantId = searchParams.get('participantId');
 
@@ -16,35 +25,52 @@ export async function GET(request: NextRequest) {
 
     console.log('Streak-data API: Fetching data for participant', participantId);
 
-    const { data: streak, error: streakError } = await supabase
-      .from('participant_streaks')
-      .select('*')
-      .eq('participant_id', participantId)
-      .maybeSingle();
+    // Fetch streak data
+    let streak = null;
+    let streakError = null;
+    try {
+      const result = await supabase
+        .from('participant_streaks')
+        .select('*')
+        .eq('participant_id', participantId)
+        .maybeSingle();
+      streak = result.data;
+      streakError = result.error;
+    } catch (err) {
+      console.error('Exception fetching streak:', err);
+      streakError = err instanceof Error ? err : new Error(String(err));
+    }
 
     if (streakError) {
       console.error('Error fetching streak:', streakError);
-      return NextResponse.json(
-        { error: 'Failed to fetch streak data', details: streakError.message },
-        { status: 500 }
-      );
+      // Don't return error - just log it and continue with null streak
     }
 
-    const { data: badges, error: badgesError } = await supabase
-      .from('participant_badges')
-      .select('*')
-      .eq('participant_id', participantId)
-      .order('earned_date', { ascending: false });
+    // Fetch badge data
+    let badges = [];
+    let badgesError = null;
+    try {
+      const result = await supabase
+        .from('participant_badges')
+        .select('*')
+        .eq('participant_id', participantId)
+        .order('earned_date', { ascending: false });
+      badges = result.data || [];
+      badgesError = result.error;
+    } catch (err) {
+      console.error('Exception fetching badges:', err);
+      badgesError = err instanceof Error ? err : new Error(String(err));
+    }
 
     if (badgesError) {
       console.error('Error fetching badges:', badgesError);
-      return NextResponse.json(
-        { error: 'Failed to fetch badge data', details: badgesError.message },
-        { status: 500 }
-      );
+      // Don't return error - just log it and continue with empty badges
     }
 
-    console.log('Streak-data API: Success', { streak, badgesCount: badges?.length || 0 });
+    console.log('Streak-data API: Success', { 
+      streak: streak ? 'found' : 'null', 
+      badgesCount: badges?.length || 0 
+    });
 
     return NextResponse.json({
       streak: streak || null,
@@ -53,8 +79,9 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('Error in streak-data API:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    const errorStack = error instanceof Error ? error.stack : undefined;
     return NextResponse.json(
-      { error: 'Internal server error', details: errorMessage },
+      { error: 'Internal server error', details: errorMessage, stack: errorStack },
       { status: 500 }
     );
   }
