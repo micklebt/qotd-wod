@@ -484,19 +484,32 @@ export default function EntryForm() {
 
       // Insert metadata
       if (type === 'word') {
+        const metadata: any = {
+          entry_id: entryData.id,
+          definition: definition || null,
+          pronunciation: pronunciationIpa || pronunciation || null, // Legacy field
+          part_of_speech: partOfSpeech || null,
+          etymology: etymology || null,
+        };
+
+        // Only include new pronunciation fields if they have values
+        // This allows the code to work even if the migration hasn't been run yet
+        if (pronunciationIpa) {
+          metadata.pronunciation_ipa = pronunciationIpa;
+        }
+        if (pronunciationRespelling) {
+          metadata.pronunciation_respelling = pronunciationRespelling;
+        }
+
         const { error: metaError } = await supabase
           .from('word_metadata')
-          .insert({
-            entry_id: entryData.id,
-            definition: definition || null,
-            pronunciation: pronunciationIpa || pronunciation || null, // Legacy field
-            pronunciation_ipa: pronunciationIpa || null,
-            pronunciation_respelling: pronunciationRespelling || null,
-            part_of_speech: partOfSpeech || null,
-            etymology: etymology || null,
-          });
+          .insert(metadata);
         if (metaError) {
           console.error('Word metadata insert error:', metaError);
+          // If error is about missing columns, provide helpful message
+          if (metaError.message?.includes('pronunciation') || metaError.message?.includes('column')) {
+            throw new Error(`Failed to save word metadata: ${metaError.message}. Please run the migration: add_pronunciation_fields.sql`);
+          }
           throw new Error(`Failed to save word metadata: ${metaError.message}`);
         }
       } else {
