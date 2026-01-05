@@ -15,7 +15,7 @@ export default function Navigation() {
               <Link href="/" className="text-lg sm:text-xl font-bold text-black dark:text-[#ffffff] hover:text-gray-700 dark:hover:text-[#e5e5e5]">
                 QOTD & WOD
               </Link>
-              <span className="text-xs text-gray-700 dark:text-[#b0b0b0] font-mono hidden sm:inline ml-2 sm:ml-3">v{APP_VERSION}</span>
+              <span className="text-xs text-gray-700 dark:text-[#b0b0b0] font-mono ml-2 sm:ml-3">v{APP_VERSION}</span>
             </div>
             <ThemeSwitcher />
           </div>
