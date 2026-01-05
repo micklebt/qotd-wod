@@ -202,6 +202,7 @@ In Supabase, verify:
 - [ ] Verify `participant_streaks.last_activity_date` is correct
 
 #### Test: Timezone Handling
+
 - [ ] Create entry late at night (near midnight EST)
 - [ ] Verify it counts for correct day in EST timezone
 - [ ] Check that `getDateStringEST()` is used consistently

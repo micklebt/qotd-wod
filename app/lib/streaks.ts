@@ -1,5 +1,5 @@
 import { supabase } from './supabase';
-import { getDateStringEST, getCurrentMonthStartEST, getPreviousMonthStartEST } from './dateUtils';
+import { getDateStringEST, getCurrentMonthStartEST, getPreviousMonthStartEST, getPreviousDayEST } from './dateUtils';
 import type { BadgeType } from './supabase';
 
 const HIGH_PARTICIPATION_DAYS_THRESHOLD = 20;
@@ -52,15 +52,15 @@ export async function calculateStreakFromEntries(participantId: string): Promise
   const sortedDates = Array.from(uniqueDates).sort((a, b) => b.localeCompare(a));
   
   let streak = 0;
-  const today = new Date();
-  let currentDate = new Date(today);
+  // Get today's date in EST
+  const todayESTStr = getDateStringEST(new Date());
+  let currentDateStr = todayESTStr;
 
   while (true) {
-    const dateStr = getDateStringEST(currentDate);
-    
-    if (sortedDates.includes(dateStr)) {
+    if (sortedDates.includes(currentDateStr)) {
       streak++;
-      currentDate.setDate(currentDate.getDate() - 1);
+      // Get previous day's EST date string
+      currentDateStr = getPreviousDayEST(currentDateStr);
     } else {
       break;
     }
