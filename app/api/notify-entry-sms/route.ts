@@ -98,8 +98,8 @@ export async function POST(request: NextRequest) {
 
     // Get app URL for link (use environment variable if set, otherwise construct)
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || 
-                   process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 
-                   'https://your-app.vercel.app';
+                   (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 
+                   'https://qotd-wod.vercel.app');
 
     const fullMessage = `${message}\n\nView: ${appUrl}/entries/${entryId}`;
 
