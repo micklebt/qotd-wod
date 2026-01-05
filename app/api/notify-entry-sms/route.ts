@@ -9,12 +9,16 @@ interface NotifySMSRequest {
 }
 
 export async function POST(request: NextRequest) {
+  console.log('📱 SMS Notification API called');
   try {
     const body: NotifySMSRequest = await request.json();
     const { entryId, entryType, entryContent, participantId } = body;
 
+    console.log('📱 SMS Request:', { entryId, entryType, participantId });
+
     // Validate required fields
     if (!entryId || !entryType || !entryContent) {
+      console.error('📱 SMS Error: Missing required fields');
       return NextResponse.json(
         { error: 'Missing required fields' },
         { status: 400 }
@@ -26,8 +30,14 @@ export async function POST(request: NextRequest) {
     const twilioAuthToken = process.env.TWILIO_AUTH_TOKEN;
     const twilioPhoneNumber = process.env.TWILIO_PHONE_NUMBER;
 
+    console.log('📱 Twilio Config Check:', {
+      hasAccountSid: !!twilioAccountSid,
+      hasAuthToken: !!twilioAuthToken,
+      hasPhoneNumber: !!twilioPhoneNumber,
+    });
+
     if (!twilioAccountSid || !twilioAuthToken || !twilioPhoneNumber) {
-      console.warn('Twilio not configured - skipping SMS notifications');
+      console.warn('📱 Twilio not configured - skipping SMS notifications');
       return NextResponse.json({ success: true, message: 'Twilio not configured' });
     }
 
@@ -38,14 +48,17 @@ export async function POST(request: NextRequest) {
       .not('mobile_phone', 'is', null);
 
     if (participantsError) {
-      console.error('Error fetching participants:', participantsError);
+      console.error('📱 Error fetching participants:', participantsError);
       return NextResponse.json(
         { error: 'Failed to fetch participants' },
         { status: 500 }
       );
     }
 
+    console.log('📱 Participants with phone numbers:', participants?.length || 0);
+
     if (!participants || participants.length === 0) {
+      console.warn('📱 No participants with phone numbers found');
       return NextResponse.json({ success: true, message: 'No participants with phone numbers' });
     }
 
@@ -115,6 +128,8 @@ export async function POST(request: NextRequest) {
 
     const successful = results.filter(r => r.status === 'fulfilled' && r.value.success).length;
     const failed = results.length - successful;
+
+    console.log(`📱 SMS Results: ${successful} sent, ${failed} failed, ${participants.length} total`);
 
     return NextResponse.json({
       success: true,
