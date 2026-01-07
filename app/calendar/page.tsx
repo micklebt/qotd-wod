@@ -3,9 +3,10 @@
 import { supabase } from '@/lib/supabase';
 import type { Entry } from '@/lib/supabase';
 import { getParticipantsAsync, getCurrentParticipantId, type Participant } from '@/lib/participants';
-import { getDateStringEST, getYearEST, toEST } from '@/lib/dateUtils';
-import { useState, useEffect } from 'react';
+import { getDateStringEST, getYearEST, toEST, getPreviousDayEST, getNextDayEST, formatDateEST } from '@/lib/dateUtils';
+import { useState, useEffect, useMemo } from 'react';
 import StreakDisplay from '@/components/StreakDisplay';
+import Link from 'next/link';
 
 interface MonthDay {
   day: number;
@@ -31,6 +32,8 @@ export default function CalendarPage() {
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [yearsWithEntries, setYearsWithEntries] = useState<number[]>([]);
+  const [selectedDate, setSelectedDate] = useState<string>(getDateStringEST(new Date()));
+  const [entriesLoading, setEntriesLoading] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -51,10 +54,10 @@ export default function CalendarPage() {
           setSelectedParticipant(stickyParticipantId);
         }
 
-        // Fetch entries
+        // Fetch entries with metadata
         const { data, error } = await supabase
           .from('entries')
-          .select('id, type, content, created_at, updated_at, participant_id')
+          .select('*, word_metadata(*), quote_metadata(*)')
           .order('created_at', { ascending: false });
 
         if (error) throw error;
@@ -245,6 +248,99 @@ export default function CalendarPage() {
     return idx >= 0 ? idx : -1;
   };
 
+  // Get all unique dates with entries for the selected participant
+  const datesWithEntries = useMemo(() => {
+    const filteredEntries = selectedParticipant === 'all'
+      ? entries
+      : entries.filter(entry => entry.participant_id === selectedParticipant);
+    
+    const uniqueDates = Array.from(new Set(
+      filteredEntries.map(entry => getDateStringEST(entry.created_at))
+    )).sort();
+    
+    return uniqueDates;
+  }, [entries, selectedParticipant]);
+
+  // Find next day with entries
+  const findNextDayWithEntries = (currentDate: string): string | null => {
+    const currentIndex = datesWithEntries.indexOf(currentDate);
+    if (currentIndex < datesWithEntries.length - 1) {
+      return datesWithEntries[currentIndex + 1];
+    }
+    return null;
+  };
+
+  // Find previous day with entries
+  const findPreviousDayWithEntries = (currentDate: string): string | null => {
+    const currentIndex = datesWithEntries.indexOf(currentDate);
+    if (currentIndex > 0) {
+      return datesWithEntries[currentIndex - 1];
+    }
+    return null;
+  };
+
+  // Navigate to next day with entries
+  const goToNextDay = () => {
+    const nextDay = findNextDayWithEntries(selectedDate);
+    if (nextDay) {
+      setSelectedDate(nextDay);
+      const year = parseInt(nextDay.split('-')[0]);
+      setCurrentYear(year);
+    }
+  };
+
+  // Navigate to previous day with entries
+  const goToPreviousDay = () => {
+    const prevDay = findPreviousDayWithEntries(selectedDate);
+    if (prevDay) {
+      setSelectedDate(prevDay);
+      const year = parseInt(prevDay.split('-')[0]);
+      setCurrentYear(year);
+    }
+  };
+
+  // Go to today
+  const goToToday = () => {
+    const todayStr = getDateStringEST(new Date());
+    setSelectedDate(todayStr);
+    const year = new Date().getFullYear();
+    setCurrentYear(year);
+  };
+
+  // Get entries for the selected date
+  const selectedDateEntries = useMemo(() => {
+    return entries.filter(entry => {
+      const entryDate = getDateStringEST(entry.created_at);
+      const matchesDate = entryDate === selectedDate;
+      const matchesParticipant = selectedParticipant === 'all' || entry.participant_id === selectedParticipant;
+      return matchesDate && matchesParticipant;
+    }).sort((a, b) => {
+      // Sort by type (words first), then by created_at
+      if (a.type !== b.type) {
+        return a.type === 'word' ? -1 : 1;
+      }
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    });
+  }, [entries, selectedDate, selectedParticipant]);
+
+  // Update currentYear when selectedDate changes
+  useEffect(() => {
+    const year = parseInt(selectedDate.split('-')[0]);
+    if (year !== currentYear) {
+      setCurrentYear(year);
+    }
+  }, [selectedDate, currentYear]);
+
+  // Show loading indicator when date or participant changes
+  useEffect(() => {
+    setEntriesLoading(true);
+    const timer = setTimeout(() => {
+      setEntriesLoading(false);
+    }, 300); // Short delay to show the loading indicator
+    
+    return () => clearTimeout(timer);
+  }, [selectedDate, selectedParticipant]);
+
   const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   const maxDays = 31;
 
@@ -263,37 +359,54 @@ export default function CalendarPage() {
     );
   }
 
+  const canGoPrevious = findPreviousDayWithEntries(selectedDate) !== null;
+  const canGoNext = findNextDayWithEntries(selectedDate) !== null;
+  const isToday = selectedDate === getDateStringEST(new Date());
+
   return (
-                <div className="max-w-4xl mx-auto px-3 sm:px-4 py-3 sm:py-4 bg-white dark:bg-[#000000]">
+    <div className="max-w-4xl mx-auto px-3 sm:px-4 py-3 sm:py-4 bg-white dark:bg-[#000000]">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-2 mb-3 sm:mb-4">
-                    <h1 className="text-2xl sm:text-3xl font-bold text-black dark:text-[#ffffff]">Participation Calendar <span className="text-black dark:text-[#ffffff]">{currentYear}</span></h1>
+        <h1 className="text-2xl sm:text-3xl font-bold text-black dark:text-[#ffffff]">Participation Calendar <span className="text-black dark:text-[#ffffff]">{currentYear}</span></h1>
         <div className="flex gap-1 items-center flex-wrap">
           <button
-            onClick={() => setCurrentYear(currentYear - 1)}
-            className="text-xs sm:text-sm px-2 py-1 border border-black dark:border-white rounded hover:bg-gray-100 dark:hover:bg-gray-900 touch-target bg-white dark:bg-black text-black dark:text-white font-bold"
-            aria-label="Previous year"
+            onClick={goToPreviousDay}
+            disabled={!canGoPrevious}
+            className="text-xs sm:text-sm px-3 py-1.5 border border-input-border rounded hover:bg-hover-bg disabled:opacity-50 disabled:cursor-not-allowed touch-target bg-input-bg text-input-text font-bold transition-colors"
+            aria-label="Previous day with entries"
+            title={canGoPrevious ? `Go to ${formatDateEST(findPreviousDayWithEntries(selectedDate) || '')}` : 'No previous entries'}
           >
             ←
           </button>
           <button
-            onClick={() => setCurrentYear(new Date().getFullYear())}
-            className="text-xs sm:text-sm px-2 py-1 border border-black dark:border-white rounded hover:bg-gray-100 dark:hover:bg-gray-900 touch-target bg-white dark:bg-black text-black dark:text-white font-bold"
-            aria-label="Current year"
+            onClick={goToToday}
+            className={`text-xs sm:text-sm px-3 py-1.5 border border-input-border rounded hover:bg-hover-bg touch-target bg-input-bg text-input-text font-bold transition-colors ${isToday ? 'ring-2 ring-accent-blue' : ''}`}
+            aria-label="Go to today"
+            title="Go to today"
           >
             Today
           </button>
           <button
-            onClick={() => setCurrentYear(currentYear + 1)}
-            className="text-xs sm:text-sm px-2 py-1 border border-black dark:border-white rounded hover:bg-gray-100 dark:hover:bg-gray-900 touch-target bg-white dark:bg-black text-black dark:text-white font-bold"
-            aria-label="Next year"
+            onClick={goToNextDay}
+            disabled={!canGoNext}
+            className="text-xs sm:text-sm px-3 py-1.5 border border-input-border rounded hover:bg-hover-bg disabled:opacity-50 disabled:cursor-not-allowed touch-target bg-input-bg text-input-text font-bold transition-colors"
+            aria-label="Next day with entries"
+            title={canGoNext ? `Go to ${formatDateEST(findNextDayWithEntries(selectedDate) || '')}` : 'No next entries'}
           >
             →
           </button>
           {yearsWithEntries.length > 0 && (
             <select
               value={currentYear}
-              onChange={(e) => setCurrentYear(Number(e.target.value))}
-              className="text-xs sm:text-sm px-2 py-1 border border-black dark:border-white rounded bg-white dark:bg-black text-black dark:text-white ml-1 sm:ml-2 font-bold"
+              onChange={(e) => {
+                const year = Number(e.target.value);
+                setCurrentYear(year);
+                // Find the first date in that year with entries
+                const yearDate = datesWithEntries.find(d => parseInt(d.split('-')[0]) === year);
+                if (yearDate) {
+                  setSelectedDate(yearDate);
+                }
+              }}
+              className="text-xs sm:text-sm px-2 py-1 border border-input-border rounded bg-input-bg text-input-text ml-1 sm:ml-2 font-bold"
             >
               {yearsWithEntries.map(year => (
                 <option key={year} value={year}>{year}</option>
@@ -303,12 +416,28 @@ export default function CalendarPage() {
         </div>
       </div>
 
-                  <div className="bg-white dark:bg-[#0a0a0a] border border-black dark:border-[#333333] rounded p-2.5 sm:p-3 mb-3 sm:mb-4">
+      <div className="bg-white dark:bg-[#0a0a0a] border border-black dark:border-[#333333] rounded p-2.5 sm:p-3 mb-3 sm:mb-4">
         <div className="mb-2 sm:mb-3">
           <select
             value={selectedParticipant}
-            onChange={(e) => setSelectedParticipant(e.target.value)}
-            className="w-full text-sm border border-black dark:border-white rounded px-3 py-2 bg-white dark:bg-black text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-700 dark:focus:ring-blue-300 font-bold"
+            onChange={(e) => {
+              setSelectedParticipant(e.target.value);
+              // When participant changes, find the most recent date with entries for that participant
+              const newParticipant = e.target.value;
+              const filteredDates = newParticipant === 'all'
+                ? datesWithEntries
+                : Array.from(new Set(
+                    entries
+                      .filter(entry => entry.participant_id === newParticipant)
+                      .map(entry => getDateStringEST(entry.created_at))
+                  )).sort();
+              
+              if (filteredDates.length > 0) {
+                // Set to the most recent date (last in sorted array)
+                setSelectedDate(filteredDates[filteredDates.length - 1]);
+              }
+            }}
+            className="w-full text-sm border border-input-border rounded px-3 py-2 bg-input-bg text-input-text focus:outline-none focus:ring-2 focus:ring-input-focus-ring font-bold"
           >
             <option value="all">All Participants</option>
             {participants.map((participant) => (
@@ -324,18 +453,105 @@ export default function CalendarPage() {
         ) : (
           <div className="grid grid-cols-2 gap-2 sm:gap-3">
             <div className="bg-white dark:bg-black rounded p-2 sm:p-3 border border-black dark:border-white">
-                          <p className="text-xs text-black dark:text-[#b0b0b0] font-bold mb-1 sm:mb-0.5">Current Streak</p>
-                          <p className="text-lg sm:text-xl font-bold text-blue-700 dark:text-[#3b82f6]">{currentStreak}</p>
+              <p className="text-xs text-black dark:text-[#b0b0b0] font-bold mb-1 sm:mb-0.5">Current Streak</p>
+              <p className="text-lg sm:text-xl font-bold text-blue-700 dark:text-[#3b82f6]">{currentStreak}</p>
             </div>
             <div className="bg-white dark:bg-black rounded p-2 sm:p-3 border border-black dark:border-white">
-                          <p className="text-xs text-black dark:text-[#b0b0b0] font-bold mb-1 sm:mb-0.5">Longest Streak</p>
-                          <p className="text-lg sm:text-xl font-bold text-green-700 dark:text-[#22c55e]">{longestStreak}</p>
+              <p className="text-xs text-black dark:text-[#b0b0b0] font-bold mb-1 sm:mb-0.5">Longest Streak</p>
+              <p className="text-lg sm:text-xl font-bold text-green-700 dark:text-[#22c55e]">{longestStreak}</p>
             </div>
           </div>
         )}
       </div>
 
-                  <div className="bg-white dark:bg-[#0a0a0a] border border-black dark:border-[#333333] rounded p-2 sm:p-3 overflow-x-auto">
+      {/* Compact Entry Display for Selected Date */}
+      {entriesLoading ? (
+        <div className="bg-card-bg border border-card-border rounded p-2.5 sm:p-3 mb-3 sm:mb-4 flex items-center justify-center min-h-[100px]">
+          <div className="flex flex-col items-center gap-2">
+            <svg
+              className="animate-spin h-8 w-8 text-accent-blue"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+              ></circle>
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+              ></path>
+            </svg>
+            <p className="text-sm text-muted-text font-bold">Loading entries...</p>
+          </div>
+        </div>
+      ) : selectedDateEntries.length > 0 ? (
+        <div 
+          key={`${selectedDate}-${selectedParticipant}`}
+          className="bg-card-bg border border-card-border rounded p-2.5 sm:p-3 mb-3 sm:mb-4 animate-fade-in"
+        >
+          <h3 className="text-sm sm:text-base font-bold text-foreground mb-3">
+            {formatDateEST(selectedDate)} - {selectedDateEntries.length} {selectedDateEntries.length === 1 ? 'entry' : 'entries'}
+          </h3>
+          
+          {/* Words - matching All Entries page layout */}
+          {selectedDateEntries.filter(e => e.type === 'word').length > 0 && (
+            <div className="mb-3 sm:mb-4">
+              <h2 className="text-base sm:text-lg font-bold text-foreground mb-3">Words</h2>
+              <div className="flex flex-wrap gap-2 sm:gap-3">
+                {selectedDateEntries
+                  .filter(entry => entry.type === 'word')
+                  .sort((a, b) => a.content.localeCompare(b.content))
+                  .map((entry, index) => (
+                    <Link
+                      key={entry.id}
+                      href={`/entries/${entry.id}`}
+                      className="text-base sm:text-lg text-blue-700 dark:text-[#3b82f6] hover:text-blue-900 dark:hover:text-[#60a5fa] hover:underline font-medium transition-all duration-300 ease-out animate-slide-in"
+                      style={{
+                        animationDelay: `${index * 30}ms`,
+                        animationFillMode: 'both'
+                      }}
+                    >
+                      {entry.content}
+                    </Link>
+                  ))}
+              </div>
+            </div>
+          )}
+
+          {/* Quotes - matching All Entries page layout */}
+          {selectedDateEntries.filter(e => e.type === 'quote').length > 0 && (
+            <div>
+              <h2 className="text-base sm:text-lg font-bold text-foreground mb-3">Quotes</h2>
+              <div className="flex flex-wrap gap-2 sm:gap-3">
+                {selectedDateEntries
+                  .filter(entry => entry.type === 'quote')
+                  .map((entry, index) => (
+                    <Link
+                      key={entry.id}
+                      href={`/entries/${entry.id}`}
+                      className="text-base sm:text-lg italic text-blue-700 dark:text-[#3b82f6] hover:text-blue-900 dark:hover:text-[#60a5fa] hover:underline font-medium transition-all duration-300 ease-out animate-slide-in"
+                      style={{
+                        animationDelay: `${index * 30}ms`,
+                        animationFillMode: 'both'
+                      }}
+                    >
+                      &quot;{entry.content}&quot;
+                    </Link>
+                  ))}
+              </div>
+            </div>
+          )}
+        </div>
+      ) : null}
+
+      <div className="bg-white dark:bg-[#0a0a0a] border border-black dark:border-[#333333] rounded p-2 sm:p-3 overflow-x-auto">
         <div className="inline-block min-w-full">
           <div className="grid grid-cols-[auto_repeat(12,1fr)] gap-1 mb-1">
             <div className="w-8"></div>
@@ -437,17 +653,29 @@ export default function CalendarPage() {
                       borderStyle = { borderColor: 'rgba(239, 68, 68, 0.5)' }; // red-500 with 50% opacity
                     }
 
+                    const dayDateStr = getDateStringEST(monthDay!.date);
+                    const isSelected = dayDateStr === selectedDate;
+                    const hasEntriesForSelectedParticipant = selectedParticipant === 'all'
+                      ? monthDay!.participants.length > 0
+                      : monthDay!.participants.includes(selectedParticipant);
+
                     return (
                       <div
                         key={dayIdx}
-                          className={`
+                        onClick={() => {
+                          if (!isFuture) {
+                            setSelectedDate(dayDateStr);
+                          }
+                        }}
+                        className={`
                           w-full h-4 rounded border flex items-center justify-center gap-1
-                                      ${isFuture ? 'bg-gray-200 dark:bg-[#0a0a0a]' : 'bg-white dark:bg-[#0a0a0a]'}
+                          ${isFuture ? 'bg-gray-200 dark:bg-[#0a0a0a] cursor-default' : 'bg-white dark:bg-[#0a0a0a] cursor-pointer hover:bg-hover-bg'}
                           ${borderClass}
                           ${isToday ? 'ring-2 ring-blue-700 dark:ring-blue-300' : ''}
+                          ${isSelected ? 'ring-2 ring-accent-blue' : ''}
                         `}
                         style={borderStyle}
-                        title={`${monthDay!.date.toLocaleDateString()}: ${monthDay!.participants.length > 0 ? monthDay!.participants.map(pid => participants.find(p => p.id === pid)?.name || pid).join(', ') : 'No entries'}`}
+                        title={`${monthDay!.date.toLocaleDateString()}: ${monthDay!.participants.length > 0 ? monthDay!.participants.map(pid => participants.find(p => p.id === pid)?.name || pid).join(', ') : 'No entries'}${!isFuture ? ' (Click to view entries)' : ''}`}
                       >
                         {!isFuture && participantSymbols.map((p, idx) => {
                           // Make circle symbol larger to match visual size of triangle and square

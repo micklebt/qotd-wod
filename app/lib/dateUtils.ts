@@ -39,15 +39,27 @@ export function toEST(date: Date | string): Date {
 
 /**
  * Formats a date to EST/EDT and returns as locale date string
+ * If input is a date string (YYYY-MM-DD), format it directly without timezone conversion
  */
 export function formatDateEST(date: Date | string): string {
-  const estDate = toEST(date);
-  return estDate.toLocaleDateString('en-US', {
+  // If it's a date string in YYYY-MM-DD format, format it directly
+  if (typeof date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(date)) {
+    const [year, month, day] = date.split('-').map(Number);
+    // Format directly without timezone conversion since the string already represents the date
+    // Match the format that Intl.DateTimeFormat produces (M/D/YYYY)
+    return `${month}/${day}/${year}`;
+  }
+  
+  // For Date objects or other string formats, use EST timezone
+  const d = typeof date === 'string' ? new Date(date) : date;
+  const formatter = new Intl.DateTimeFormat('en-US', {
     timeZone: 'America/New_York',
     year: 'numeric',
     month: 'numeric',
     day: 'numeric'
   });
+  
+  return formatter.format(d);
 }
 
 /**
@@ -152,6 +164,21 @@ export function getPreviousDayEST(dateStr: string): string {
   // Use Date constructor with month-1 (since months are 0-indexed)
   const date = new Date(year, month - 1, day, 12, 0, 0);
   date.setDate(date.getDate() - 1);
+  // Convert back to EST date string
+  return getDateStringEST(date);
+}
+
+/**
+ * Gets the next day's date string in EST/EDT timezone
+ * Input: date string in YYYY-MM-DD format (EST)
+ * Output: next day's date string in YYYY-MM-DD format (EST)
+ */
+export function getNextDayEST(dateStr: string): string {
+  const [year, month, day] = dateStr.split('-').map(Number);
+  // Create a date at noon EST to avoid timezone edge cases
+  // Use Date constructor with month-1 (since months are 0-indexed)
+  const date = new Date(year, month - 1, day, 12, 0, 0);
+  date.setDate(date.getDate() + 1);
   // Convert back to EST date string
   return getDateStringEST(date);
 }
