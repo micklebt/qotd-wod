@@ -59,7 +59,7 @@ export default function HomeWordCard({ word }: HomeWordCardProps) {
         <h2 className="text-base sm:text-lg font-bold text-black dark:text-[#ffffff]">Word of the Day</h2>
         {masteryStatus !== 'mastered' && (
           <div className="flex items-center gap-2">
-            {masteryStatus && masteryStatus !== 'mastered' && (
+            {masteryStatus && (
               <span className={`text-xs px-1.5 py-0.5 rounded font-bold ${
                 masteryStatus === 'practicing'
                   ? 'bg-blue-100 dark:bg-blue-900 text-blue-900 dark:text-blue-100'
@@ -68,15 +68,13 @@ export default function HomeWordCard({ word }: HomeWordCardProps) {
                 {masteryStatus === 'practicing' ? '…' : '!'}
               </span>
             )}
-            {masteryStatus !== 'mastered' && (
-              <button
-                onClick={handleMarkAsConfident}
-                disabled={markingConfident}
-                className="text-xs px-2 py-1 rounded font-bold border transition-colors bg-green-100 dark:bg-green-900 text-green-900 dark:text-green-100 border-green-700 dark:border-green-300 hover:bg-green-200 dark:hover:bg-green-800 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {markingConfident ? 'Updating...' : '✓ I Know This'}
-              </button>
-            )}
+            <button
+              onClick={handleMarkAsConfident}
+              disabled={markingConfident}
+              className="text-xs px-2 py-1 rounded font-bold border transition-colors bg-green-100 dark:bg-green-900 text-green-900 dark:text-green-100 border-green-700 dark:border-green-300 hover:bg-green-200 dark:hover:bg-green-800 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {markingConfident ? 'Updating...' : '✓ I Know This'}
+            </button>
             <button
               onClick={handleMarkAsProblem}
               disabled={markingProblem}

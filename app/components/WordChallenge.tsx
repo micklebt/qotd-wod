@@ -1,9 +1,10 @@
 'use client';
 
 import { supabase } from '@/lib/supabase';
-import type { Entry } from '@/lib/supabase';
+import type { Entry, WordMasteryStatus } from '@/lib/supabase';
 import { useState, useEffect } from 'react';
 import { getCurrentParticipantId, getParticipantName, getParticipantsAsync, type Participant } from '@/lib/participants';
+import { getMasteryStatus, markAsConfident, markAsProblemWord, removeFromProblemWords } from '@/lib/wordMastery';
 import Navigation from './Navigation';
 
 interface WordChallengeProps {

@@ -866,37 +866,35 @@ export default function EntryForm() {
               />
               {content.trim() && masteryStatus !== 'mastered' && (
                 <>
-                  {masteryStatus !== 'mastered' && (
-                    <button
-                      type="button"
-                      onClick={async () => {
-                        if (!content.trim()) return;
-                        const { data: existingWord } = await supabase
-                          .from('entries')
-                          .select('id')
-                          .eq('type', 'word')
-                          .eq('content', content.trim())
-                          .single();
-                        
-                        if (existingWord) {
-                          setMarkingConfident(true);
-                          try {
-                            await markAsConfident(existingWord.id);
-                            setMasteryStatus('mastered');
-                          } catch (err) {
-                            console.error('Error marking word as confident:', err);
-                            alert('Failed to mark word as confident');
-                          } finally {
-                            setMarkingConfident(false);
-                          }
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      if (!content.trim()) return;
+                      const { data: existingWord } = await supabase
+                        .from('entries')
+                        .select('id')
+                        .eq('type', 'word')
+                        .eq('content', content.trim())
+                        .single();
+                      
+                      if (existingWord) {
+                        setMarkingConfident(true);
+                        try {
+                          await markAsConfident(existingWord.id);
+                          setMasteryStatus('mastered');
+                        } catch (err) {
+                          console.error('Error marking word as confident:', err);
+                          alert('Failed to mark word as confident');
+                        } finally {
+                          setMarkingConfident(false);
                         }
-                      }}
-                      disabled={markingConfident || !content.trim()}
-                      className="px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm font-bold rounded border transition-colors whitespace-nowrap bg-green-100 dark:bg-green-900 text-green-900 dark:text-green-100 border-green-700 dark:border-green-300 hover:bg-green-200 dark:hover:bg-green-800 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {markingConfident ? 'Updating...' : '✓ I Know'}
-                    </button>
-                  )}
+                      }
+                    }}
+                    disabled={markingConfident || !content.trim()}
+                    className="px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm font-bold rounded border transition-colors whitespace-nowrap bg-green-100 dark:bg-green-900 text-green-900 dark:text-green-100 border-green-700 dark:border-green-300 hover:bg-green-200 dark:hover:bg-green-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {markingConfident ? 'Updating...' : '✓ I Know'}
+                  </button>
                   <button
                     type="button"
                     onClick={async () => {

@@ -99,15 +99,13 @@ export default function EntryCard({ entry }: { entry: Entry }) {
       </Link>
       {entry.type === 'word' && masteryStatus !== 'mastered' && (
         <div className="mt-2 pt-2 border-t border-card-border flex gap-2">
-          {masteryStatus !== 'mastered' && (
-            <button
-              onClick={handleMarkAsConfident}
-              disabled={markingConfident}
-              className="text-xs px-2 py-1 rounded font-bold border transition-colors bg-green-100 dark:bg-green-900 text-green-900 dark:text-green-100 border-green-700 dark:border-green-300 hover:bg-green-200 dark:hover:bg-green-800 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {markingConfident ? 'Updating...' : '✓ I Know This'}
-            </button>
-          )}
+          <button
+            onClick={handleMarkAsConfident}
+            disabled={markingConfident}
+            className="text-xs px-2 py-1 rounded font-bold border transition-colors bg-green-100 dark:bg-green-900 text-green-900 dark:text-green-100 border-green-700 dark:border-green-300 hover:bg-green-200 dark:hover:bg-green-800 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {markingConfident ? 'Updating...' : '✓ I Know This'}
+          </button>
           <button
             onClick={handleMarkAsProblem}
             disabled={markingProblem}
