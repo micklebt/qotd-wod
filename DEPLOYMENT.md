@@ -240,3 +240,4 @@ Vercel provides:
 - [Supabase Documentation](https://supabase.com/docs)
 - [Vercel Community](https://github.com/vercel/vercel/discussions)
 
+

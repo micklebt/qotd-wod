@@ -4,6 +4,8 @@ import { supabase } from '@/lib/supabase';
 import EntryCard from '@/components/EntryCard';
 import type { Entry } from '@/lib/supabase';
 import { getParticipantsAsync, type Participant } from '@/lib/participants';
+import { getProblemWords, getCurrentParticipantId } from '@/lib/wordMastery';
+import { getDateStringEST } from '@/lib/dateUtils';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 
@@ -18,6 +20,8 @@ export default function EntriesPage() {
   const [selectedType, setSelectedType] = useState<'all' | 'word' | 'quote'>('all');
   const [selectedDate, setSelectedDate] = useState<string>('all');
   const [selectedLetter, setSelectedLetter] = useState<string>('all');
+  const [showProblemWordsOnly, setShowProblemWordsOnly] = useState(false);
+  const [problemWordIds, setProblemWordIds] = useState<Set<number>>(new Set());
 
   useEffect(() => {
     const fetchData = async () => {
@@ -35,6 +39,10 @@ export default function EntriesPage() {
         if (error) throw error;
         setEntries(data || []);
         setFilteredEntries(data || []);
+
+        // Load problem words for current participant
+        const problemWords = await getProblemWords();
+        setProblemWordIds(new Set(problemWords.map(w => w.entry_id)));
       } catch (err) {
         console.error('Error fetching data:', err);
       } finally {
@@ -68,25 +76,45 @@ export default function EntriesPage() {
 
     // Filter by date
     if (selectedDate !== 'all') {
-      const today = new Date();
-      const filterDate = new Date(selectedDate);
+      const now = new Date();
+      const todayEST = getDateStringEST(now); // Get today's date in EST
       
       filtered = filtered.filter(entry => {
-        const entryDate = new Date(entry.created_at);
-        
-        if (selectedDate === 'today') {
-          return entryDate.toDateString() === today.toDateString();
-        } else if (selectedDate === 'this-week') {
-          const weekAgo = new Date(today);
-          weekAgo.setDate(today.getDate() - 7);
-          return entryDate >= weekAgo;
-        } else if (selectedDate === 'this-month') {
-          return entryDate.getMonth() === today.getMonth() && 
-                 entryDate.getFullYear() === today.getFullYear();
-        } else if (selectedDate === 'this-year') {
-          return entryDate.getFullYear() === today.getFullYear();
+        try {
+          if (!entry.created_at) return false;
+          
+          const entryDateEST = getDateStringEST(entry.created_at);
+          
+          if (selectedDate === 'today') {
+            // Compare date strings in YYYY-MM-DD format
+            const matches = entryDateEST === todayEST;
+            // Debug logging (can be removed later)
+            if (process.env.NODE_ENV === 'development') {
+              console.log('Date filter - Today:', todayEST, 'Entry:', entryDateEST, 'Matches:', matches);
+            }
+            return matches;
+          } else if (selectedDate === 'this-week') {
+            // Get date 7 days ago in EST
+            const weekAgoDate = new Date(now);
+            weekAgoDate.setDate(weekAgoDate.getDate() - 7);
+            const weekAgoEST = getDateStringEST(weekAgoDate);
+            // String comparison works for YYYY-MM-DD format
+            return entryDateEST >= weekAgoEST && entryDateEST <= todayEST;
+          } else if (selectedDate === 'this-month') {
+            const [todayYear, todayMonth] = todayEST.split('-').map(Number);
+            const [entryYear, entryMonth] = entryDateEST.split('-').map(Number);
+            return entryMonth === todayMonth && entryYear === todayYear;
+          } else if (selectedDate === 'this-year') {
+            const [todayYear] = todayEST.split('-').map(Number);
+            const [entryYear] = entryDateEST.split('-').map(Number);
+            return entryYear === todayYear;
+          }
+          return true;
+        } catch (err) {
+          // If date parsing fails, exclude the entry
+          console.error('Error parsing entry date:', entry.created_at, err);
+          return false;
         }
-        return true;
       });
     }
 
@@ -120,17 +148,25 @@ export default function EntriesPage() {
       });
     }
 
+    // Filter by problem words
+    if (showProblemWordsOnly) {
+      filtered = filtered.filter(entry => {
+        return entry.type === 'word' && problemWordIds.has(entry.id);
+      });
+    }
+
     setFilteredEntries(filtered);
-  }, [entries, selectedParticipant, selectedType, selectedDate, selectedLetter]);
+  }, [entries, selectedParticipant, selectedType, selectedDate, selectedLetter, showProblemWordsOnly, problemWordIds]);
 
   const clearFilters = () => {
     setSelectedParticipant('all');
     setSelectedType('all');
     setSelectedDate('all');
     setSelectedLetter('all');
+    setShowProblemWordsOnly(false);
   };
 
-  const hasActiveFilters = selectedParticipant !== 'all' || selectedType !== 'all' || selectedDate !== 'all' || selectedLetter !== 'all';
+  const hasActiveFilters = selectedParticipant !== 'all' || selectedType !== 'all' || selectedDate !== 'all' || selectedLetter !== 'all' || showProblemWordsOnly;
 
   if (loading) {
     return (
@@ -211,7 +247,7 @@ export default function EntriesPage() {
             </select>
           </div>
 
-          {/* Date Filter */}
+          {/* Date Filter - Always show */}
           <div>
             <label className="block text-xs font-bold text-black dark:text-[#ffffff] mb-1">
               Date
@@ -228,6 +264,28 @@ export default function EntriesPage() {
               <option value="this-year">This Year</option>
             </select>
           </div>
+
+          {/* Problem Words Toggle - Only show when Type is 'word' */}
+          {selectedType === 'word' && (
+            <div>
+              <label className="block text-xs font-bold text-black dark:text-[#ffffff] mb-1">
+                Filter
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={showProblemWordsOnly}
+                  onChange={(e) => {
+                    setShowProblemWordsOnly(e.target.checked);
+                  }}
+                  className="w-4 h-4 text-accent-blue border-black dark:border-white rounded focus:ring-2 focus:ring-blue-700 dark:focus:ring-[#3b82f6] cursor-pointer"
+                />
+                <span className="text-xs font-semibold text-black dark:text-[#ffffff]">
+                  Show only problem words
+                </span>
+              </label>
+            </div>
+          )}
         </div>
 
         {/* Alphabet Filter - Only show for Words */}

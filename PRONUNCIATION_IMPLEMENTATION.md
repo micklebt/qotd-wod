@@ -47,3 +47,4 @@ Store both pronunciation formats in the database and display the respelling form
 - Initial implementation will store IPA and allow manual entry of respelling
 - Display will prioritize respelling, falling back to IPA if respelling is not available
 
+

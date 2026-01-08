@@ -381,6 +381,11 @@ export async function lookupWord(word: string): Promise<{
       }
     }
 
+    // If no example sentence after all attempts, generate a simple fallback
+    if (!exampleSentence || exampleSentence.trim() === '') {
+      exampleSentence = `The word "${word.trim()}" was used in a sentence to demonstrate its meaning.`;
+    }
+
     // Format IPA: wrap in / /, ensure proper stress marks (ˈ for primary, ˌ for secondary)
     let formattedIpa = pronunciation || '';
     if (formattedIpa) {

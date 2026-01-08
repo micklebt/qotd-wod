@@ -3,7 +3,9 @@ import type { Entry } from '@/lib/supabase';
 import { getParticipantNameAsync, preloadParticipants, getParticipantsAsync } from '@/lib/participants';
 import Link from 'next/link';
 import WordChallengeTrigger from '@/components/WordChallengeTrigger';
+import WordPracticeTrigger from '@/components/WordPracticeTrigger';
 import StreakDisplay from '@/components/StreakDisplay';
+import HomeWordCard from '@/components/HomeWordCard';
 
 export const dynamic = 'force-dynamic';
 
@@ -102,8 +104,9 @@ export default async function Home() {
       <div className="max-w-4xl mx-auto px-3 sm:px-4 py-3 sm:py-4 space-y-3 sm:space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-2 mb-3 sm:mb-4">
           <h1 className="text-2xl sm:text-3xl font-bold text-black dark:text-[#ffffff]">Today&apos;s Featured</h1>
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
             <WordChallengeTrigger />
+            <WordPracticeTrigger />
             <Link
               href="/entries/new"
               className="bg-black dark:bg-[#0a0a0a] text-white dark:text-[#ffffff] font-bold px-3 sm:px-4 py-2 rounded hover:bg-gray-800 dark:hover:bg-[#1a1a1a] border border-black dark:border-[#333333] text-sm sm:text-base whitespace-nowrap"
@@ -126,22 +129,11 @@ export default async function Home() {
 
         {/* Word of the Day */}
         {word && (
-          <div className="border border-black dark:border-[#333333] rounded p-3 sm:p-4 bg-white dark:bg-[#0a0a0a]">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-2 mb-3 sm:mb-2">
-              <h2 className="text-base sm:text-lg font-bold text-black dark:text-[#ffffff]">Word of the Day</h2>
+          <div>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-2 mb-2">
               <p className="text-xs sm:text-sm text-black dark:text-[#b0b0b0] font-semibold">Submitted by {wordParticipantName}</p>
             </div>
-            <p className="text-2xl sm:text-3xl font-bold mb-3 sm:mb-4 break-words text-black dark:text-[#ffffff]">{word.content}</p>
-            {word.word_metadata && word.word_metadata[0] && (
-              <div className="space-y-2 text-xs sm:text-sm text-black dark:text-[#ffffff]">
-                <p><span className="font-bold">Pronunciation:</span> {word.word_metadata[0].pronunciation_respelling || word.word_metadata[0].pronunciation_ipa || word.word_metadata[0].pronunciation}</p>
-                <p><span className="font-bold">Part of Speech:</span> {word.word_metadata[0].part_of_speech}</p>
-                <p><span className="font-bold">Definition:</span> {word.word_metadata[0].definition}</p>
-                {word.word_metadata[0].etymology && (
-                  <p><span className="font-bold">Etymology:</span> {word.word_metadata[0].etymology}</p>
-                )}
-              </div>
-            )}
+            <HomeWordCard word={word} />
           </div>
         )}
 

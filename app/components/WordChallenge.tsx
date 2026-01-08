@@ -26,6 +26,8 @@ export default function WordChallenge({ isOpen, onClose }: WordChallengeProps) {
   const [saving, setSaving] = useState(false);
   const [currentParticipantId, setCurrentParticipantId] = useState<string | null>(null);
   const [participants, setParticipants] = useState<Participant[]>([]);
+  const [masteryStatus, setMasteryStatus] = useState<WordMasteryStatus | null>(null);
+  const [markingProblem, setMarkingProblem] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
@@ -116,6 +118,9 @@ export default function WordChallenge({ isOpen, onClose }: WordChallengeProps) {
         const word = allWords[randomIndex];
         setRandomWord(word);
         await fetchWordStats(word.id, true); // Pass true to reset user response
+        // Load mastery status
+        const tracking = await getMasteryStatus(word.id);
+        setMasteryStatus(tracking?.status || null);
       } else {
         setRandomWord(null);
       }
@@ -225,6 +230,17 @@ export default function WordChallenge({ isOpen, onClose }: WordChallengeProps) {
         return;
       }
 
+      // If user confirms they know the word, also mark as confident in mastery tracking
+      if (isKnown) {
+        try {
+          await markAsConfident(randomWord.id, participantId);
+          setMasteryStatus('mastered');
+        } catch (err) {
+          console.error('Error marking as confident:', err);
+          // Don't fail the whole operation if mastery update fails
+        }
+      }
+
       // Refresh stats to show updated counters
       await fetchWordStats(randomWord.id, false);
     } catch (err) {
@@ -287,6 +303,40 @@ export default function WordChallenge({ isOpen, onClose }: WordChallengeProps) {
                   )}
                 </div>
 
+                {/* Mark as Problem Word */}
+                {randomWord && masteryStatus !== 'mastered' && (
+                  <div className="flex justify-center mb-4">
+                    <button
+                      onClick={async () => {
+                        if (!randomWord) return;
+                        setMarkingProblem(true);
+                        try {
+                          if (masteryStatus) {
+                            await removeFromProblemWords(randomWord.id);
+                            setMasteryStatus(null);
+                          } else {
+                            await markAsProblemWord(randomWord.id);
+                            setMasteryStatus('not_known');
+                          }
+                        } catch (err) {
+                          console.error('Error toggling problem word:', err);
+                          alert('Failed to update problem word status');
+                        } finally {
+                          setMarkingProblem(false);
+                        }
+                      }}
+                      disabled={markingProblem}
+                      className={`px-3 sm:px-4 py-1.5 sm:py-2 font-bold rounded border transition-colors text-xs sm:text-sm ${
+                        masteryStatus
+                          ? 'bg-red-100 dark:bg-red-900 text-red-900 dark:text-red-100 border-red-700 dark:border-red-300 hover:bg-red-200 dark:hover:bg-red-800'
+                          : 'bg-yellow-100 dark:bg-yellow-900 text-yellow-900 dark:text-yellow-100 border-yellow-700 dark:border-yellow-300 hover:bg-yellow-200 dark:hover:bg-yellow-800'
+                      } disabled:opacity-50 disabled:cursor-not-allowed`}
+                    >
+                      {markingProblem ? 'Updating...' : masteryStatus ? '✓ Problem Word' : 'Mark as Problem Word'}
+                    </button>
+                  </div>
+                )}
+
                 {/* Statistics Display */}
                 {stats && (
                   <div                               className="bg-white dark:bg-[#0a0a0a] rounded-lg p-3 sm:p-4 mb-3 sm:mb-4">
@@ -328,6 +378,23 @@ export default function WordChallenge({ isOpen, onClose }: WordChallengeProps) {
                     className="px-3 sm:px-4 py-1.5 sm:py-2 bg-white dark:bg-black text-black dark:text-white rounded border border-black dark:border-white hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors text-xs sm:text-sm font-bold"
                   >
                     Close
+                  </button>
+                </div>
+
+                {/* Practice Problem Words Link */}
+                <div className="pt-4 mt-4 border-t border-black dark:border-white">
+                  <p className="text-xs sm:text-sm text-black dark:text-[#ffffff] font-bold mb-2 text-center">
+                    Practice your problem words to master them
+                  </p>
+                  <button
+                    onClick={() => {
+                      onClose();
+                      // Trigger practice modal - this will be handled by parent component
+                      window.dispatchEvent(new CustomEvent('openWordPractice'));
+                    }}
+                    className="w-full px-3 sm:px-4 py-1.5 sm:py-2 bg-accent-blue text-white font-bold rounded hover:bg-blue-600 dark:hover:bg-blue-700 transition-colors text-xs sm:text-sm"
+                  >
+                    Practice Problem Words
                   </button>
                 </div>
 

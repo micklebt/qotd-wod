@@ -68,3 +68,17 @@ export interface StreakSaveUsage {
   saved_streak_length: number;
   created_at: string;
 }
+
+export type WordMasteryStatus = 'not_known' | 'practicing' | 'mastered';
+
+export interface WordMasteryTracking {
+  id: number;
+  entry_id: number;
+  participant_id: string;
+  status: WordMasteryStatus;
+  correct_count: number;
+  last_practiced_at: string | null;
+  mastered_at: string | null;
+  created_at: string;
+  updated_at: string;
+}

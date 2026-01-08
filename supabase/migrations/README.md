@@ -48,3 +48,4 @@ Once the migration is complete, you can:
 2. The application will automatically use the database participants instead of constants
 3. Add new participants by inserting rows into the `participants` table
 
+

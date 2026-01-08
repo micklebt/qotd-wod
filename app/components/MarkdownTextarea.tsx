@@ -58,8 +58,9 @@ const MarkdownTextarea = forwardRef<HTMLDivElement, MarkdownTextareaProps>(({
     if (editorRef.current) {
       editorRef.current.style.height = 'auto';
       const scrollHeight = editorRef.current.scrollHeight;
+      // Always expand to show ALL content - no height limits
       if (markdownValue.trim() || editorRef.current.textContent?.trim()) {
-        editorRef.current.style.height = `${Math.max(scrollHeight, 40)}px`; // At least 40px (one line)
+        editorRef.current.style.height = `${scrollHeight}px`; // Show all content
       } else {
         editorRef.current.style.height = '40px'; // One line height when empty
       }
@@ -135,8 +136,9 @@ const MarkdownTextarea = forwardRef<HTMLDivElement, MarkdownTextareaProps>(({
           editorRef.current.style.height = 'auto';
           const scrollHeight = editorRef.current.scrollHeight;
           const hasContent = markdown.trim() || editorRef.current.textContent?.trim();
+          // Always expand to show ALL content - no height limits
           if (hasContent) {
-            editorRef.current.style.height = `${Math.max(scrollHeight, 40)}px`;
+            editorRef.current.style.height = `${scrollHeight}px`; // Show all content
           } else {
             editorRef.current.style.height = '40px';
           }
@@ -188,34 +190,46 @@ const MarkdownTextarea = forwardRef<HTMLDivElement, MarkdownTextareaProps>(({
       setMarkdownValue(markdown);
       onChange(markdown);
       
-      // Re-render the markdown
-      setTimeout(() => {
-        if (editorRef.current) {
-          const renderedHtml = renderMarkdown(markdown) || '<br>';
-          editorRef.current.innerHTML = renderedHtml;
-          // Update height after re-rendering
-          editorRef.current.style.height = 'auto';
-          const scrollHeight = editorRef.current.scrollHeight;
-          if (markdown.trim()) {
-            editorRef.current.style.height = `${Math.max(scrollHeight, 40)}px`;
-          } else {
-            editorRef.current.style.height = '40px';
-          }
-        }
-        isUpdatingRef.current = false;
-      }, 0);
+          // Re-render the markdown
+          setTimeout(() => {
+            if (editorRef.current) {
+              const renderedHtml = renderMarkdown(markdown) || '<br>';
+              editorRef.current.innerHTML = renderedHtml;
+              // Update height after re-rendering - always expand to show ALL content
+              editorRef.current.style.height = 'auto';
+              const scrollHeight = editorRef.current.scrollHeight;
+              if (markdown.trim()) {
+                editorRef.current.style.height = `${scrollHeight}px`; // Show all content
+              } else {
+                editorRef.current.style.height = '40px';
+              }
+            }
+            isUpdatingRef.current = false;
+          }, 0);
     }
   };
 
-  // Initialize content on mount
+  // Initialize content on mount and ensure height is correct
   useEffect(() => {
     if (editorRef.current && !isFocused) {
       const html = renderMarkdown(markdownValue) || '<br>';
       if (editorRef.current.innerHTML !== html) {
         editorRef.current.innerHTML = html;
       }
+      // Ensure height expands to show all content on mount
+      requestAnimationFrame(() => {
+        if (editorRef.current) {
+          editorRef.current.style.height = 'auto';
+          const scrollHeight = editorRef.current.scrollHeight;
+          if (markdownValue.trim() || editorRef.current.textContent?.trim()) {
+            editorRef.current.style.height = `${scrollHeight}px`; // Show all content
+          } else {
+            editorRef.current.style.height = '40px';
+          }
+        }
+      });
     }
-  }, []);
+  }, [markdownValue]);
 
   return (
     <div className="relative">
@@ -227,7 +241,7 @@ const MarkdownTextarea = forwardRef<HTMLDivElement, MarkdownTextareaProps>(({
         onFocus={handleFocus}
         onBlur={handleBlur}
         onContextMenu={onContextMenu}
-        className={`${className} w-full rounded p-2 resize-none overflow-hidden bg-input-bg text-input-text border-input-border`}
+        className={`${className} w-full rounded p-2 resize-none overflow-y-auto bg-input-bg text-input-text border-input-border`}
         style={{
           ...style,
           minHeight: style?.minHeight || '2.5rem',

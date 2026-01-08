@@ -45,3 +45,4 @@ FROM pg_constraint
 WHERE conrelid = 'word_challenge_responses'::regclass
   AND contype = 'u';
 
+

@@ -11,6 +11,7 @@ import { getParticipantName, getParticipantsAsync, preloadParticipants, type Par
 import { formatIPA } from '@/lib/pronunciation';
 import { formatExampleSentences } from '@/lib/formatExampleSentence';
 import { formatDateEST } from '@/lib/dateUtils';
+import { markAsProblemWord, removeFromProblemWords, getMasteryStatus, markAsConfident, type WordMasteryStatus } from '@/lib/wordMastery';
 import MarkdownContextMenu from './MarkdownContextMenu';
 import MarkdownTextarea from './MarkdownTextarea';
 
@@ -27,6 +28,9 @@ export default function EntryForm() {
   const [selectedParticipant, setSelectedParticipant] = useState<string>('');
   const [type, setType] = useState<'word' | 'quote'>('word');
   const [content, setContent] = useState('');
+  const [masteryStatus, setMasteryStatus] = useState<WordMasteryStatus | null>(null);
+  const [markingProblem, setMarkingProblem] = useState(false);
+  const [markingConfident, setMarkingConfident] = useState(false);
   const [definition, setDefinition] = useState('');
   const [pronunciation, setPronunciation] = useState(''); // Legacy - for backward compatibility
   const [pronunciationRespelling, setPronunciationRespelling] = useState(''); // Dictionary-style respelling (e.g., MYND-fuhl)
@@ -143,12 +147,61 @@ export default function EntryForm() {
     }
   }, [quoteInterpretation]);
 
+  // Auto-expand all textareas on mount and when content changes
+  useEffect(() => {
+    if (quoteContentTextareaRef.current) {
+      quoteContentTextareaRef.current.style.height = 'auto';
+      quoteContentTextareaRef.current.style.height = `${quoteContentTextareaRef.current.scrollHeight}px`;
+    }
+  }, [content]);
+
+  useEffect(() => {
+    if (quoteContextTextareaRef.current) {
+      quoteContextTextareaRef.current.style.height = 'auto';
+      quoteContextTextareaRef.current.style.height = `${quoteContextTextareaRef.current.scrollHeight}px`;
+    }
+  }, [quoteContext]);
+
+  useEffect(() => {
+    if (quoteBackgroundTextareaRef.current) {
+      quoteBackgroundTextareaRef.current.style.height = 'auto';
+      quoteBackgroundTextareaRef.current.style.height = `${quoteBackgroundTextareaRef.current.scrollHeight}px`;
+    }
+  }, [quoteBackground]);
+
+  useEffect(() => {
+    if (quoteInterpretationTextareaRef.current) {
+      quoteInterpretationTextareaRef.current.style.height = 'auto';
+      quoteInterpretationTextareaRef.current.style.height = `${quoteInterpretationTextareaRef.current.scrollHeight}px`;
+    }
+  }, [quoteInterpretation]);
+
   useEffect(() => {
     if (quoteSignificanceTextareaRef.current) {
       quoteSignificanceTextareaRef.current.style.height = 'auto';
       quoteSignificanceTextareaRef.current.style.height = `${quoteSignificanceTextareaRef.current.scrollHeight}px`;
     }
   }, [quoteSignificance]);
+
+  // Auto-lookup word when entered (debounced)
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    
+    const autoLookup = async () => {
+      if (type === 'word' && content.trim() && !definition && !lookupLoading && content.length > 2) {
+        // Debounce the lookup - wait 800ms after user stops typing
+        timer = setTimeout(async () => {
+          await handleLookupWord();
+        }, 800);
+      }
+    };
+    
+    autoLookup();
+    
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
+  }, [content, type]);
 
   const handleParticipantChange = (participantId: string) => {
     setSelectedParticipant(participantId);
@@ -785,15 +838,105 @@ export default function EntryForm() {
       <div>
         {type === 'word' ? (
           <div className="space-y-2">
-            <div className="flex flex-col sm:flex-row gap-2">
+            <div className="flex flex-col sm:flex-row gap-2 items-center">
               <input
                 type="text"
                 value={content}
-                onChange={(e) => setContent(e.target.value)}
+                onChange={async (e) => {
+                  setContent(e.target.value);
+                  // Check if word exists and load mastery status
+                  if (e.target.value.trim()) {
+                    const { data: existingWord } = await supabase
+                      .from('entries')
+                      .select('id')
+                      .eq('type', 'word')
+                      .eq('content', e.target.value.trim())
+                      .single();
+                    if (existingWord) {
+                      const tracking = await getMasteryStatus(existingWord.id);
+                      setMasteryStatus(tracking?.status || null);
+                    } else {
+                      setMasteryStatus(null);
+                    }
+                  }
+                }}
                 placeholder="Word"
                 className="flex-1 rounded p-2.5 sm:p-2 text-base sm:text-sm bg-input-bg text-input-text border-input-border placeholder:text-input-placeholder"
                 required
               />
+              {content.trim() && masteryStatus !== 'mastered' && (
+                <>
+                  {masteryStatus !== 'mastered' && (
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        if (!content.trim()) return;
+                        const { data: existingWord } = await supabase
+                          .from('entries')
+                          .select('id')
+                          .eq('type', 'word')
+                          .eq('content', content.trim())
+                          .single();
+                        
+                        if (existingWord) {
+                          setMarkingConfident(true);
+                          try {
+                            await markAsConfident(existingWord.id);
+                            setMasteryStatus('mastered');
+                          } catch (err) {
+                            console.error('Error marking word as confident:', err);
+                            alert('Failed to mark word as confident');
+                          } finally {
+                            setMarkingConfident(false);
+                          }
+                        }
+                      }}
+                      disabled={markingConfident || !content.trim()}
+                      className="px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm font-bold rounded border transition-colors whitespace-nowrap bg-green-100 dark:bg-green-900 text-green-900 dark:text-green-100 border-green-700 dark:border-green-300 hover:bg-green-200 dark:hover:bg-green-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {markingConfident ? 'Updating...' : '✓ I Know'}
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      if (!content.trim()) return;
+                      const { data: existingWord } = await supabase
+                        .from('entries')
+                        .select('id')
+                        .eq('type', 'word')
+                        .eq('content', content.trim())
+                        .single();
+                      
+                      if (existingWord) {
+                        setMarkingProblem(true);
+                        try {
+                          if (masteryStatus) {
+                            await removeFromProblemWords(existingWord.id);
+                            setMasteryStatus(null);
+                          } else {
+                            await markAsProblemWord(existingWord.id);
+                            setMasteryStatus('not_known');
+                          }
+                        } catch (err) {
+                          console.error('Error toggling problem word:', err);
+                          alert('Failed to update problem word status');
+                        } finally {
+                          setMarkingProblem(false);
+                        }
+                      }
+                    }}
+                    disabled={markingProblem || !content.trim()}
+                    className={`px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm font-bold rounded border transition-colors whitespace-nowrap ${
+                      masteryStatus
+                        ? 'bg-red-100 dark:bg-red-900 text-red-900 dark:text-red-100 border-red-700 dark:border-red-300 hover:bg-red-200 dark:hover:bg-red-800'
+                        : 'bg-yellow-100 dark:bg-yellow-900 text-yellow-900 dark:text-yellow-100 border-yellow-700 dark:border-yellow-300 hover:bg-yellow-200 dark:hover:bg-yellow-800'
+                    } disabled:opacity-50 disabled:cursor-not-allowed`}
+                  >
+                    {markingProblem ? 'Updating...' : masteryStatus ? '✓ Problem' : 'Mark Problem'}
+                  </button>
+                </>
+              )}
               {pronunciationIpa && (
                 <input
                   type="text"
@@ -895,7 +1038,7 @@ export default function EntryForm() {
                   target.style.height = `${target.scrollHeight}px`;
                 }}
                 placeholder="Quote (1 sentence to 1 paragraph)"
-                className="flex-1 border border-gray-300 dark:border-[#404040] rounded p-2.5 sm:p-2 bg-blue-50 dark:bg-[#1a1a1a] dark:text-[#ffffff] resize-none overflow-hidden text-base sm:text-sm"
+                className="flex-1 border border-gray-300 dark:border-[#404040] rounded p-2.5 sm:p-2 bg-blue-50 dark:bg-[#1a1a1a] dark:text-[#ffffff] resize-none overflow-y-auto text-base sm:text-sm"
                 style={{ minHeight: '2.5rem' }}
                 required
               />
@@ -1042,7 +1185,7 @@ export default function EntryForm() {
                     target.style.height = `${target.scrollHeight}px`;
                   }}
                   placeholder="Context - When and where the quote was originally said, or its usage context"
-                  className="w-full rounded p-2 resize-none overflow-hidden bg-input-bg text-input-text border-input-border placeholder:text-input-placeholder"
+                  className="w-full rounded p-2 resize-none overflow-y-auto bg-input-bg text-input-text border-input-border placeholder:text-input-placeholder"
                   style={{ minHeight: '2.5rem' }}
                 />
               </div>
