@@ -10,9 +10,9 @@ export default function WordChallengeTrigger() {
     <>
       <button
         onClick={() => setIsOpen(true)}
-        className="bg-green-700 dark:bg-[#22c55e] text-white dark:text-[#1a1a1a] font-bold px-3 sm:px-4 py-2 rounded hover:bg-green-800 dark:hover:bg-[#16a34a] border border-green-900 dark:border-[#22c55e] text-sm sm:text-base"
+        className="bg-green-100 dark:bg-green-900 text-green-900 dark:text-green-100 font-bold px-3 sm:px-4 py-2 rounded hover:bg-green-200 dark:hover:bg-green-800 border border-green-700 dark:border-green-300 text-sm sm:text-base transition-colors"
       >
-        Word Challenge
+        Flash Cards
       </button>
       <WordChallenge isOpen={isOpen} onClose={() => setIsOpen(false)} />
     </>

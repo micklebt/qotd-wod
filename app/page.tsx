@@ -106,12 +106,6 @@ export default async function Home() {
           <div className="flex gap-2 flex-wrap">
             <WordChallengeTrigger />
             <WordPracticeTrigger />
-            <Link
-              href="/entries/new"
-              className="bg-black dark:bg-[#0a0a0a] text-white dark:text-[#ffffff] font-bold px-3 sm:px-4 py-2 rounded hover:bg-gray-800 dark:hover:bg-[#1a1a1a] border border-black dark:border-[#333333] text-sm sm:text-base whitespace-nowrap"
-            >
-              Create New Entry
-            </Link>
           </div>
         </div>
 
