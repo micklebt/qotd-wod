@@ -2,6 +2,7 @@ import { supabase } from './supabase';
 import type { WordMasteryTracking } from './supabase';
 import type { WordMasteryStatus } from './supabase';
 import { getCurrentParticipantId } from './participants';
+import { getCurrentTimestampEST } from './dateUtils';
 
 export type { WordMasteryStatus };
 
@@ -67,7 +68,7 @@ export async function startPractice(entryId: number, participantId?: string): Pr
       .from('word_mastery_tracking')
       .update({
         status: 'practicing',
-        last_practiced_at: new Date().toISOString(),
+        last_practiced_at: getCurrentTimestampEST(),
       })
       .eq('entry_id', entryId)
       .eq('participant_id', pid)
@@ -127,7 +128,7 @@ export async function recordPracticeAnswer(
     // Transition to 'mastered' when threshold is reached
     if (newCorrectCount >= MASTERY_THRESHOLD && existing.status !== 'mastered') {
       newStatus = 'mastered';
-      masteredAt = new Date().toISOString();
+      masteredAt = getCurrentTimestampEST();
     }
   } else {
     // Create new record if it doesn't exist
@@ -142,7 +143,7 @@ export async function recordPracticeAnswer(
   const updateData: Partial<WordMasteryTracking> = {
     status: newStatus,
     correct_count: newCorrectCount,
-    last_practiced_at: new Date().toISOString(),
+    last_practiced_at: getCurrentTimestampEST(),
     ...(masteredAt && { mastered_at: masteredAt }),
   };
 
@@ -289,8 +290,8 @@ export async function markAsConfident(
       participant_id: pid,
       status: 'mastered',
       correct_count: MASTERY_THRESHOLD,
-      last_practiced_at: new Date().toISOString(),
-      mastered_at: new Date().toISOString(),
+    last_practiced_at: getCurrentTimestampEST(),
+    mastered_at: getCurrentTimestampEST(),
     }, {
       onConflict: 'entry_id,participant_id',
     })

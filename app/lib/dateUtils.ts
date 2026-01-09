@@ -183,3 +183,107 @@ export function getNextDayEST(dateStr: string): string {
   return getDateStringEST(date);
 }
 
+/**
+ * Gets the current timestamp in EST/EDT timezone as ISO string
+ * This should be used instead of new Date().toISOString() for all database operations
+ * to ensure all timestamps are stored in EST timezone
+ */
+export function getCurrentTimestampEST(): string {
+  const now = new Date();
+  const estDate = toEST(now);
+  return estDate.toISOString();
+}
+
+/**
+ * Converts an EST date string (YYYY-MM-DD) to EST timestamp range for database queries
+ * Returns start and end timestamps in ISO format for the given EST date
+ * Uses America/New_York timezone to handle EST/EDT automatically
+ */
+export function getESTDateRange(dateStr: string): { start: string; end: string } {
+  const [year, month, day] = dateStr.split('-').map(Number);
+  
+  // Create a date representing midnight EST/EDT
+  // We use a trick: create a date string with EST timezone offset and parse it
+  // First, try EST (UTC-5), then check if we need EDT (UTC-4)
+  const dateStrFormatted = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+  
+  // Create dates representing EST times using timezone-aware parsing
+  // Use Intl to get the actual UTC time for EST midnight
+  const estMidnightStr = `${dateStrFormatted}T00:00:00`;
+  const estEndOfDayStr = `${dateStrFormatted}T23:59:59`;
+  
+  // Convert EST time strings to UTC by using the timezone offset
+  // Create a date object and use toLocaleString to get UTC equivalent
+  const tempDate = new Date(`${dateStrFormatted}T12:00:00`);
+  
+  // Get the UTC offset for this date in EST timezone
+  // Create a formatter to determine the offset
+  const formatter = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'America/New_York',
+    timeZoneName: 'longOffset'
+  });
+  
+  // Simpler approach: use the fact that we can create a date and check its offset
+  // EST is UTC-5, EDT is UTC-4
+  // Check if date is in DST period (roughly March-November)
+  const isDST = isDateInDST(year, month - 1, day);
+  const offsetHours = isDST ? 4 : 5; // EDT = UTC-4, EST = UTC-5
+  
+  // Create UTC timestamps representing EST/EDT times
+  const start = new Date(Date.UTC(year, month - 1, day, offsetHours, 0, 0));
+  const end = new Date(Date.UTC(year, month - 1, day, offsetHours + 24, 0, 0) - 1); // 1ms before next day
+  
+  return {
+    start: start.toISOString(),
+    end: end.toISOString()
+  };
+}
+
+/**
+ * Determines if a date is in Daylight Saving Time (EDT) in America/New_York timezone
+ * DST typically runs from 2nd Sunday in March to 1st Sunday in November
+ */
+function isDateInDST(year: number, month: number, day: number): boolean {
+  // DST starts: 2nd Sunday in March at 2:00 AM
+  // DST ends: 1st Sunday in November at 2:00 AM
+  const marchSecondSunday = getNthSunday(year, 2, 1); // month 2 = March (0-indexed), 1 = 2nd Sunday
+  const novemberFirstSunday = getNthSunday(year, 10, 0); // month 10 = November (0-indexed), 0 = 1st Sunday
+  
+  const date = new Date(year, month, day);
+  const marchStart = new Date(year, 2, marchSecondSunday, 2, 0, 0); // 2 AM EST
+  const novemberEnd = new Date(year, 10, novemberFirstSunday, 2, 0, 0); // 2 AM EST
+  
+  return date >= marchStart && date < novemberEnd;
+}
+
+/**
+ * Gets the day of month for the nth Sunday in a given month (0-indexed: 0 = 1st Sunday, 1 = 2nd Sunday)
+ */
+function getNthSunday(year: number, month: number, n: number): number {
+  // Find first Sunday of the month
+  const firstDay = new Date(year, month, 1);
+  const firstDayOfWeek = firstDay.getDay();
+  const daysUntilFirstSunday = (7 - firstDayOfWeek) % 7;
+  const firstSunday = 1 + daysUntilFirstSunday;
+  
+  // Get nth Sunday (0-indexed, so n=0 is first Sunday, n=1 is second Sunday)
+  return firstSunday + (n * 7);
+}
+
+/**
+ * Gets EST timestamp range for a month (start and end of month in EST)
+ */
+export function getESTMonthRange(year: number, month: number): { start: string; end: string } {
+  const monthStart = getMonthStartEST(year, month);
+  const monthEndDate = new Date(year, month + 1, 0); // Last day of month
+  const monthEndStr = getDateStringEST(monthEndDate);
+  
+  const startRange = getESTDateRange(monthStart);
+  const endRange = getESTDateRange(monthEndStr);
+  
+  return {
+    start: startRange.start,
+    end: endRange.end
+  };
+}
+

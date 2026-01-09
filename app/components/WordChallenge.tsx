@@ -5,6 +5,7 @@ import type { Entry, WordMasteryStatus } from '@/lib/supabase';
 import { useState, useEffect } from 'react';
 import { getCurrentParticipantId, getParticipantName, getParticipantsAsync, type Participant } from '@/lib/participants';
 import { getMasteryStatus, markAsConfident, markAsProblemWord, removeFromProblemWords } from '@/lib/wordMastery';
+import { getCurrentTimestampEST } from '@/lib/dateUtils';
 import Navigation from './Navigation';
 
 interface WordChallengeProps {
@@ -216,8 +217,8 @@ export default function WordChallenge({ isOpen, onClose }: WordChallengeProps) {
           entry_id: randomWord.id,
           participant_id: participantId,
           is_known: isKnown,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
+          created_at: getCurrentTimestampEST(),
+          updated_at: getCurrentTimestampEST(),
         });
 
       if (error) {

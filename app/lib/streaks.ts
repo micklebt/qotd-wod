@@ -1,5 +1,5 @@
 import { supabase } from './supabase';
-import { getDateStringEST, getCurrentMonthStartEST, getPreviousMonthStartEST, getPreviousDayEST } from './dateUtils';
+import { getDateStringEST, getCurrentMonthStartEST, getPreviousMonthStartEST, getPreviousDayEST, getESTMonthRange, getCurrentTimestampEST } from './dateUtils';
 import type { BadgeType } from './supabase';
 
 const HIGH_PARTICIPATION_DAYS_THRESHOLD = 20;
@@ -92,7 +92,7 @@ export async function updateParticipantStreak(participantId: string): Promise<vo
       current_streak: currentStreak,
       longest_streak: longestStreak,
       last_activity_date: todayEST,
-      updated_at: new Date().toISOString(),
+      updated_at: getCurrentTimestampEST(),
     }, {
       onConflict: 'participant_id',
     });
@@ -107,16 +107,14 @@ export async function updateParticipantStreak(participantId: string): Promise<vo
 }
 
 export async function calculateParticipationDaysInMonth(participantId: string, year: number, month: number): Promise<number> {
-  const monthStart = `${year}-${String(month + 1).padStart(2, '0')}-01`;
-  const monthEnd = new Date(year, month + 1, 0);
-  const monthEndStr = getDateStringEST(monthEnd);
+  const monthRange = getESTMonthRange(year, month);
 
   const { data: entries, error } = await supabase
     .from('entries')
     .select('created_at')
     .eq('participant_id', participantId)
-    .gte('created_at', `${monthStart}T00:00:00Z`)
-    .lte('created_at', `${monthEndStr}T23:59:59Z`);
+    .gte('created_at', monthRange.start)
+    .lte('created_at', monthRange.end);
 
   if (error || !entries || entries.length === 0) {
     return 0;
