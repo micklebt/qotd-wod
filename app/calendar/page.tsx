@@ -366,7 +366,16 @@ export default function CalendarPage() {
   return (
     <div className="max-w-4xl mx-auto px-3 sm:px-4 py-3 sm:py-4 bg-white dark:bg-[#000000]">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-2 mb-3 sm:mb-4">
-        <h1 className="text-2xl sm:text-3xl font-bold text-black dark:text-[#ffffff]">Participation Calendar <span className="text-black dark:text-[#ffffff]">{currentYear}</span></h1>
+        <div className="flex items-center gap-3">
+          <h1 className="text-2xl sm:text-3xl font-bold text-black dark:text-[#ffffff]">Participation Calendar <span className="text-black dark:text-[#ffffff]">{currentYear}</span></h1>
+          <Link
+            href="/competition"
+            className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white font-bold px-3 py-1.5 rounded hover:from-yellow-600 hover:to-orange-600 text-sm whitespace-nowrap"
+            title="View Competition Portal"
+          >
+            🏆 Competition
+          </Link>
+        </div>
         <div className="flex gap-1 items-center flex-wrap">
           <button
             onClick={goToPreviousDay}

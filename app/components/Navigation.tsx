@@ -43,6 +43,12 @@ export default function Navigation() {
               Calendar
             </Link>
             <Link
+              href="/competition"
+              className="text-black dark:text-[#ffffff] hover:text-gray-700 dark:hover:text-[#e5e5e5] font-semibold text-sm sm:text-base py-1"
+            >
+              Competition
+            </Link>
+            <Link
               href="/entries/new"
               className="text-blue-700 dark:text-[#3b82f6] hover:text-blue-900 dark:hover:text-[#60a5fa] font-semibold text-sm sm:text-base py-1"
             >

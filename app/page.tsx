@@ -4,7 +4,6 @@ import { getParticipantNameAsync, preloadParticipants, getParticipantsAsync } fr
 import Link from 'next/link';
 import WordChallengeTrigger from '@/components/WordChallengeTrigger';
 import WordPracticeTrigger from '@/components/WordPracticeTrigger';
-import StreakDisplay from '@/components/StreakDisplay';
 import HomeWordCard from '@/components/HomeWordCard';
 
 export const dynamic = 'force-dynamic';
@@ -114,17 +113,6 @@ export default async function Home() {
               Create New Entry
             </Link>
           </div>
-        </div>
-
-        <StreakDisplay className="mb-3 sm:mb-4" />
-
-        <div className="mb-3 sm:mb-4">
-          <Link 
-            href="/badges-demo" 
-            className="text-blue-700 dark:text-[#3b82f6] hover:underline font-bold text-sm sm:text-base inline-block"
-          >
-            View Badge Showcase →
-          </Link>
         </div>
 
         {/* Word of the Day */}

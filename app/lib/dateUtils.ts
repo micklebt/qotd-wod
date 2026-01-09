@@ -286,4 +286,3 @@ export function getESTMonthRange(year: number, month: number): { start: string; 
     end: endRange.end
   };
 }
-

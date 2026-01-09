@@ -268,9 +268,11 @@ async function checkAndAwardBadges(participantId: string, currentStreak: number)
   const currentBadge = getBadgeForStreak(currentStreak);
   if (!currentBadge) return;
 
+  const todayEST = getDateStringEST(new Date());
+
   const { data: existingBadges, error: fetchError } = await supabase
     .from('participant_badges')
-    .select('badge_type')
+    .select('badge_type, streak_length, earned_date')
     .eq('participant_id', participantId);
 
   if (fetchError) {
@@ -278,23 +280,45 @@ async function checkAndAwardBadges(participantId: string, currentStreak: number)
     return;
   }
 
-  const earnedBadgeTypes = new Set(existingBadges?.map(b => b.badge_type) || []);
-  
   for (const badgeType of BADGE_ORDER) {
-    if (currentStreak >= BADGE_MILESTONES[badgeType] && !earnedBadgeTypes.has(badgeType)) {
-      const todayEST = getDateStringEST(new Date());
+    if (currentStreak >= BADGE_MILESTONES[badgeType]) {
+      const isRepeatableBadge = badgeType === 'bronze' || badgeType === 'silver';
+      const existingBadgesOfType = existingBadges?.filter(b => b.badge_type === badgeType) || [];
       
-      const { error: insertError } = await supabase
-        .from('participant_badges')
-        .insert({
-          participant_id: participantId,
-          badge_type: badgeType,
-          earned_date: todayEST,
-          streak_length: currentStreak,
-        });
+      if (isRepeatableBadge) {
+        const alreadyAwardedToday = existingBadgesOfType.some(b => b.earned_date === todayEST);
+        const alreadyAwardedForThisStreak = existingBadgesOfType.some(b => b.streak_length === currentStreak);
+        
+        if (!alreadyAwardedToday && !alreadyAwardedForThisStreak) {
+          const { error: insertError } = await supabase
+            .from('participant_badges')
+            .insert({
+              participant_id: participantId,
+              badge_type: badgeType,
+              earned_date: todayEST,
+              streak_length: currentStreak,
+            });
 
-      if (insertError) {
-        console.error(`Error awarding ${badgeType} badge:`, insertError);
+          if (insertError) {
+            console.error(`Error awarding ${badgeType} badge:`, insertError);
+          }
+        }
+      } else {
+        const hasThisBadge = existingBadgesOfType.length > 0;
+        if (!hasThisBadge) {
+          const { error: insertError } = await supabase
+            .from('participant_badges')
+            .insert({
+              participant_id: participantId,
+              badge_type: badgeType,
+              earned_date: todayEST,
+              streak_length: currentStreak,
+            });
+
+          if (insertError) {
+            console.error(`Error awarding ${badgeType} badge:`, insertError);
+          }
+        }
       }
     }
   }

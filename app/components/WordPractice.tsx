@@ -138,19 +138,15 @@ export default function WordPractice({ isOpen, onClose }: WordPracticeProps) {
 
       if (error) throw error;
 
-      const sortedEntries = (entries || []).sort((a, b) => {
-        const aWord = words.find(w => w.entry_id === a.id);
-        const bWord = words.find(w => w.entry_id === b.id);
-        // Sort by status: not_known first, then practicing
-        if (aWord?.status === 'not_known' && bWord?.status !== 'not_known') return -1;
-        if (aWord?.status !== 'not_known' && bWord?.status === 'not_known') return 1;
-        return 0;
-      });
+      // Shuffle the entries array randomly
+      const shuffledEntries = [...(entries || [])];
+      shuffleArray(shuffledEntries);
 
-      setProblemWords(sortedEntries);
-      if (sortedEntries.length > 0) {
+      setProblemWords(shuffledEntries);
+      if (shuffledEntries.length > 0) {
+        // Start at index 0 (which is now random due to shuffling)
         setCurrentWordIndex(0);
-        setCurrentWord(sortedEntries[0]);
+        setCurrentWord(shuffledEntries[0]);
       } else {
         setCurrentWord(null);
       }
@@ -217,10 +213,12 @@ export default function WordPractice({ isOpen, onClose }: WordPracticeProps) {
     setCorrectAnswerIndex(0);
 
     if (currentWordIndex < problemWords.length - 1) {
-      setCurrentWordIndex(currentWordIndex + 1);
-      setCurrentWord(problemWords[currentWordIndex + 1]);
+      const nextIndex = currentWordIndex + 1;
+      setCurrentWordIndex(nextIndex);
+      setCurrentWord(problemWords[nextIndex]);
     } else {
-      // Reload problem words to get updated list (some may be mastered now)
+      // Reached the end of the list - reload to get updated problem words
+      // (some may be mastered now, and we'll get a new random order)
       loadProblemWords();
     }
   };

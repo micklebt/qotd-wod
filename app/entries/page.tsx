@@ -6,7 +6,7 @@ import type { Entry } from '@/lib/supabase';
 import { getParticipantsAsync, type Participant } from '@/lib/participants';
 import { getProblemWords } from '@/lib/wordMastery';
 import { getCurrentParticipantId } from '@/lib/participants';
-import { getDateStringEST } from '@/lib/dateUtils';
+import { getDateStringEST, getPreviousDayEST } from '@/lib/dateUtils';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 
@@ -94,6 +94,10 @@ export default function EntriesPage() {
               console.log('Date filter - Today:', todayEST, 'Entry:', entryDateEST, 'Matches:', matches);
             }
             return matches;
+          } else if (selectedDate === 'yesterday') {
+            // Get yesterday's date in EST
+            const yesterdayEST = getPreviousDayEST(todayEST);
+            return entryDateEST === yesterdayEST;
           } else if (selectedDate === 'this-week') {
             // Get date 7 days ago in EST
             const weekAgoDate = new Date(now);
@@ -260,6 +264,7 @@ export default function EntriesPage() {
             >
               <option value="all">All Dates</option>
               <option value="today">Today</option>
+              <option value="yesterday">Yesterday</option>
               <option value="this-week">This Week</option>
               <option value="this-month">This Month</option>
               <option value="this-year">This Year</option>
@@ -376,37 +381,8 @@ export default function EntriesPage() {
       <div className="mb-4 sm:mb-6">
         <h2 className="text-base sm:text-lg font-bold text-black dark:text-[#ffffff] mb-3">Words</h2>
         <div className="flex flex-wrap gap-2 sm:gap-3">
-          {entries
-            .filter(entry => {
-              if (entry.type !== 'word') return false;
-              
-              // Apply alphabet filter if selected
-              if (selectedLetter !== 'all' && entry.content && entry.content.length > 0) {
-                const firstLetter = entry.content.charAt(0).toUpperCase();
-                // Handle combined letter pairs
-                const letterPairs: Record<string, string[]> = {
-                  'O': ['O', 'P'],
-                  'P': ['O', 'P'],
-                  'Q': ['Q', 'R'],
-                  'R': ['Q', 'R'],
-                  'S': ['S', 'T'],
-                  'T': ['S', 'T'],
-                  'U': ['U', 'V'],
-                  'V': ['U', 'V'],
-                  'W': ['W', 'X'],
-                  'X': ['W', 'X'],
-                  'Y': ['Y', 'Z'],
-                  'Z': ['Y', 'Z']
-                };
-                
-                if (letterPairs[selectedLetter]) {
-                  return letterPairs[selectedLetter].includes(firstLetter);
-                }
-                return firstLetter === selectedLetter;
-              }
-              
-              return true;
-            })
+          {filteredEntries
+            .filter(entry => entry.type === 'word')
             .sort((a, b) => a.content.localeCompare(b.content))
             .map((entry: Entry) => (
               <Link

@@ -21,9 +21,9 @@ export default function WordPracticeTrigger() {
     <>
       <button
         onClick={() => setIsOpen(true)}
-        className="bg-accent-blue text-white font-bold px-3 sm:px-4 py-2 rounded hover:bg-blue-600 dark:hover:bg-blue-700 border border-blue-900 dark:border-blue-300 text-sm sm:text-base"
+        className="bg-yellow-100 dark:bg-yellow-900 text-yellow-900 dark:text-yellow-100 font-bold px-3 sm:px-4 py-2 rounded hover:bg-yellow-200 dark:hover:bg-yellow-800 border border-yellow-700 dark:border-yellow-300 text-sm sm:text-base transition-colors"
       >
-        Practice Words
+        Problem Words
       </button>
       <WordPractice isOpen={isOpen} onClose={() => setIsOpen(false)} />
     </>
