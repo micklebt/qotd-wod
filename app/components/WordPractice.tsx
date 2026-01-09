@@ -6,7 +6,6 @@ import { useState, useEffect } from 'react';
 import { getCurrentParticipantId } from '@/lib/participants';
 import { getProblemWords, recordPracticeAnswer } from '@/lib/wordMastery';
 import type { WordMasteryStatus } from '@/lib/supabase';
-import Navigation from './Navigation';
 
 interface WordPracticeProps {
   isOpen: boolean;
@@ -239,8 +238,15 @@ export default function WordPractice({ isOpen, onClose }: WordPracticeProps) {
     return (
       <div className="fixed inset-0 bg-black bg-opacity-70 dark:bg-opacity-80 flex items-center justify-center z-50 p-4">
         <div className="bg-white dark:bg-[#0a0a0a] rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-black dark:border-[#333333]">
-          <div className="sticky top-0 bg-white dark:bg-[#0a0a0a] z-10 border-b border-black dark:border-[#333333]">
-            <Navigation />
+          <div className="sticky top-0 bg-white dark:bg-[#0a0a0a] z-10 border-b border-black dark:border-[#333333] px-4 py-3 flex items-center justify-between">
+            <h2 className="text-lg font-bold text-black dark:text-white">Problem Words</h2>
+            <button
+              onClick={onClose}
+              className="text-gray-500 hover:text-black dark:hover:text-white text-2xl font-bold leading-none p-1"
+              aria-label="Close"
+            >
+              ×
+            </button>
           </div>
           <div className="p-4 sm:p-6">
             <div className="text-center py-12">
@@ -264,8 +270,15 @@ export default function WordPractice({ isOpen, onClose }: WordPracticeProps) {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-70 dark:bg-opacity-80 flex items-center justify-center z-50 p-4">
       <div className="bg-white dark:bg-[#0a0a0a] rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-black dark:border-[#333333]">
-        <div className="sticky top-0 bg-white dark:bg-[#0a0a0a] z-10 border-b border-black dark:border-[#333333]">
-          <Navigation />
+        <div className="sticky top-0 bg-white dark:bg-[#0a0a0a] z-10 border-b border-black dark:border-[#333333] px-4 py-3 flex items-center justify-between">
+          <h2 className="text-lg font-bold text-black dark:text-white">Problem Words</h2>
+          <button
+            onClick={onClose}
+            className="text-gray-500 hover:text-black dark:hover:text-white text-2xl font-bold leading-none p-1"
+            aria-label="Close"
+          >
+            ×
+          </button>
         </div>
         <div className="p-4 sm:p-6">
           {currentWord && (

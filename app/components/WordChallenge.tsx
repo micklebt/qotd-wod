@@ -2,11 +2,10 @@
 
 import { supabase } from '@/lib/supabase';
 import type { Entry, WordMasteryStatus } from '@/lib/supabase';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { getCurrentParticipantId, getParticipantName, getParticipantsAsync, type Participant } from '@/lib/participants';
 import { getMasteryStatus, markAsConfident, markAsProblemWord, removeFromProblemWords } from '@/lib/wordMastery';
 import { getCurrentTimestampEST } from '@/lib/dateUtils';
-import Navigation from './Navigation';
 
 interface WordChallengeProps {
   isOpen: boolean;
@@ -30,6 +29,7 @@ export default function WordChallenge({ isOpen, onClose }: WordChallengeProps) {
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [masteryStatus, setMasteryStatus] = useState<WordMasteryStatus | null>(null);
   const [markingProblem, setMarkingProblem] = useState(false);
+  const helpSectionRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (isOpen) {
@@ -259,8 +259,15 @@ export default function WordChallenge({ isOpen, onClose }: WordChallengeProps) {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-70 dark:bg-opacity-80 flex items-center justify-center z-50 p-4">
       <div className="bg-white dark:bg-[#0a0a0a] rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-black dark:border-[#333333]">
-        <div className="sticky top-0 bg-white dark:bg-[#0a0a0a] z-10 border-b border-black dark:border-[#333333]">
-          <Navigation />
+        <div className="sticky top-0 bg-white dark:bg-[#0a0a0a] z-10 border-b border-black dark:border-[#333333] px-4 py-3 flex items-center justify-between">
+          <h2 className="text-lg font-bold text-black dark:text-white">Flash Cards</h2>
+          <button
+            onClick={onClose}
+            className="text-gray-500 hover:text-black dark:hover:text-white text-2xl font-bold leading-none p-1"
+            aria-label="Close"
+          >
+            ×
+          </button>
         </div>
         <div className="p-4 sm:p-6">
           {loading ? (
@@ -297,7 +304,12 @@ export default function WordChallenge({ isOpen, onClose }: WordChallengeProps) {
                   </button>
                   {!showMetadata && (
                     <button
-                      onClick={() => setShowMetadata(true)}
+                      onClick={() => {
+                        setShowMetadata(true);
+                        setTimeout(() => {
+                          helpSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }, 100);
+                      }}
                       className="px-3 sm:px-4 py-1.5 sm:py-2 bg-blue-100 dark:bg-blue-900 text-blue-900 dark:text-blue-100 font-bold rounded border border-blue-700 dark:border-blue-300 hover:bg-blue-200 dark:hover:bg-blue-800 transition-colors text-xs sm:text-sm"
                     >
                       Help
@@ -420,7 +432,7 @@ export default function WordChallenge({ isOpen, onClose }: WordChallengeProps) {
               </div>
 
               {showMetadata && randomWord.word_metadata && randomWord.word_metadata[0] && (
-                <div className="border-t border-black dark:border-white pt-6 space-y-4">
+                <div ref={helpSectionRef} className="border-t border-black dark:border-white pt-6 space-y-4">
                   <div>
                     <p className="text-sm font-bold text-black dark:text-white mb-1">Pronunciation</p>
                     <p className="text-lg text-black dark:text-white">{randomWord.word_metadata[0].pronunciation_respelling || randomWord.word_metadata[0].pronunciation_ipa || randomWord.word_metadata[0].pronunciation || 'N/A'}</p>
