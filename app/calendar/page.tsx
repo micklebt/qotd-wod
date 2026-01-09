@@ -3,7 +3,7 @@
 import { supabase } from '@/lib/supabase';
 import type { Entry } from '@/lib/supabase';
 import { getParticipantsAsync, getCurrentParticipantId, type Participant } from '@/lib/participants';
-import { getDateStringEST, getYearEST, toEST, getPreviousDayEST, getNextDayEST, formatDateEST } from '@/lib/dateUtils';
+import { getDateStringEST, getYearEST, toEST, getPreviousDayEST, getNextDayEST, formatDateEST, daysBetweenEST } from '@/lib/dateUtils';
 import { useState, useEffect, useMemo } from 'react';
 import StreakDisplay from '@/components/StreakDisplay';
 import Link from 'next/link';
@@ -227,9 +227,7 @@ export default function CalendarPage() {
     let currentStreak = 1;
 
     for (let i = 1; i < uniqueDates.length; i++) {
-      const prevDate = new Date(uniqueDates[i - 1]);
-      const currDate = new Date(uniqueDates[i]);
-      const diffDays = Math.floor((currDate.getTime() - prevDate.getTime()) / (1000 * 60 * 60 * 24));
+      const diffDays = daysBetweenEST(uniqueDates[i - 1], uniqueDates[i]);
 
       if (diffDays === 1) {
         currentStreak++;

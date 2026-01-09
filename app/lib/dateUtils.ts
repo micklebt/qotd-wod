@@ -190,3 +190,25 @@ export function getESTMonthRange(year: number, month: number): { start: string; 
     end: endRange.end
   };
 }
+
+/**
+ * Parses an EST date string (YYYY-MM-DD) into a Date object representing noon on that day.
+ * 
+ * CRITICAL: Using new Date("2026-01-08") creates midnight UTC, which is 7pm EST on Jan 7th!
+ * This function creates noon local time on the specified date to avoid timezone issues.
+ */
+export function parseESTDateString(dateStr: string): Date {
+  const [year, month, day] = dateStr.split('-').map(Number);
+  return new Date(year, month - 1, day, 12, 0, 0);
+}
+
+/**
+ * Calculates the number of days between two EST date strings.
+ * Returns a positive number if date2 is after date1.
+ */
+export function daysBetweenEST(date1: string, date2: string): number {
+  const d1 = parseESTDateString(date1);
+  const d2 = parseESTDateString(date2);
+  const diffMs = d2.getTime() - d1.getTime();
+  return Math.round(diffMs / (1000 * 60 * 60 * 24));
+}

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { getParticipantsAsync, type Participant } from '@/lib/participants';
-import { getDateStringEST } from '@/lib/dateUtils';
+import { getDateStringEST, parseESTDateString, daysBetweenEST } from '@/lib/dateUtils';
 import Link from 'next/link';
 
 interface ParticipantStats {
@@ -150,7 +150,7 @@ export default function CompetitionPage() {
           while (true) {
             if (sortedDates.includes(checkDate)) {
               currentStreak++;
-              const d = new Date(checkDate);
+              const d = parseESTDateString(checkDate);
               d.setDate(d.getDate() - 1);
               checkDate = getDateStringEST(d);
             } else {
@@ -166,9 +166,7 @@ export default function CompetitionPage() {
             if (i === 0) {
               tempStreak = 1;
             } else {
-              const prev = new Date(allSortedDates[i - 1]);
-              const curr = new Date(allSortedDates[i]);
-              const diffDays = Math.floor((curr.getTime() - prev.getTime()) / (1000 * 60 * 60 * 24));
+              const diffDays = daysBetweenEST(allSortedDates[i - 1], allSortedDates[i]);
               if (diffDays === 1) {
                 tempStreak++;
               } else {
@@ -184,19 +182,19 @@ export default function CompetitionPage() {
           const consistencyPercent = totalPossibleDays > 0 ? Math.round((totalDays / totalPossibleDays) * 100) : 0;
 
           const weeklyDays = Array.from(uniqueDates).filter(d => {
-            const date = new Date(d);
+            const date = parseESTDateString(d);
             return date >= weekStart && date <= now;
           }).length;
 
           const rolling7Days = Array.from(uniqueDates).filter(d => {
-            const date = new Date(d);
+            const date = parseESTDateString(d);
             return date >= rolling7DaysAgo && date <= now;
           }).length;
 
           const todayEntries = entryCountByDate.get(todayStr) || 0;
 
           const lastWeekDays = Array.from(uniqueDates).filter(d => {
-            const date = new Date(d);
+            const date = parseESTDateString(d);
             return date >= lastWeekStart && date <= lastWeekEnd;
           }).length;
 
