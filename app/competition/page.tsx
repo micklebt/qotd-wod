@@ -193,10 +193,13 @@ export default function CompetitionPage() {
       {/* Champion Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
         {/* Streak Champion */}
-        <div className="bg-gradient-to-br from-yellow-100 to-yellow-200 dark:from-yellow-900 dark:to-yellow-800 border-2 border-yellow-500 rounded-lg p-4">
+        <div className="bg-gradient-to-br from-yellow-100 to-yellow-200 dark:from-yellow-900 dark:to-yellow-800 border-2 border-yellow-500 rounded-lg p-4 relative group">
           <div className="text-center">
             <div className="text-3xl mb-2">👑</div>
-            <h3 className="font-bold text-yellow-900 dark:text-yellow-100 text-sm mb-1">STREAK CHAMPION</h3>
+            <h3 className="font-bold text-yellow-900 dark:text-yellow-100 text-sm mb-1 flex items-center justify-center gap-1">
+              STREAK CHAMPION
+              <span className="cursor-help text-yellow-700 dark:text-yellow-300 text-xs" title="Click for details">ⓘ</span>
+            </h3>
             {streakChampion && (
               <>
                 <p className="text-lg font-bold text-yellow-800 dark:text-yellow-200">{streakChampion.participant.name}</p>
@@ -204,13 +207,20 @@ export default function CompetitionPage() {
               </>
             )}
           </div>
+          <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-64 p-3 bg-yellow-900 text-yellow-100 text-xs rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-10">
+            <p className="font-bold mb-1">How it&apos;s calculated:</p>
+            <p>The participant with the longest <strong>current active streak</strong>. A streak counts consecutive days with at least one entry. Missing a day resets the streak to zero.</p>
+          </div>
         </div>
 
         {/* Monthly Race Leader */}
-        <div className="bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900 dark:to-blue-800 border-2 border-blue-500 rounded-lg p-4">
+        <div className="bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900 dark:to-blue-800 border-2 border-blue-500 rounded-lg p-4 relative group">
           <div className="text-center">
             <div className="text-3xl mb-2">🏃</div>
-            <h3 className="font-bold text-blue-900 dark:text-blue-100 text-sm mb-1">MONTHLY RACE LEADER</h3>
+            <h3 className="font-bold text-blue-900 dark:text-blue-100 text-sm mb-1 flex items-center justify-center gap-1">
+              MONTHLY RACE LEADER
+              <span className="cursor-help text-blue-700 dark:text-blue-300 text-xs" title="Click for details">ⓘ</span>
+            </h3>
             <p className="text-xs text-blue-700 dark:text-blue-300 mb-1">{currentMonth}</p>
             {monthlyRaceLeader && (
               <>
@@ -219,19 +229,30 @@ export default function CompetitionPage() {
               </>
             )}
           </div>
+          <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-64 p-3 bg-blue-900 text-blue-100 text-xs rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-10">
+            <p className="font-bold mb-1">How it&apos;s calculated:</p>
+            <p>The participant with the <strong>most participation days this month</strong>. Each unique day with at least one entry counts. Shown as days participated / days elapsed in the month.</p>
+          </div>
         </div>
 
         {/* Consistency Award */}
-        <div className="bg-gradient-to-br from-green-100 to-green-200 dark:from-green-900 dark:to-green-800 border-2 border-green-500 rounded-lg p-4">
+        <div className="bg-gradient-to-br from-green-100 to-green-200 dark:from-green-900 dark:to-green-800 border-2 border-green-500 rounded-lg p-4 relative group">
           <div className="text-center">
             <div className="text-3xl mb-2">🎯</div>
-            <h3 className="font-bold text-green-900 dark:text-green-100 text-sm mb-1">CONSISTENCY AWARD</h3>
+            <h3 className="font-bold text-green-900 dark:text-green-100 text-sm mb-1 flex items-center justify-center gap-1">
+              CONSISTENCY AWARD
+              <span className="cursor-help text-green-700 dark:text-green-300 text-xs" title="Click for details">ⓘ</span>
+            </h3>
             {consistencyLeader && (
               <>
                 <p className="text-lg font-bold text-green-800 dark:text-green-200">{consistencyLeader.participant.name}</p>
                 <p className="text-2xl font-bold text-green-900 dark:text-green-100">{consistencyLeader.consistencyPercent}%</p>
               </>
             )}
+          </div>
+          <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-64 p-3 bg-green-900 text-green-100 text-xs rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-10">
+            <p className="font-bold mb-1">How it&apos;s calculated:</p>
+            <p>The participant with the <strong>highest participation percentage</strong> since their first entry. Calculated as: (total days participated ÷ total days since first entry) × 100.</p>
           </div>
         </div>
       </div>
