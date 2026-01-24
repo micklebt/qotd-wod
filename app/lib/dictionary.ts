@@ -1,4 +1,6 @@
 import { filterAndRankExamples } from './exampleQuality';
+import { getSingularForms } from './pluralForms';
+import { logger } from './logger';
 
 interface DictionaryResponse {
   word: string;
@@ -100,46 +102,18 @@ export async function lookupWord(word: string): Promise<{
         const audioPath = phoneticWithAudio?.audio || '';
         // Convert relative URLs to absolute URLs (dictionaryapi.dev usually returns full URLs, but handle both)
         if (audioPath && audioPath.trim() !== '') {
-          audioUrl = audioPath.startsWith('http') 
-            ? audioPath 
+          audioUrl = audioPath.startsWith('http')
+            ? audioPath
             : `https://api.dictionaryapi.dev${audioPath.startsWith('/') ? '' : '/'}${audioPath}`;
-          console.log('Found audio URL:', audioUrl);
+          logger.debug('Found audio URL', { context: { audioUrl } });
         }
       }
     });
 
     // If no pronunciation found, try singular form for plural words
     if (!pronunciation && !audioUrl) {
-      const wordLower = word.trim().toLowerCase();
-      // Try singular form if word ends in common plural endings
-      if (wordLower.endsWith('ics') && wordLower.length > 3) {
-        // For words ending in -ics (like diacritics -> diacritic)
-        const singularForm = wordLower.slice(0, -1); // Remove 's'
-        try {
-          const singularResponse = await fetch(
-            `https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(singularForm)}`
-          );
-          if (singularResponse.ok) {
-            const singularData: DictionaryResponse[] = await singularResponse.json();
-            if (singularData && singularData.length > 0) {
-              const singularEntry = singularData[0];
-              pronunciation = singularEntry.phonetic || 
-                            singularEntry.phonetics?.find(p => p.text)?.text || 
-                            '';
-              const audioPath = singularEntry.phonetics?.find(p => p.audio)?.audio || '';
-              if (audioPath && !audioUrl) {
-                audioUrl = audioPath.startsWith('http') 
-                  ? audioPath 
-                  : `https://api.dictionaryapi.dev${audioPath.startsWith('/') ? '' : '/'}${audioPath}`;
-              }
-            }
-          }
-        } catch (e) {
-          // Silently fail
-        }
-      } else if (wordLower.endsWith('s') && wordLower.length > 2 && !wordLower.endsWith('ss')) {
-        // Try removing 's' for regular plurals
-        const singularForm = wordLower.slice(0, -1);
+      const singularForms = getSingularForms(word.trim());
+      for (const singularForm of singularForms) {
         try {
           const singularResponse = await fetch(
             `https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(singularForm)}`
@@ -149,22 +123,24 @@ export async function lookupWord(word: string): Promise<{
             if (singularData && singularData.length > 0) {
               const singularEntry = singularData[0];
               if (!pronunciation) {
-                pronunciation = singularEntry.phonetic || 
-                              singularEntry.phonetics?.find(p => p.text)?.text || 
+                pronunciation = singularEntry.phonetic ||
+                              singularEntry.phonetics?.find(p => p.text)?.text ||
                               '';
               }
               if (!audioUrl) {
                 const audioPath = singularEntry.phonetics?.find(p => p.audio)?.audio || '';
                 if (audioPath) {
-                  audioUrl = audioPath.startsWith('http') 
-                    ? audioPath 
+                  audioUrl = audioPath.startsWith('http')
+                    ? audioPath
                     : `https://api.dictionaryapi.dev${audioPath.startsWith('/') ? '' : '/'}${audioPath}`;
                 }
               }
+              // If we found data, stop trying other forms
+              if (pronunciation || audioUrl) break;
             }
           }
-        } catch (e) {
-          // Silently fail
+        } catch {
+          // Continue to next form
         }
       }
     }
@@ -226,61 +202,78 @@ export async function lookupWord(word: string): Promise<{
       ? qualityFiltered.slice(0, 5).join('\n\n') 
       : '';
 
-    // Try to get additional examples from other sources (Wordnik, etc.)
-    // This enhances the examples we already have from dictionaryapi.dev
+    // PARALLEL API CALLS: Fetch examples and etymology simultaneously for better performance
+    // These calls don't depend on each other, so we can run them in parallel
     let wordnikSourceUrl: string | undefined = undefined;
-    try {
-      // Try our API route which uses Wordnik for real example sentences
-      // Note: Wordnik requires an API key, but we try anyway and fall back gracefully
-      const examplesResponse = await fetch(
-        `/api/examples?word=${encodeURIComponent(word.trim())}`,
-        { signal: AbortSignal.timeout(3000) }
-      );
-      
-      if (examplesResponse.ok) {
-        const examplesData = await examplesResponse.json();
-        if (examplesData.examples && Array.isArray(examplesData.examples) && examplesData.examples.length > 0) {
-          // If we already have examples from dictionaryapi.dev, combine them
-          // Otherwise, use the examples from the API route
-          if (exampleSentence) {
-            // Merge examples, avoiding duplicates using exact match (case-insensitive, trimmed)
-            const existingExamples = exampleSentence.split('\n\n').map(e => e.trim().toLowerCase());
-            const newExamples = examplesData.examples
-              .map((ex: string) => ex.trim())
-              .filter((ex: string) => {
-                const exLower = ex.toLowerCase();
-                // Check for exact match (case-insensitive)
-                return !existingExamples.some(existing => existing === exLower);
-              });
-            if (newExamples.length > 0) {
-              const allExamples = [...exampleSentence.split('\n\n'), ...newExamples];
-              // Remove duplicates again (in case of any edge cases)
-              const uniqueExamples = Array.from(new Set(allExamples.map(e => e.trim().toLowerCase())))
-                .map(lower => allExamples.find(e => e.trim().toLowerCase() === lower) || '')
-                .filter(e => e.length > 0);
-              exampleSentence = uniqueExamples.slice(0, 5).join('\n\n');
+
+    const [examplesResult, etymologyResult] = await Promise.allSettled([
+      // Examples API call
+      fetch(`/api/examples?word=${encodeURIComponent(word.trim())}`, {
+        signal: AbortSignal.timeout(3000)
+      }).then(async (res) => {
+        if (res.ok) {
+          const data = await res.json();
+          return { success: true, data };
+        }
+        return { success: false, data: null };
+      }).catch(() => ({ success: false, data: null })),
+
+      // Etymology API call (only if we don't have etymology from dictionary)
+      !etymology
+        ? fetch(`/api/etymology?word=${encodeURIComponent(word.trim())}`, {
+            signal: AbortSignal.timeout(5000)
+          }).then(async (res) => {
+            if (res.ok) {
+              const data = await res.json();
+              return { success: true, data };
             }
-          } else {
-            // Remove duplicates from new examples
-            const uniqueExamples = Array.from(new Set(examplesData.examples.map((e: string) => e.trim().toLowerCase())))
-              .map(lower => examplesData.examples.find((e: string) => e.trim().toLowerCase() === lower) || '')
+            return { success: false, data: null };
+          }).catch(() => ({ success: false, data: null }))
+        : Promise.resolve({ success: false, data: null })
+    ]);
+
+    // Process examples result
+    if (examplesResult.status === 'fulfilled' && examplesResult.value.success) {
+      const examplesData = examplesResult.value.data;
+      if (examplesData?.examples && Array.isArray(examplesData.examples) && examplesData.examples.length > 0) {
+        if (exampleSentence) {
+          // Merge examples, avoiding duplicates
+          const existingExamples = exampleSentence.split('\n\n').map(e => e.trim().toLowerCase());
+          const newExamples = examplesData.examples
+            .map((ex: string) => ex.trim())
+            .filter((ex: string) => !existingExamples.some(existing => existing === ex.toLowerCase()));
+          if (newExamples.length > 0) {
+            const allExamples = [...exampleSentence.split('\n\n'), ...newExamples];
+            const uniqueExamples = Array.from(new Set(allExamples.map(e => e.trim().toLowerCase())))
+              .map(lower => allExamples.find(e => e.trim().toLowerCase() === lower) || '')
               .filter(e => e.length > 0);
             exampleSentence = uniqueExamples.slice(0, 5).join('\n\n');
           }
-          
-          // Track Wordnik source URL for attribution if examples came from Wordnik
-          if (examplesData.wordnikSourceUrl) {
-            wordnikSourceUrl = examplesData.wordnikSourceUrl;
-          }
+        } else {
+          const uniqueExamples = Array.from(new Set(examplesData.examples.map((e: string) => e.trim().toLowerCase())))
+            .map(lower => examplesData.examples.find((e: string) => e.trim().toLowerCase() === lower) || '')
+            .filter(e => e.length > 0);
+          exampleSentence = uniqueExamples.slice(0, 5).join('\n\n');
         }
+        if (examplesData.wordnikSourceUrl) {
+          wordnikSourceUrl = examplesData.wordnikSourceUrl;
+        }
+        logger.apiCall('Wordnik Examples', true);
       }
-    } catch (examplesError) {
-      // Silently fail - examples are optional
-      // This is normal if Wordnik API key is not yet configured
-      console.log('Examples API lookup failed (this is normal if Wordnik API key is not configured):', examplesError);
+    } else {
+      logger.warn('Examples API lookup failed', { expected: true });
     }
 
-    // Fallback: Try WordsAPI if configured
+    // Process etymology result
+    if (!etymology && etymologyResult.status === 'fulfilled' && etymologyResult.value.success) {
+      const etymologyData = etymologyResult.value.data;
+      if (etymologyData?.etymology && etymologyData.etymology.trim()) {
+        etymology = etymologyData.etymology.trim();
+        logger.apiCall('Wiktionary Etymology', true, { preview: etymology.substring(0, 50) });
+      }
+    }
+
+    // Fallback: Try WordsAPI if no examples found
     if (!exampleSentence) {
       try {
         const wordsApiKey = process.env.NEXT_PUBLIC_WORDS_API_KEY;
@@ -295,88 +288,38 @@ export async function lookupWord(word: string): Promise<{
               signal: AbortSignal.timeout(3000)
             }
           );
-          
           if (wordsApiResponse.ok) {
             const wordsApiData = await wordsApiResponse.json();
             if (wordsApiData.examples && Array.isArray(wordsApiData.examples) && wordsApiData.examples.length > 0) {
               exampleSentence = wordsApiData.examples.slice(0, 5).join('\n\n');
+              logger.apiCall('WordsAPI', true);
             }
           }
         }
-      } catch (wordsApiError) {
-        // Silently fail - WordsAPI is optional
-        console.log('WordsAPI lookup failed (this is normal if not configured):', wordsApiError);
+      } catch {
+        logger.warn('WordsAPI lookup failed', { expected: true });
       }
     }
 
-    // If no etymology from dictionary API, try our API route (which uses Wiktionary)
+    // If still no etymology, try singular forms
     if (!etymology) {
-      try {
-        const etymologyResponse = await fetch(
-          `/api/etymology?word=${encodeURIComponent(word.trim())}`,
-          { 
-            signal: AbortSignal.timeout(5000)
-          }
-        );
-        
-        if (etymologyResponse.ok) {
-          const etymologyData = await etymologyResponse.json();
-          if (etymologyData.etymology && etymologyData.etymology.trim()) {
-            etymology = etymologyData.etymology.trim();
-            console.log('Etymology found from Wiktionary:', etymology.substring(0, 100));
-          }
-        } else {
-          console.log('Etymology API response not OK:', etymologyResponse.status);
-        }
-      } catch (etymologyError) {
-        // Silently fail - etymology is optional
-        console.log('Etymology lookup failed (this is normal if word not found):', etymologyError);
-      }
-      
-      // If still no etymology and word is plural, try singular form
-      if (!etymology) {
-        const wordLower = word.trim().toLowerCase();
-        // Try singular form if word ends in common plural endings
-        if (wordLower.endsWith('ics') && wordLower.length > 3) {
-          // For words ending in -ics (like diacritics -> diacritic)
-          const singularForm = wordLower.slice(0, -1); // Remove 's'
-          try {
-            const singularEtymologyResponse = await fetch(
-              `/api/etymology?word=${encodeURIComponent(singularForm)}`,
-              { 
-                signal: AbortSignal.timeout(5000)
-              }
-            );
-            
-            if (singularEtymologyResponse.ok) {
-              const singularEtymologyData = await singularEtymologyResponse.json();
-              if (singularEtymologyData.etymology && singularEtymologyData.etymology.trim()) {
-                etymology = singularEtymologyData.etymology.trim();
-              }
+      const singularForms = getSingularForms(word.trim());
+      for (const singularForm of singularForms) {
+        try {
+          const singularEtymologyResponse = await fetch(
+            `/api/etymology?word=${encodeURIComponent(singularForm)}`,
+            { signal: AbortSignal.timeout(5000) }
+          );
+          if (singularEtymologyResponse.ok) {
+            const singularEtymologyData = await singularEtymologyResponse.json();
+            if (singularEtymologyData.etymology && singularEtymologyData.etymology.trim()) {
+              etymology = singularEtymologyData.etymology.trim();
+              logger.apiCall('Etymology (singular fallback)', true, { form: singularForm });
+              break;
             }
-          } catch (e) {
-            // Silently fail
           }
-        } else if (wordLower.endsWith('s') && wordLower.length > 2 && !wordLower.endsWith('ss')) {
-          // Try removing 's' for regular plurals
-          const singularForm = wordLower.slice(0, -1);
-          try {
-            const singularEtymologyResponse = await fetch(
-              `/api/etymology?word=${encodeURIComponent(singularForm)}`,
-              { 
-                signal: AbortSignal.timeout(5000)
-              }
-            );
-            
-            if (singularEtymologyResponse.ok) {
-              const singularEtymologyData = await singularEtymologyResponse.json();
-              if (singularEtymologyData.etymology && singularEtymologyData.etymology.trim()) {
-                etymology = singularEtymologyData.etymology.trim();
-              }
-            }
-          } catch (e) {
-            // Silently fail
-          }
+        } catch {
+          // Continue to next form
         }
       }
     }
@@ -409,7 +352,7 @@ export async function lookupWord(word: string): Promise<{
       sourceUrl: sourceUrl || undefined,
       wordnikSourceUrl: wordnikSourceUrl || undefined,
     };
-    console.log('Lookup result for', word, '- audioUrl:', result.audioUrl || 'NONE');
+    logger.debug('Lookup result', { context: { word, hasAudio: !!result.audioUrl } });
     return result;
   } catch (error) {
     return {
@@ -572,7 +515,7 @@ async function getSpellingSuggestions(word: string): Promise<string[]> {
     validSuggestions.sort((a, b) => a.distance - b.distance);
     return validSuggestions.slice(0, 5).map(s => s.word);
   } catch (error) {
-    console.log('Spelling suggestions failed:', error);
+    logger.warn('Spelling suggestions failed', { expected: true });
     return [];
   }
 }

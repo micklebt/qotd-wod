@@ -58,26 +58,9 @@ export default function StreakDisplay({ participantId: propParticipantId, classN
           if (data.streak) setStreak(data.streak);
           if (data.badges) setBadges(data.badges || []);
         } else {
-          // If API returns no data but this is Brian Mickley (101), use demo data
-          if (pid === '101' && (!data.streak || !data.badges || data.badges.length === 0)) {
-            setStreak({
-              id: 1,
-              participant_id: '101',
-              current_streak: 8,
-              longest_streak: 8,
-              last_activity_date: new Date().toISOString().split('T')[0],
-              streak_saves_available: 1,
-              last_streak_save_month: null,
-              updated_at: new Date().toISOString()
-            });
-            setBadges([
-              { id: 1, participant_id: '101', badge_type: 'silver' as BadgeType, earned_date: '2025-12-20', streak_length: 7, created_at: new Date().toISOString() },
-              { id: 2, participant_id: '101', badge_type: 'bronze' as BadgeType, earned_date: '2025-12-15', streak_length: 3, created_at: new Date().toISOString() }
-            ]);
-          } else {
-            setStreak(data.streak || null);
-            setBadges(data.badges || []);
-          }
+          // Use actual data from API - no hardcoded demo data
+          setStreak(data.streak || null);
+          setBadges(data.badges || []);
         }
       } catch (error) {
         console.error('Error fetching streak data:', error);
