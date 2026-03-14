@@ -1,6 +1,6 @@
 import { supabase } from '@/lib/supabase';
 import type { Entry } from '@/lib/supabase';
-import { getParticipantNameAsync, preloadParticipants, getParticipantsAsync } from '@/lib/participants';
+import { getParticipantNameAsync, getParticipantsAsync } from '@/lib/participants';
 import Link from 'next/link';
 import WordChallengeTrigger from '@/components/WordChallengeTrigger';
 import WordPracticeTrigger from '@/components/WordPracticeTrigger';
@@ -13,77 +13,62 @@ export default async function Home() {
   let quote: Entry | null = null;
   let error: string | null = null;
 
-  // Preload participants cache
-  await preloadParticipants();
-
   try {
-    // Get all participants to check if all know a word
-    const allParticipants = await getParticipantsAsync();
-    const participantIds = allParticipants.map(p => p.id);
+    const [participantsResult, wordsResult, responsesResult, quotesResult] = await Promise.all([
+      getParticipantsAsync(),
+      supabase
+        .from('entries')
+        .select('id, type, content, created_at, updated_at, participant_id, word_metadata(*)')
+        .eq('type', 'word'),
+      supabase
+        .from('word_challenge_responses')
+        .select('entry_id, participant_id')
+        .eq('is_known', true),
+      supabase
+        .from('entries')
+        .select('id, type, content, created_at, updated_at, participant_id, quote_metadata(*)')
+        .eq('type', 'quote'),
+    ]);
 
-    // Fetch all words
-    const { data: allWords, error: wordsError } = await supabase
-      .from('entries')
-      .select('id, type, content, created_at, updated_at, participant_id, word_metadata(*)')
-      .eq('type', 'word');
+    const allParticipants = participantsResult;
+    const participantIds = allParticipants.map(p => String(p.id));
 
+    const { data: allWords, error: wordsError } = wordsResult;
     if (wordsError) throw wordsError;
 
-    // Filter out words that all participants know
+    const { data: knownResponses, error: responsesError } = responsesResult;
+    const knownByEntry = new Map<number, Set<string>>();
+    if (!responsesError && knownResponses) {
+      for (const r of knownResponses) {
+        const eid = r.entry_id as number;
+        if (!knownByEntry.has(eid)) knownByEntry.set(eid, new Set());
+        knownByEntry.get(eid)!.add(String(r.participant_id));
+      }
+    }
+
     let eligibleWords: Entry[] = [];
-    
     if (allWords && allWords.length > 0) {
-      // If there are no participants, all words are eligible
       if (participantIds.length === 0) {
         eligibleWords = allWords;
       } else {
-        // Check each word to see if all participants know it
         for (const wordEntry of allWords) {
-          // Get all responses for this word where is_known = true
-          const { data: knownResponses, error: responsesError } = await supabase
-            .from('word_challenge_responses')
-            .select('participant_id')
-            .eq('entry_id', wordEntry.id)
-            .eq('is_known', true);
-
-          if (responsesError) {
-            // If there's an error (e.g., table doesn't exist), include the word
+          const knownIds = knownByEntry.get(wordEntry.id);
+          if (responsesError || !knownIds) {
             eligibleWords.push(wordEntry);
             continue;
           }
-
-          // Get unique participant IDs who know this word
-          const knownParticipantIds = new Set(
-            (knownResponses || []).map(r => String(r.participant_id))
-          );
-
-          // Check if all participants know this word
-          const allParticipantsKnow = participantIds.every(pid => 
-            knownParticipantIds.has(String(pid))
-          );
-
-          // Only include words where NOT all participants know it
-          if (!allParticipantsKnow) {
-            eligibleWords.push(wordEntry);
-          }
+          const allParticipantsKnow = participantIds.every(pid => knownIds.has(pid));
+          if (!allParticipantsKnow) eligibleWords.push(wordEntry);
         }
       }
-
-      // Select a random word from eligible words
       if (eligibleWords.length > 0) {
         const randomIndex = Math.floor(Math.random() * eligibleWords.length);
         word = eligibleWords[randomIndex];
       }
     }
 
-    // Fetch all quotes and select a random one
-    const { data: allQuotes, error: quoteError } = await supabase
-      .from('entries')
-      .select('id, type, content, created_at, updated_at, participant_id, quote_metadata(*)')
-      .eq('type', 'quote');
-
+    const { data: allQuotes, error: quoteError } = quotesResult;
     if (quoteError) throw quoteError;
-
     if (allQuotes && allQuotes.length > 0) {
       const randomIndex = Math.floor(Math.random() * allQuotes.length);
       quote = allQuotes[randomIndex];
@@ -94,9 +79,10 @@ export default async function Home() {
 
   if (error) return <div className="p-4 text-red-700 dark:text-[#ef4444] font-bold">Error: {error}</div>;
 
-  // Get participant names
-  const wordParticipantName = word ? await getParticipantNameAsync(word.participant_id) : '';
-  const quoteParticipantName = quote ? await getParticipantNameAsync(quote.participant_id) : '';
+  const [wordParticipantName, quoteParticipantName] = await Promise.all([
+    word ? getParticipantNameAsync(word.participant_id) : Promise.resolve(''),
+    quote ? getParticipantNameAsync(quote.participant_id) : Promise.resolve(''),
+  ]);
 
   return (
     <div className="min-h-screen bg-white dark:bg-[#000000]">
@@ -109,7 +95,6 @@ export default async function Home() {
           </div>
         </div>
 
-        {/* Word of the Day */}
         {word && (
           <div>
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-2 mb-2">
@@ -119,7 +104,6 @@ export default async function Home() {
           </div>
         )}
 
-        {/* Quote of the Day */}
         {quote && (
           <div className="border border-black dark:border-[#333333] rounded p-3 sm:p-4 bg-white dark:bg-[#0a0a0a]">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-2 mb-3 sm:mb-4">

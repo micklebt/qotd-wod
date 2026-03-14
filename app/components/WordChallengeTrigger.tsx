@@ -1,7 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import WordChallenge from './WordChallenge';
+import dynamic from 'next/dynamic';
+
+const WordChallenge = dynamic(() => import('./WordChallenge'), {
+  ssr: false,
+  loading: () => <span className="text-sm text-gray-500 dark:text-gray-400">Loading…</span>,
+});
 
 export default function WordChallengeTrigger() {
   const [isOpen, setIsOpen] = useState(false);

@@ -1,7 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import WordPractice from './WordPractice';
+import dynamic from 'next/dynamic';
+
+const WordPractice = dynamic(() => import('./WordPractice'), {
+  ssr: false,
+  loading: () => <span className="text-sm text-gray-500 dark:text-gray-400">Loading…</span>,
+});
 
 export default function WordPracticeTrigger() {
   const [isOpen, setIsOpen] = useState(false);
